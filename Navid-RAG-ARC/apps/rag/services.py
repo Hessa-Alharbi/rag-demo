@@ -1,8 +1,10 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from uuid import UUID
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+# from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+from langchain_experimental.text_splitter import SemanticChunker
+from langchain_openai import OpenAIEmbeddings  # Or your preferred embeddings
 from langchain.schema import Document as LangchainDocument
-from langchain_community.retrievers import BM25Retriever
 from loguru import logger
 from apps.chat.models import Attachment
 from core.llm.factory import ModelFactory
@@ -14,16 +16,10 @@ import fitz  # PyMuPDF for PDF processing
 import docx2txt
 import aiofiles
 import json
-from core.vector_store.manager import VectorStoreManager
-from core.queue.manager import AsyncTaskQueue
 from sqlmodel import Session, select
-from core.db import get_session
 from langdetect import detect
-import arabic_reshaper
-from bidi.algorithm import get_display
-from langchain.chat_models import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage
 import asyncio
+import re
 from core.vector_store.singleton import VectorStoreSingleton
 
 class RAGService:
@@ -33,20 +29,16 @@ class RAGService:
             self._initialize_lock = asyncio.Lock()
             self._initialized = False
             
-            # Initialize text splitter with improved settings
-            self.text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=self.settings.CHUNK_SIZE,
-                chunk_overlap=self.settings.CHUNK_OVERLAP,
-                length_function=len,
-                separators=["\n\n", "\n", " ", ""]
+            # Initialize embeddings for semantic chunking
+            self.embeddings = OpenAIEmbeddings()
+            
+            # Initialize text splitter with semantic chunking
+            self.text_splitter = SemanticChunker(
+                self.embeddings
             )
             
             # Initialize LLM
             self.llm = ModelFactory.create_llm()
-            # self.chat_model = ChatOpenAI(
-            #     model_name=self.settings.OPENAI_MODEL_NAME,
-            #     temperature=0.0
-            # )
             self.chat_model = ModelFactory.create_llm()
             
         except Exception as e:
@@ -83,7 +75,7 @@ class RAGService:
             raise
 
     async def process_document(self, doc: Document, file_path: str) -> Document:
-        """Process document and add to vector store"""
+        """Process document and add to vector store with improved chunking"""
         try:
             # Get conversation-specific vector store
             vector_store = await VectorStoreSingleton.get_conversation_store(str(doc.conversation_id))
@@ -92,30 +84,46 @@ class RAGService:
             content = await self.extract_file_content(file_path)
             doc.content = content
             
-            # Split into chunks
-            chunks = self.text_splitter.split_text(content)
+            # Clean and preprocess content for better chunking
+            content = self._preprocess_content(content)
             
-            # Prepare chunks for vector store
+            # Create a document object for semantic chunking
+            langchain_doc = [LangchainDocument(
+                page_content=content,
+                metadata={"source": file_path, "title": doc.title}
+            )]
+            
+            # Split into semantic chunks using SemanticChunker
+            chunks = self.text_splitter.create_documents(langchain_doc)
+            
+            # Prepare chunks for vector store with richer metadata
             texts = []
             metadatas = []
             db_chunks = []
             
-            for i, chunk_text in enumerate(chunks):
-                chunk = Chunk(
+            for i, chunk in enumerate(chunks):
+                # Create a more descriptive chunk title
+                chunk_title = self._generate_chunk_title(chunk.page_content, i)
+                
+                chunk_obj = Chunk(
                     document_id=doc.id,
-                    content=chunk_text,
+                    content=chunk.page_content,
                     chunk_metadata={
                         "index": i,
-                        "source": file_path
+                        "source": file_path,
+                        "title": chunk_title,
+                        "doc_title": doc.title
                     }
                 )
-                db_chunks.append(chunk)
-                texts.append(chunk_text)
+                db_chunks.append(chunk_obj)
+                texts.append(chunk.page_content)
                 metadatas.append({
                     "document_id": str(doc.id),
                     "conversation_id": str(doc.conversation_id),
                     "chunk_index": i,
-                    "source": file_path
+                    "source": file_path,
+                    "title": chunk_title,
+                    "doc_title": doc.title
                 })
             
             # Add to vector store
@@ -165,7 +173,7 @@ class RAGService:
             ]
 
             # Split into chunks
-            chunks = self.text_splitter.split_documents(raw_docs)
+            chunks = self.text_splitter.create_documents(raw_docs)
             
             # Create chunks in database
             db_chunks = []
@@ -178,7 +186,8 @@ class RAGService:
                     content=chunk.page_content,
                     chunk_metadata={
                         "index": i,
-                        **chunk.metadata
+                        **chunk.metadata,
+                        "title": doc.title
                     }
                 )
                 db_chunks.append(db_chunk)
@@ -219,6 +228,31 @@ class RAGService:
                 f"Processing failed: {str(e)}"
             )
             raise
+
+    def _preprocess_content(self, content: str) -> str:
+        """Clean and preprocess document content for better chunking"""
+        # Remove excessive whitespace
+        content = re.sub(r'\s+', ' ', content)
+        
+        # Fix common OCR issues
+        content = re.sub(r'([a-z])(\.)([A-Z])', r'\1\2 \3', content)  # Fix sentence boundaries
+        
+        return content.strip()
+        
+    def _generate_chunk_title(self, chunk_text: str, index: int) -> str:
+        """Generate a descriptive title for a chunk"""
+        # Extract first line or first few words
+        first_line = chunk_text.split('\n', 1)[0].strip()
+        
+        # Limit to reasonable length
+        if len(first_line) > 50:
+            first_line = first_line[:50] + "..."
+            
+        # If title is empty or just whitespace, use generic title
+        if not first_line or first_line.isspace():
+            return f"Chunk {index+1}"
+            
+        return first_line
 
     async def _update_processing_status(
         self,
@@ -269,7 +303,9 @@ class RAGService:
         limit: int = 5
     ) -> List[dict]:
         try:
-            results = await self.vector_store.similarity_search(
+            # Get instance of vector store
+            vector_store = await VectorStoreSingleton.get_instance()
+            results = await vector_store.similarity_search(
                 query,
                 k=limit,
                 filter=filter_metadata
@@ -285,7 +321,7 @@ class RAGService:
         conversation_id: str,
         limit: int = 5
     ) -> List[Dict[str, Any]]:
-        """Improved hybrid search with conversation isolation"""
+        """Enhanced hybrid search with multi-stage retrieval"""
         try:
             # Get conversation-specific vector store
             vector_store = await VectorStoreSingleton.get_conversation_store(conversation_id)
@@ -296,21 +332,33 @@ class RAGService:
             # Generate search queries
             search_queries = await self._generate_search_queries(query)
             
-            # Perform semantic search
+            # Stage 1: Try semantic search with primary query
             semantic_results = await vector_store.similarity_search(
                 query=search_queries["semantic_queries"][0],
                 k=limit,
                 filter={"conversation_id": conversation_id}
             )
             
-            if not semantic_results:
-                # Try keyword search as fallback
+            # Stage 2: If no results, try with keyword fallback
+            if not semantic_results and search_queries["keyword_terms"]:
                 keyword_query = " ".join(search_queries["keyword_terms"])
                 semantic_results = await vector_store.similarity_search(
                     query=keyword_query,
                     k=limit,
                     filter={"conversation_id": conversation_id}
                 )
+            
+            # Stage 3: If still no results, try with wider search (no conversation filter)
+            if not semantic_results:
+                semantic_results = await vector_store.similarity_search(
+                    query=search_queries["semantic_queries"][0],
+                    k=limit,
+                    filter=None  # Remove conversation filter for wider search
+                )
+                
+            # Rerank results for better accuracy if we have enough results
+            if len(semantic_results) > 1:
+                semantic_results = self._rerank_results(semantic_results, query)
             
             return semantic_results
             
@@ -335,7 +383,8 @@ class RAGService:
                         if lang == 'ar' else
                         "I cannot find sufficient information to answer this question."
                     )
-                except:
+                except Exception as e:
+                    logger.error(f"Error detecting language: {e}")
                     return "I cannot find sufficient information to answer this question."
 
             # Format context with improved structure
@@ -376,77 +425,128 @@ class RAGService:
             return "I apologize, but I encountered an error while processing your question."
 
     async def _generate_search_queries(self, query: str) -> Dict:
-        """Generate search queries using LLM"""
+        """Generate search queries with robust error handling"""
         try:
-            # Use direct prompt format instead of chat messages
+            # Use simplified prompt format for more reliable parsing
             prompt = f"{SEARCH_PROMPT_TEMPLATES['system']}\n\n{SEARCH_PROMPT_TEMPLATES['user'].format(query=query)}"
             
-            response = await self.llm.agenerate([prompt])
-            response_text = response.generations[0][0].text
+            # Set a reasonable timeout for query generation
+            async with asyncio.timeout(5):
+                response = await self.llm.agenerate([prompt])
+                response_text = response.generations[0][0].text
+            
+            # Extract JSON from response (handling cases where there's extra text)
+            json_match = re.search(r'(\{.*\})', response_text, re.DOTALL)
+            if json_match:
+                response_text = json_match.group(1)
             
             try:
                 search_queries = json.loads(response_text)
+                # Validate expected structure
+                if not isinstance(search_queries, dict) or "semantic_queries" not in search_queries:
+                    raise ValueError("Invalid search query structure")
+                    
                 return search_queries
-            except json.JSONDecodeError:
-                logger.error("Failed to parse search queries")
+                
+            except (json.JSONDecodeError, ValueError) as e:
+                logger.error(f"Failed to parse search queries: {str(e)}")
                 # Detect language for fallback
                 is_arabic = False
                 try:
                     is_arabic = detect(query) == 'ar'
-                except:
-                    pass
-                return self._get_default_queries(query, is_arabic)
+                except Exception as e:
+                    logger.error(f"Error detecting language: {e}")
+                # Use enhanced query expansion for better fallback
+                return self._get_expanded_queries(query, is_arabic)
                 
-        except Exception as e:
+        except (asyncio.TimeoutError, Exception) as e:
             logger.error(f"Error generating search queries: {e}")
-            # Detect language for fallback
+            # Detect language for better fallback
             is_arabic = False
             try:
                 is_arabic = detect(query) == 'ar'
             except:
                 pass
-            return self._get_default_queries(query, is_arabic)
+            return self._get_expanded_queries(query, is_arabic)
 
-    def _get_default_queries(self, query: str, is_arabic: bool = False) -> Dict:
-        """Get default queries with Arabic support"""
+    def _get_expanded_queries(self, query: str, is_arabic: bool = False) -> Dict:
+        """Get expanded queries with better keyword extraction"""
+        # Extract keywords more intelligently
+        keywords = []
+        
+        # Basic keyword extraction by removing stopwords and keeping important terms
+        stopwords = {'and', 'or', 'the', 'is', 'at', 'which', 'on', 'a', 'an', 'in', 'for', 'to', 'of', 'with'}
+        
+        # Split by spaces and keep non-stopwords
+        words = [w.strip('.,?!:;()[]{}"\'-') for w in query.split()]
+        keywords = [word for word in words if word.lower() not in stopwords and len(word) > 1]
+        
+        # Generate query variations
+        query_variations = [query]
+        
+        # Add the first half of the query as a variation (if long enough)
+        if len(query.split()) > 4:
+            half_query = ' '.join(query.split()[:len(query.split())//2])
+            query_variations.append(half_query)
+        
         return {
-            "semantic_queries": [query],
-            "keyword_terms": query.split(),
+            "semantic_queries": query_variations,
+            "keyword_terms": keywords,
             "arabic_terms": [query] if is_arabic else [],
             "filters": {}
         }
 
-    def _merge_search_results(
-        self,
-        semantic_results: List[dict],
-        keyword_results: List[dict],
-        limit: int
-    ) -> List[dict]:
-        """Merge and deduplicate search results"""
-        # Implement custom merging logic
-        seen_ids = set()
-        merged = []
-        
-        for result in semantic_results + keyword_results:
-            if result["id"] not in seen_ids:
-                seen_ids.add(result["id"])
-                merged.append(result)
-                if len(merged) >= limit:
-                    break
-                    
-        return merged
+    def _rerank_results(self, results: List[Dict], query: str) -> List[Dict]:
+        """Rerank search results using relevance heuristics"""
+        # Sort results by relevance score if available
+        try:
+            # Filter out any empty results
+            results = [r for r in results if r.get("content")]
+            
+            # Calculate basic relevance scores
+            for result in results:
+                content = result.get("content", "").lower()
+                query_terms = query.lower().split()
+                
+                # Count term frequency
+                term_count = sum(content.count(term) for term in query_terms)
+                
+                # Check for exact phrase matches (higher weight)
+                exact_match = 2 if query.lower() in content else 0
+                
+                # Calculate proximity score (terms appearing close together)
+                proximity_score = 0
+                for i in range(len(query_terms) - 1):
+                    if query_terms[i] in content and query_terms[i+1] in content:
+                        idx1 = content.find(query_terms[i])
+                        idx2 = content.find(query_terms[i+1])
+                        if 0 < abs(idx2 - idx1) < 20:  # Terms within 20 chars
+                            proximity_score += 1
+                
+                # Calculate final score
+                result["relevance_score"] = term_count + exact_match + proximity_score
+            
+            # Sort by relevance score (descending)
+            return sorted(results, key=lambda x: x.get("relevance_score", 0), reverse=True)
+            
+        except Exception as e:
+            logger.warning(f"Error during result reranking: {e}")
+            return results  # Return original results if reranking fails
 
     def _format_context(self, docs: List[dict]) -> str:
-        """Format retrieved documents into context string"""
+        """Format retrieved documents into context string with improved structure"""
         context_parts = []
         for i, doc in enumerate(docs, 1):
             # Extract content and metadata
             content = doc.get("content", "")
             metadata = doc.get("metadata", {})
             source = metadata.get("source", f"Document {i}")
+            title = metadata.get("title", f"Section {i}")
+            doc_title = metadata.get("doc_title", "")
             
-            # Format with source information
-            context_parts.append(f"[Source: {source}]\n{content}\n")
+            # Format with better source information
+            header = f"[Document: {doc_title}] [Section: {title}]"
+            context_parts.append(f"{header}\n{content}\n")
             
         return "\n---\n".join(context_parts)
 
@@ -532,15 +632,14 @@ class RAGService:
         conversation_id: UUID,
         limit: int = 5
     ) -> Dict[str, Any]:
-        """Query documents with improved error handling"""
+        """Query documents with improved error handling and result processing"""
         try:
-            # Initialize if needed
-            if not self.vector_store._initialized:
-                await self.vector_store.initialize()
+            # Make sure RAG service is initialized
+            await self.initialize()
             
             logger.info(f"Querying documents for: {query}")
             
-            # Perform search
+            # Perform search with improved hybrid search
             search_results = await self.hybrid_search(
                 query=query,
                 conversation_id=str(conversation_id),
@@ -558,7 +657,8 @@ class RAGService:
                         if lang == 'ar' else
                         "I couldn't find any relevant information to answer your question."
                     )
-                except:
+                except Exception as e:
+                    logger.error(f"Error detecting language: {e}")
                     message = "I couldn't find any relevant information to answer your question."
                     
                 return {
@@ -566,18 +666,20 @@ class RAGService:
                     "sources": []
                 }
 
-            # Generate response
+            # Generate response with chat history context
             response = await self.generate_response(
                 query=query,
                 context_docs=search_results
             )
             
+            # Return response with source documents
             return {
                 "response": response,
                 "sources": [
                     {
                         "content": doc.get("content", ""),
-                        "metadata": doc.get("metadata", {})
+                        "metadata": doc.get("metadata", {}),
+                        "score": doc.get("relevance_score", 0)  # Include relevance score
                     }
                     for doc in search_results
                 ]
