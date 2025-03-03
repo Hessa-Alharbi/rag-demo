@@ -1,0 +1,164 @@
+2025-02-26 01:03:09.920 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-26 01:03:12.315 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 01:03:12.317 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-26 01:03:12.345 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-26 01:03:22.379 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-02-26 01:03:22.379 | ERROR    | __main__:lifespan:32 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-02-26 01:03:22.379 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 01:11:19.164 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-26 01:11:21.007 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 01:11:21.007 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-26 01:11:21.024 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-26 01:11:31.067 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-02-26 01:11:31.067 | ERROR    | __main__:lifespan:32 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-02-26 01:11:31.067 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 01:12:21.543 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-26 01:12:23.356 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 01:12:23.356 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-26 01:12:23.373 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-26 01:12:33.413 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-02-26 01:12:33.413 | ERROR    | __main__:lifespan:32 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-02-26 01:12:33.413 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 01:17:50.821 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-26 01:17:52.874 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 01:17:52.874 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-26 01:17:52.899 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-26 01:17:53.013 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 01:19:34.033 | DEBUG    | apps.chat.routes:upload_attachments:271 | Uploading files to conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 01:19:56.004 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-26 01:22:11.726 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-26 01:22:18.916 | ERROR    | apps.rag.services:_generate_search_queries:337 | Search query generation error: '\n    "semantic_queries"'
+2025-02-26 01:22:18.923 | DEBUG    | apps.rag.services:hybrid_search:233 | Generated search queries: {'semantic_queries': ['explain it'], 'keyword_terms': ['explain', 'it'], 'arabic_terms': [], 'filters': {}}
+2025-02-26 01:22:19.542 | INFO     | apps.chat.routes:query_documents:431 | Successfully queried documents for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 01:28:48.385 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 01:28:48.387 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-26 01:28:48.433 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-26 01:28:48.655 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 01:30:04.059 | INFO     | apps.chat.routes:query_documents:400 | Processing query request: explain it for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 01:30:04.084 | DEBUG    | apps.chat.routes:query_documents:426 | Initializing RAG service
+2025-02-26 01:30:06.954 | ERROR    | core.vector_store.manager:_create_store:38 | Error creating vector store: 'Settings' object has no attribute 'get_embeddings'
+2025-02-26 01:30:06.962 | ERROR    | core.vector_store.manager:initialize:27 | Failed to initialize vector store: 'Settings' object has no attribute 'get_embeddings'
+2025-02-26 01:30:06.963 | ERROR    | apps.rag.services:query_documents:524 | Error in document query: 'Settings' object has no attribute 'get_embeddings'
+2025-02-26 01:30:06.963 | ERROR    | apps.chat.routes:query_documents:442 | Error processing query: 'Settings' object has no attribute 'get_embeddings'
+2025-02-26 01:30:06.968 | ERROR    | core.db:get_session:31 | Database session error: 500: {'error': 'query_failed', 'message': 'Query failed / فشل الاستعلام', 'code': 500, 'details': {'error': "'Settings' object has no attribute 'get_embeddings'"}, 'timestamp': '2025-02-25T20:30:06.963511'}
+2025-02-26 01:33:43.626 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 01:33:43.628 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 01:33:59.822 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 01:33:59.824 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-26 01:33:59.858 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-26 01:34:00.037 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 01:35:19.360 | INFO     | apps.chat.routes:query_documents:400 | Processing query request: explain it for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 01:35:19.388 | ERROR    | core.db:get_session:31 | Database session error: "'error'"
+2025-02-26 01:35:19.391 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'error'"
+2025-02-26 01:35:39.517 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 01:35:39.518 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 01:39:15.264 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 01:39:15.273 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-26 01:39:15.284 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-26 01:39:15.393 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 01:41:18.750 | INFO     | apps.chat.routes:query_documents:400 | Processing query request: explain it for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 01:41:18.773 | ERROR    | core.db:get_session:31 | Database session error: "'error'"
+2025-02-26 01:41:18.777 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'error'"
+2025-02-26 01:43:31.454 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 01:43:31.454 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 01:44:06.436 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 01:44:06.443 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-26 01:44:06.474 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-26 01:44:06.594 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 01:44:41.883 | INFO     | apps.chat.routes:query_documents:400 | Processing query request: explain it for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 01:44:41.901 | ERROR    | core.db:get_session:31 | Database session error: "'error'"
+2025-02-26 01:44:41.905 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'error'"
+2025-02-26 01:44:47.559 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 01:44:47.560 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 02:04:17.983 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 02:04:17.988 | INFO     | core.db:init_db:20 | Initializing database...
+2025-02-26 02:04:18.034 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-02-26 02:04:18.233 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 02:05:42.023 | INFO     | apps.chat.routes:process_query:400 | Processing query request: explain it for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 02:05:42.027 | ERROR    | apps.chat.routes:process_query:417 | Error processing query: '_GeneratorContextManager' object has no attribute 'query'
+2025-02-26 02:08:17.626 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 02:08:17.637 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 02:08:43.204 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 02:08:43.204 | INFO     | core.db:init_db:20 | Initializing database...
+2025-02-26 02:08:43.235 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-02-26 02:08:43.410 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 02:09:26.125 | INFO     | apps.chat.routes:process_query:400 | Processing query request: explain it for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 02:09:26.127 | ERROR    | apps.chat.routes:process_query:441 | Error processing query: (builtins.AttributeError) 'str' object has no attribute 'hex'
+[SQL: SELECT conversation.id, conversation.title, conversation.created_by_id, conversation.created_at, conversation.updated_at 
+FROM conversation 
+WHERE conversation.id = ? AND conversation.created_by_id = ?]
+[parameters: [{}]]
+2025-02-26 02:10:34.618 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 02:10:34.619 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 02:10:52.337 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 02:10:52.342 | INFO     | core.db:init_db:20 | Initializing database...
+2025-02-26 02:10:52.417 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-02-26 02:10:52.559 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 02:11:38.169 | INFO     | apps.chat.routes:process_query:400 | Processing query request: explain it for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 02:11:40.021 | ERROR    | apps.rag.services:_generate_search_queries:350 | Error generating search queries: 'ChatOpenAI' object has no attribute 'chat'
+2025-02-26 02:11:40.023 | DEBUG    | apps.rag.services:hybrid_search:233 | Generated search queries: {'semantic_queries': ['explain it'], 'keyword_terms': ['explain', 'it'], 'arabic_terms': [], 'filters': {}}
+2025-02-26 02:12:37.557 | INFO     | core.vector_store.manager:initialize:41 | Vector store initialized successfully
+2025-02-26 02:17:12.582 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 02:17:12.583 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 02:17:36.074 | ERROR    | apps.rag.services:__init__:55 | Failed to initialize RAGService: 'Settings' object has no attribute 'OPENAI_MODEL_NAME'
+2025-02-26 02:22:07.084 | ERROR    | apps.rag.services:__init__:55 | Failed to initialize RAGService: 'Settings' object has no attribute 'OPENAI_MODEL_NAME'
+2025-02-26 02:23:38.474 | ERROR    | apps.rag.services:__init__:55 | Failed to initialize RAGService: 'Settings' object has no attribute 'OPENAI_MODEL_NAME'
+2025-02-26 02:24:51.991 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 02:24:51.994 | INFO     | core.db:init_db:20 | Initializing database...
+2025-02-26 02:24:52.025 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-02-26 02:24:52.199 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 02:25:54.816 | INFO     | apps.chat.routes:process_query:400 | Processing query request: explain it? for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 02:26:43.384 | INFO     | core.vector_store.manager:initialize:41 | Vector store initialized successfully
+2025-02-26 02:27:03.745 | INFO     | apps.chat.routes:process_query:400 | Processing query request: hey for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 02:32:20.456 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 02:32:20.477 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 02:32:40.543 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-26 02:32:40.546 | INFO     | core.db:init_db:20 | Initializing database...
+2025-02-26 02:32:40.564 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-02-26 02:32:40.703 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 02:35:09.056 | INFO     | apps.chat.routes:process_query:400 | Processing query request: explain it for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 02:35:51.124 | INFO     | core.vector_store.manager:initialize:43 | Created new vector store
+2025-02-26 02:35:52.695 | ERROR    | apps.rag.services:_generate_search_queries:397 | Error generating search queries: 'ChatOpenAI' object has no attribute 'chat'
+2025-02-26 02:42:28.373 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 02:42:28.374 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-26 02:42:40.676 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-26 02:42:40.681 | INFO     | core.db:init_db:20 | Initializing database...
+2025-02-26 02:42:40.686 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-02-26 02:42:40.769 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 02:43:36.683 | INFO     | apps.chat.routes:process_query:400 | Processing query request: explain it for conversation: 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 02:43:55.304 | INFO     | core.vector_store.manager:initialize:44 | Created new vector store for namespace 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 02:47:56.989 | DEBUG    | apps.chat.routes:upload_attachments:273 | Uploading files to conversation e1c5e3d1-c84a-419b-9362-f03d58b00147
+2025-02-26 02:48:08.224 | INFO     | core.vector_store.manager:initialize:44 | Created new vector store for namespace default
+2025-02-26 02:48:08.234 | ERROR    | apps.rag.services:process_attachments:465 | Error processing document 1st dataset navid RAG.docx: 'RAGService' object has no attribute 'task_queue'
+2025-02-26 02:48:30.167 | INFO     | apps.chat.routes:process_query:400 | Processing query request: explain it for conversation: e1c5e3d1-c84a-419b-9362-f03d58b00147
+2025-02-26 02:48:42.466 | INFO     | core.vector_store.manager:initialize:44 | Created new vector store for namespace e1c5e3d1-c84a-419b-9362-f03d58b00147
+2025-02-26 02:52:35.298 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 02:52:35.298 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-26 02:52:47.480 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-26 02:52:47.480 | INFO     | core.db:init_db:20 | Initializing database...
+2025-02-26 02:52:47.497 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-02-26 02:52:47.584 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 02:54:30.771 | DEBUG    | apps.chat.routes:upload_attachments:275 | Uploading files to conversation 157eaaf8-d9f2-4a58-9837-ed50f18d347e
+2025-02-26 02:54:53.898 | INFO     | core.vector_store.manager:initialize:51 | Created new vector store for namespace default
+2025-02-26 02:55:04.217 | INFO     | core.vector_store.manager:initialize:51 | Created new vector store for namespace 157eaaf8-d9f2-4a58-9837-ed50f18d347e
+2025-02-26 02:56:42.356 | INFO     | apps.chat.routes:process_query:414 | Processing query request: explain it for conversation: 157eaaf8-d9f2-4a58-9837-ed50f18d347e
+2025-02-26 02:58:10.142 | INFO     | apps.chat.routes:process_query:414 | Processing query request: explain it in detailed and well formated for conversation: 157eaaf8-d9f2-4a58-9837-ed50f18d347e
+2025-02-26 02:59:17.724 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 02:59:17.725 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-26 03:00:39.324 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-26 03:00:39.326 | INFO     | core.db:init_db:20 | Initializing database...
+2025-02-26 03:00:39.336 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-02-26 03:00:39.428 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-26 03:02:00.568 | DEBUG    | apps.chat.routes:list_attachments:353 | Fetching attachments for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 03:02:00.767 | INFO     | apps.chat.routes:list_attachments:380 | Successfully retrieved 4 attachments for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-26 03:03:08.396 | DEBUG    | apps.chat.routes:create_message:133 | Creating message for conversation 1094c401-f065-4106-bea3-9c461934fbe7
+2025-02-26 03:03:29.689 | INFO     | core.vector_store.manager:initialize:51 | Created new vector store for namespace 1094c401-f065-4106-bea3-9c461934fbe7
+2025-02-26 03:03:31.313 | WARNING  | core.vector_store.manager:similarity_search:109 | No results found for query: hello
+2025-02-26 03:03:31.573 | WARNING  | core.vector_store.manager:similarity_search:109 | No results found for query: hi greetings
+2025-02-26 03:04:20.822 | DEBUG    | apps.chat.routes:list_attachments:353 | Fetching attachments for conversation 1094c401-f065-4106-bea3-9c461934fbe7
+2025-02-26 03:04:20.829 | INFO     | apps.chat.routes:list_attachments:380 | Successfully retrieved 0 attachments for conversation 1094c401-f065-4106-bea3-9c461934fbe7
+2025-02-26 03:04:39.529 | DEBUG    | apps.chat.routes:upload_attachments:275 | Uploading files to conversation 1094c401-f065-4106-bea3-9c461934fbe7
+2025-02-26 03:04:48.317 | INFO     | core.vector_store.manager:initialize:51 | Created new vector store for namespace default
+2025-02-26 03:05:33.532 | INFO     | apps.chat.routes:process_query:414 | Processing query request: explain it for conversation: 1094c401-f065-4106-bea3-9c461934fbe7
+2025-02-26 03:18:18.662 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-26 03:18:18.663 | INFO     | __main__:lifespan:41 | Application shutdown complete

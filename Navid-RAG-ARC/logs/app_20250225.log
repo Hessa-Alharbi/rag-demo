@@ -1,0 +1,326 @@
+2025-02-25 01:34:35.647 | INFO     | __main__:lifespan:16 | Starting up application...
+2025-02-25 01:34:35.656 | INFO     | core.db:init_db:8 | Initializing database...
+2025-02-25 01:34:35.808 | INFO     | core.db:init_db:11 | Database initialization completed successfully
+2025-02-25 01:37:23.405 | ERROR    | core.db:get_session:21 | Database session error: 500: Authentication failed
+2025-02-25 01:37:48.972 | ERROR    | core.db:get_session:21 | Database session error: 500: Registration failed
+2025-02-25 01:48:24.763 | INFO     | __main__:lifespan:16 | Starting up application...
+2025-02-25 01:48:24.763 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 01:48:24.814 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 01:49:18.985 | ERROR    | core.db:get_session:31 | Database session error: 400: Email already registered
+2025-02-25 01:49:39.691 | INFO     | __main__:reset_database:35 | Starting database reset...
+2025-02-25 01:49:39.693 | INFO     | __main__:reset_database:38 | Dropping all tables...
+2025-02-25 01:49:39.870 | INFO     | __main__:reset_database:42 | Creating new tables...
+2025-02-25 01:49:40.133 | INFO     | __main__:reset_database:46 | Cleaning uploads directory...
+2025-02-25 01:49:40.146 | INFO     | __main__:clean_uploads_directory:27 | Uploads directory cleaned and recreated
+2025-02-25 01:49:40.153 | INFO     | __main__:reset_database:49 | Database reset completed successfully!
+2025-02-25 01:50:26.104 | INFO     | __main__:lifespan:16 | Starting up application...
+2025-02-25 01:50:26.104 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 01:50:26.134 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 01:52:02.397 | DEBUG    | apps.chat.routes:create_message:47 | Creating message for conversation 61ff029d-bc32-493b-afc8-df7cb3fe4973
+2025-02-25 01:52:02.453 | INFO     | apps.chat.routes:create_message:85 | Message 5ec7fd79-455e-45c2-8fc5-3e3be2233574 created successfully
+2025-02-25 01:52:36.716 | ERROR    | core.db:get_session:31 | Database session error: (sqlite3.IntegrityError) NOT NULL constraint failed: document.content
+[SQL: INSERT INTO document (id, title, content, doc_metadata, status, vector_ids, conversation_id, created_by_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('af72443e07a2420a937db9f8e7150dd2', 'Amended Securities Business Regulations-ar.pdf', None, '{}', 'PROCESSING', '[]', '61ff029dbc32493bafc8df7cb3fe4973', '79ba2c8ae22b430799a6a0a92f315669', '2025-02-24 20:52:36.697809', '2025-02-24 20:52:36.697809')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-02-25 02:13:43.799 | INFO     | __main__:lifespan:16 | Starting up application...
+2025-02-25 02:13:43.799 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 02:13:43.818 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 02:14:47.488 | DEBUG    | apps.chat.routes:upload_attachments:142 | Uploading files to conversation 61ff029d-bc32-493b-afc8-df7cb3fe4973
+2025-02-25 02:14:47.694 | INFO     | apps.chat.routes:upload_attachments:187 | File Amended Securities Business Regulations-ar.pdf uploaded successfully
+2025-02-25 02:15:39.688 | DEBUG    | apps.chat.routes:create_message:47 | Creating message for conversation 61ff029d-bc32-493b-afc8-df7cb3fe4973
+2025-02-25 02:15:39.798 | INFO     | apps.chat.routes:create_message:85 | Message 453d70c6-e267-4d62-9560-34303f83d11d created successfully
+2025-02-25 02:21:46.246 | INFO     | __main__:reset_database:35 | Starting database reset...
+2025-02-25 02:21:46.248 | INFO     | __main__:reset_database:38 | Dropping all tables...
+2025-02-25 02:21:46.420 | INFO     | __main__:reset_database:42 | Creating new tables...
+2025-02-25 02:21:46.645 | INFO     | __main__:reset_database:46 | Cleaning uploads directory...
+2025-02-25 02:21:46.650 | INFO     | __main__:clean_uploads_directory:27 | Uploads directory cleaned and recreated
+2025-02-25 02:21:46.651 | INFO     | __main__:reset_database:49 | Database reset completed successfully!
+2025-02-25 02:22:36.984 | ERROR    | apps.rag.services:__init__:31 | Failed to initialize RAGService: not enough values to unpack (expected 3, got 0)
+2025-02-25 02:24:18.279 | ERROR    | apps.rag.services:__init__:31 | Failed to initialize RAGService: not enough values to unpack (expected 3, got 0)
+2025-02-25 02:27:56.656 | ERROR    | apps.rag.services:__init__:38 | Failed to initialize RAGService: Could not import rank_bm25, please install with `pip install rank_bm25`.
+2025-02-25 02:29:31.957 | INFO     | __main__:lifespan:16 | Starting up application...
+2025-02-25 02:29:31.957 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 02:29:31.998 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 02:30:02.753 | ERROR    | core.db:get_session:31 | Database session error: 401: Invalid credentials
+2025-02-25 02:31:25.303 | DEBUG    | apps.chat.routes:upload_attachments:181 | Uploading files to conversation e4cde619-1897-4479-a355-ae4ac894389a
+2025-02-25 02:31:25.471 | INFO     | apps.chat.routes:upload_attachments:226 | File Arabic_ RAG sampels Dataset.pdf uploaded successfully
+2025-02-25 02:32:25.895 | DEBUG    | apps.chat.routes:create_message:49 | Creating message for conversation e4cde619-1897-4479-a355-ae4ac894389a
+2025-02-25 02:32:25.976 | ERROR    | apps.rag.services:hybrid_search:182 | Error in hybrid search: '\n    "semantic_queries"'
+2025-02-25 02:32:25.978 | ERROR    | apps.chat.routes:create_message:124 | Error generating response: '\n    "semantic_queries"'
+2025-02-25 02:32:26.007 | ERROR    | apps.chat.routes:create_message:136 | Error creating message: '\n    "semantic_queries"'
+2025-02-25 02:32:26.011 | ERROR    | core.db:get_session:31 | Database session error: 500: {'error': 'message_creation_failed', 'message': 'Failed to create message', 'code': 500, 'details': {'error': '\'\\n    "semantic_queries"\''}, 'timestamp': '2025-02-24T21:32:26.009521'}
+2025-02-25 02:38:57.162 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-25 02:38:57.169 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 02:38:57.188 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 02:40:17.340 | ERROR    | apps.test.routes:test_embeddings:24 | Embeddings test failed: object list can't be used in 'await' expression
+2025-02-25 02:40:45.634 | ERROR    | apps.test.routes:test_vector_store:58 | Vector store test failed: A list of valid ids are required when auto_id is False. You can set `auto_id` to True in this Milvus instance to generate ids automatically, or specify string-type ids for each text.
+2025-02-25 02:41:47.288 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-25 02:41:47.288 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 02:41:47.304 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 02:42:16.593 | ERROR    | apps.test.routes:test_embeddings:25 | Embeddings test failed: object list can't be used in 'await' expression
+2025-02-25 02:44:36.226 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-25 02:44:36.226 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 02:44:36.233 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 02:46:34.147 | ERROR    | apps.test.routes:test_vector_store:69 | Vector store test failed: A list of valid ids are required when auto_id is False. You can set `auto_id` to True in this Milvus instance to generate ids automatically, or specify string-type ids for each text.
+2025-02-25 02:49:59.660 | ERROR    | apps.rag.services:__init__:43 | Failed to initialize RAGService: Milvus.__init__() got an unexpected keyword argument 'dimension'
+2025-02-25 02:52:12.626 | ERROR    | apps.rag.services:__init__:45 | Failed to initialize RAGService: Milvus.__init__() got an unexpected keyword argument 'collection_config'
+2025-02-25 02:57:04.957 | ERROR    | apps.rag.services:__init__:36 | Failed to initialize RAGService: Milvus.__init__() got an unexpected keyword argument 'schema'
+2025-02-25 03:00:00.471 | ERROR    | core.vector_store.utils:ensure_milvus_collection:22 | Error ensuring Milvus collection: <ConnectionNotExistException: (code=1, message=should create connection first.)>
+2025-02-25 03:00:00.473 | ERROR    | apps.rag.services:__init__:36 | Failed to initialize RAGService: <ConnectionNotExistException: (code=1, message=should create connection first.)>
+2025-02-25 03:02:46.114 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:02:46.231 | ERROR    | core.vector_store.utils:ensure_milvus_collection:26 | Error ensuring Milvus collection: Either `embedding_function` or `builtin_function` should be provided.
+2025-02-25 03:02:46.232 | ERROR    | apps.rag.services:__init__:36 | Failed to initialize RAGService: Either `embedding_function` or `builtin_function` should be provided.
+2025-02-25 03:06:10.933 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:06:11.008 | ERROR    | core.vector_store.utils:create_milvus_collection:29 | Error creating Milvus collection: <MilvusException: (code=700, message=index not found[collection=document_store])>
+2025-02-25 03:06:11.009 | ERROR    | apps.rag.services:__init__:37 | Failed to initialize RAGService: <MilvusException: (code=700, message=index not found[collection=document_store])>
+2025-02-25 03:10:41.097 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-02-25 03:10:41.184 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:10:41.232 | INFO     | __main__:reset_vector_store:27 | Dropping collection: document_store
+2025-02-25 03:10:41.241 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-02-25 03:10:41.241 | ERROR    | __main__:reset_vector_store:48 | Error resetting vector store: 'Settings' object has no attribute 'EMBEDDING_DIMENSION'
+2025-02-25 03:10:41.343 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 03:11:41.847 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-02-25 03:11:41.942 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:11:41.990 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-02-25 03:11:42.573 | INFO     | core.vector_store.utils:create_milvus_collection:52 | Created collection and index: document_store
+2025-02-25 03:11:43.434 | INFO     | __main__:reset_vector_store:35 | Creating index...
+2025-02-25 03:11:43.956 | INFO     | __main__:reset_vector_store:45 | Vector store reset completed successfully!
+2025-02-25 03:11:43.958 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 03:11:54.354 | INFO     | __main__:reset_database:35 | Starting database reset...
+2025-02-25 03:11:54.356 | INFO     | __main__:reset_database:38 | Dropping all tables...
+2025-02-25 03:11:54.448 | INFO     | __main__:reset_database:42 | Creating new tables...
+2025-02-25 03:11:54.587 | INFO     | __main__:reset_database:46 | Cleaning uploads directory...
+2025-02-25 03:11:54.589 | INFO     | __main__:clean_uploads_directory:27 | Uploads directory cleaned and recreated
+2025-02-25 03:11:54.589 | INFO     | __main__:reset_database:49 | Database reset completed successfully!
+2025-02-25 03:12:04.189 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-02-25 03:12:04.268 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:12:04.278 | INFO     | __main__:reset_vector_store:27 | Dropping collection: document_store
+2025-02-25 03:12:04.286 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-02-25 03:12:04.847 | INFO     | core.vector_store.utils:create_milvus_collection:52 | Created collection and index: document_store
+2025-02-25 03:12:05.714 | INFO     | __main__:reset_vector_store:35 | Creating index...
+2025-02-25 03:12:06.239 | INFO     | __main__:reset_vector_store:45 | Vector store reset completed successfully!
+2025-02-25 03:12:06.241 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 03:12:37.854 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:12:37.910 | ERROR    | apps.rag.services:__init__:37 | Failed to initialize RAGService: no running event loop
+2025-02-25 03:14:58.111 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:15:06.034 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 03:15:06.034 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 03:15:06.038 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 03:16:06.593 | WARNING  | apps.test.routes:test_vector_store:90 | Failed to cleanup test collection: 'NoneType' object has no attribute 'drop'
+2025-02-25 03:16:06.604 | ERROR    | apps.test.routes:test_vector_store:93 | Vector store test failed: A list of valid ids are required when auto_id is False. You can set `auto_id` to True in this Milvus instance to generate ids automatically, or specify string-type ids for each text.
+2025-02-25 03:17:04.105 | ERROR    | apps.rag.services:_generate_search_queries:236 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 03:17:04.106 | ERROR    | apps.test.routes:test_hybrid_search:145 | Hybrid search test failed: '\n    "semantic_queries"'
+2025-02-25 03:17:14.969 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 03:17:14.970 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 03:17:52.458 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:18:02.447 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 03:18:02.447 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 03:18:02.463 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 03:18:23.146 | WARNING  | apps.test.routes:test_vector_store:90 | Failed to cleanup test collection: 'NoneType' object has no attribute 'drop'
+2025-02-25 03:18:23.146 | ERROR    | apps.test.routes:test_vector_store:93 | Vector store test failed: A list of valid ids are required when auto_id is False. You can set `auto_id` to True in this Milvus instance to generate ids automatically, or specify string-type ids for each text.
+2025-02-25 03:20:27.281 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 03:20:27.289 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 03:20:57.784 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:21:06.270 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 03:21:06.271 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 03:21:06.280 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 03:21:36.181 | INFO     | apps.test.routes:test_vector_store:50 | Creating test collection: test_collection_4d6f0529
+2025-02-25 03:21:36.287 | ERROR    | core.vector_store.utils:create_milvus_collection:52 | Error creating Milvus collection: <MilvusException: (code=65535, message=only metric type can be passed when use AutoIndex)>
+2025-02-25 03:21:36.288 | ERROR    | apps.test.routes:test_vector_store:97 | Vector store test failed: <MilvusException: (code=65535, message=only metric type can be passed when use AutoIndex)>
+2025-02-25 03:23:33.623 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 03:23:33.625 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 03:24:07.870 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:24:15.430 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 03:24:15.430 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 03:24:15.437 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 03:24:30.226 | INFO     | apps.test.routes:test_vector_store:50 | Creating test collection: test_collection_89238420
+2025-02-25 03:24:30.816 | INFO     | core.vector_store.utils:create_milvus_collection:33 | Created collection with auto-index: test_collection_89238420
+2025-02-25 03:24:31.783 | INFO     | apps.test.routes:test_vector_store:73 | Inserted 2 test vectors
+2025-02-25 03:24:31.829 | INFO     | apps.test.routes:test_vector_store:84 | Vector search test successful
+2025-02-25 03:24:31.853 | INFO     | apps.test.routes:test_vector_store:95 | Cleaned up test collection: test_collection_89238420
+2025-02-25 03:25:06.201 | ERROR    | apps.rag.services:_generate_search_queries:236 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 03:25:06.201 | ERROR    | apps.test.routes:test_hybrid_search:145 | Hybrid search test failed: '\n    "semantic_queries"'
+2025-02-25 03:25:16.773 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 03:25:16.773 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 03:27:44.235 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:27:52.933 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 03:27:52.934 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 03:27:52.938 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 03:29:15.960 | INFO     | apps.test.routes:test_vector_store:50 | Creating test collection: test_collection_17e3d0ab
+2025-02-25 03:29:16.528 | INFO     | core.vector_store.utils:create_milvus_collection:33 | Created collection with auto-index: test_collection_17e3d0ab
+2025-02-25 03:29:17.197 | INFO     | apps.test.routes:test_vector_store:73 | Inserted 2 test vectors
+2025-02-25 03:29:17.211 | INFO     | apps.test.routes:test_vector_store:84 | Vector search test successful
+2025-02-25 03:29:17.223 | INFO     | apps.test.routes:test_vector_store:95 | Cleaned up test collection: test_collection_17e3d0ab
+2025-02-25 03:30:01.342 | ERROR    | apps.rag.services:_generate_search_queries:236 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 03:30:01.345 | ERROR    | apps.test.routes:test_hybrid_search:145 | Hybrid search test failed: '\n    "semantic_queries"'
+2025-02-25 03:31:31.293 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 03:31:31.293 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 03:32:32.884 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:32:41.993 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 03:32:41.993 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 03:32:42.011 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 03:33:01.878 | ERROR    | apps.rag.services:_generate_search_queries:258 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 03:33:01.879 | ERROR    | apps.rag.services:_generate_search_queries:258 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 03:33:01.880 | ERROR    | apps.rag.services:hybrid_search:190 | Error in hybrid search: 'VectorStoreManager' object has no attribute 'similarity_search'
+2025-02-25 03:33:01.880 | ERROR    | apps.test.routes:test_hybrid_search:145 | Hybrid search test failed: 'VectorStoreManager' object has no attribute 'similarity_search'
+2025-02-25 03:34:48.762 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 03:34:48.763 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 03:35:05.951 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 03:35:05.953 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 03:35:05.964 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 03:35:06.043 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:35:16.927 | ERROR    | apps.rag.services:_generate_search_queries:265 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 03:35:16.928 | ERROR    | apps.rag.services:_generate_search_queries:265 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 03:35:16.929 | DEBUG    | apps.rag.services:hybrid_search:159 | Generated search queries: {'semantic_queries': ['test document'], 'keyword_terms': ['test', 'document'], 'filters': {}}
+2025-02-25 03:35:44.331 | ERROR    | core.db:get_session:31 | Database session error: 401: Invalid credentials
+2025-02-25 03:37:25.837 | DEBUG    | apps.chat.routes:upload_attachments:181 | Uploading files to conversation ea37a2c3-b485-4dd1-9882-89cdcb40464f
+2025-02-25 03:37:25.941 | INFO     | apps.chat.routes:upload_attachments:226 | File Amended Securities Business Regulations-ar.pdf uploaded successfully
+2025-02-25 03:38:26.677 | DEBUG    | apps.chat.routes:create_message:49 | Creating message for conversation ea37a2c3-b485-4dd1-9882-89cdcb40464f
+2025-02-25 03:38:26.702 | ERROR    | apps.rag.services:_generate_search_queries:265 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 03:38:26.705 | DEBUG    | apps.rag.services:hybrid_search:159 | Generated search queries: {'semantic_queries': ['explain the doc'], 'keyword_terms': ['explain', 'the', 'doc'], 'filters': {}}
+2025-02-25 03:50:56.329 | ERROR    | apps.rag.services:__init__:38 | Failed to initialize RAGService: 'Settings' object has no attribute 'DATA_DIR'
+2025-02-25 03:52:36.569 | ERROR    | core.vector_store.manager:initialize_store:31 | Error initializing vector store: Error code: 401 - {'error': {'message': 'Incorrect API key provided: your_ope************here. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-02-25 03:56:06.679 | ERROR    | core.vector_store.manager:initialize_store:44 | Error initializing vector store: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-02-25 03:56:06.680 | ERROR    | apps.rag.services:__init__:38 | Failed to initialize RAGService: Vector store initialization failed: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-02-25 03:56:55.548 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 03:56:59.582 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 03:57:00.358 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 03:57:00.358 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 03:57:00.391 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 03:57:00.470 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 03:58:15.963 | DEBUG    | apps.chat.routes:upload_attachments:181 | Uploading files to conversation ea37a2c3-b485-4dd1-9882-89cdcb40464f
+2025-02-25 03:58:16.041 | INFO     | apps.chat.routes:upload_attachments:226 | File Arabic_ RAG sampels Dataset.pdf uploaded successfully
+2025-02-25 03:58:50.305 | ERROR    | core.db:get_session:31 | Database session error: 'RAGService' object has no attribute 'get_document'
+2025-02-25 03:58:50.309 | ERROR    | core.middleware:error_handler:11 | Unhandled error: 'RAGService' object has no attribute 'get_document'
+2025-02-25 04:01:52.155 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 04:01:52.157 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 04:02:16.390 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 04:02:20.132 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 04:02:20.866 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 04:02:20.866 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 04:02:20.881 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 04:02:20.972 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 04:03:45.397 | DEBUG    | apps.chat.routes:upload_attachments:181 | Uploading files to conversation ea37a2c3-b485-4dd1-9882-89cdcb40464f
+2025-02-25 04:03:45.477 | INFO     | apps.chat.routes:upload_attachments:226 | File Arabic_ RAG sampels Dataset.pdf uploaded successfully
+2025-02-25 04:04:03.135 | ERROR    | core.db:get_session:31 | Database session error: RAGService.get_document() missing 1 required positional argument: 'session'
+2025-02-25 04:04:03.156 | ERROR    | core.middleware:error_handler:11 | Unhandled error: RAGService.get_document() missing 1 required positional argument: 'session'
+2025-02-25 04:05:52.543 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 04:05:52.545 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 04:06:16.160 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 04:06:23.396 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 04:06:24.480 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 04:06:24.481 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 04:06:24.492 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 04:06:24.577 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 04:07:22.316 | DEBUG    | apps.chat.routes:upload_attachments:181 | Uploading files to conversation ea37a2c3-b485-4dd1-9882-89cdcb40464f
+2025-02-25 04:07:22.391 | INFO     | apps.chat.routes:upload_attachments:226 | File Arabic_ RAG sampels Dataset.pdf uploaded successfully
+2025-02-25 04:07:37.320 | ERROR    | core.db:get_session:31 | Database session error: RAGService.get_document_status() missing 1 required positional argument: 'session'
+2025-02-25 04:07:37.324 | ERROR    | core.middleware:error_handler:11 | Unhandled error: RAGService.get_document_status() missing 1 required positional argument: 'session'
+2025-02-25 04:08:07.004 | ERROR    | apps.rag.routes:upload_document:82 | Error processing document: (sqlite3.OperationalError) table document has no column named current_status
+[SQL: INSERT INTO document (id, title, content, doc_metadata, status, vector_ids, conversation_id, created_by_id, created_at, updated_at, current_status, is_searchable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('e82460ca2eee4f539f7e35277f8e9295', '1st dataset navid RAG.docx', '', '{"file_size": 13826, "file_type": "application/octet-stream", "attachment_id": "5801d1f2-d9ac-4dc0-99be-e0cc8eb3ad2c"}', 'PROCESSING', '[]', 'ea37a2c3b4854dd1988289cdcb40464f', '25384abfe3d64861bbb5eb8c986ceea1', '2025-02-24 23:08:06.993438', '2025-02-24 23:08:06.993438', 'QUEUED', 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-02-25 04:08:07.006 | ERROR    | core.db:get_session:31 | Database session error: 500: (sqlite3.OperationalError) table document has no column named current_status
+[SQL: INSERT INTO document (id, title, content, doc_metadata, status, vector_ids, conversation_id, created_by_id, created_at, updated_at, current_status, is_searchable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('e82460ca2eee4f539f7e35277f8e9295', '1st dataset navid RAG.docx', '', '{"file_size": 13826, "file_type": "application/octet-stream", "attachment_id": "5801d1f2-d9ac-4dc0-99be-e0cc8eb3ad2c"}', 'PROCESSING', '[]', 'ea37a2c3b4854dd1988289cdcb40464f', '25384abfe3d64861bbb5eb8c986ceea1', '2025-02-24 23:08:06.993438', '2025-02-24 23:08:06.993438', 'QUEUED', 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-02-25 04:08:13.459 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 04:08:13.460 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 04:11:41.045 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 04:11:46.397 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 04:11:47.618 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 04:11:47.618 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 04:11:47.646 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 04:11:47.732 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 04:13:07.998 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 04:13:08.003 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 16:27:54.306 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 16:28:01.101 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 16:28:01.982 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 16:28:01.982 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 16:28:01.992 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 16:28:02.081 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 16:28:25.160 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 16:28:25.161 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 16:28:41.722 | INFO     | __main__:reset_database:35 | Starting database reset...
+2025-02-25 16:28:41.724 | INFO     | __main__:reset_database:38 | Dropping all tables...
+2025-02-25 16:28:41.841 | INFO     | __main__:reset_database:42 | Creating new tables...
+2025-02-25 16:28:42.034 | INFO     | __main__:reset_database:46 | Cleaning uploads directory...
+2025-02-25 16:28:42.037 | INFO     | __main__:clean_uploads_directory:27 | Uploads directory cleaned and recreated
+2025-02-25 16:28:42.038 | INFO     | __main__:reset_database:49 | Database reset completed successfully!
+2025-02-25 16:29:26.420 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 16:29:35.973 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 16:29:37.200 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-02-25 16:29:37.202 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 16:29:37.213 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 16:29:37.294 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 16:44:48.267 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 16:44:48.268 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-02-25 16:45:55.242 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 16:47:20.864 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 16:48:51.665 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 16:48:53.102 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-25 16:48:53.103 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 16:48:53.121 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 16:48:53.200 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 16:49:05.328 | ERROR    | core.db:get_session:31 | Database session error: 401: Invalid credentials
+2025-02-25 16:50:37.402 | DEBUG    | apps.chat.routes:upload_attachments:271 | Uploading files to conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-25 16:50:37.482 | INFO     | apps.chat.routes:upload_attachments:316 | File 1st dataset navid RAG.docx uploaded successfully
+2025-02-25 16:51:06.687 | DEBUG    | apps.chat.routes:list_attachments:358 | Fetching attachments for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-25 16:51:06.691 | INFO     | apps.chat.routes:list_attachments:385 | Successfully retrieved 1 attachments for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-25 16:51:37.138 | DEBUG    | apps.chat.routes:create_message:129 | Creating message for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-25 16:51:37.201 | ERROR    | apps.rag.services:_generate_search_queries:334 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 16:51:37.201 | DEBUG    | apps.rag.services:hybrid_search:228 | Generated search queries: {'semantic_queries': ['explain it'], 'keyword_terms': ['explain', 'it'], 'filters': {}}
+2025-02-25 17:02:58.979 | ERROR    | apps.rag.services:generate_response:277 | Error generating response: object LLMResult can't be used in 'await' expression
+2025-02-25 17:02:58.983 | ERROR    | apps.chat.routes:generate_rag_response:228 | Error generating response: object LLMResult can't be used in 'await' expression
+2025-02-25 17:03:44.884 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 17:03:44.887 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-25 17:04:47.502 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:04:49.518 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-25 17:04:49.528 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 17:04:49.549 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 17:04:49.670 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 17:06:14.530 | DEBUG    | apps.chat.routes:upload_attachments:271 | Uploading files to conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-25 17:06:27.737 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:07:37.697 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:07:39.415 | ERROR    | apps.rag.services:_generate_search_queries:335 | Error generating search queries: '\n    "semantic_queries"'
+2025-02-25 17:07:39.418 | DEBUG    | apps.rag.services:hybrid_search:229 | Generated search queries: {'semantic_queries': ['explain it'], 'keyword_terms': ['explain', 'it'], 'filters': {}}
+2025-02-25 17:11:07.736 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 17:11:07.745 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-25 17:12:05.751 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:12:07.679 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-25 17:12:07.679 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 17:12:07.711 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 17:12:07.837 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 17:26:48.254 | DEBUG    | apps.chat.routes:upload_attachments:271 | Uploading files to conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-25 17:27:00.138 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:28:00.496 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:28:02.707 | ERROR    | apps.rag.services:_generate_search_queries:325 | Search query generation error: 'RAGService' object has no attribute 'HYBRID_SEARCH_PROMPT'
+2025-02-25 17:28:02.711 | DEBUG    | apps.rag.services:hybrid_search:229 | Generated search queries: {'semantic_queries': ['explain it'], 'keyword_terms': ['explain', 'it'], 'filters': {}}
+2025-02-25 17:28:03.063 | INFO     | apps.chat.routes:query_documents:433 | Successfully queried documents for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-25 17:32:15.522 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 17:32:15.527 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-25 17:37:15.669 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:37:17.701 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-25 17:37:17.702 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 17:37:17.727 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 17:37:17.849 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 17:38:26.432 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:38:32.406 | ERROR    | apps.rag.services:_generate_search_queries:337 | Search query generation error: '\n    "semantic_queries"'
+2025-02-25 17:38:32.409 | DEBUG    | apps.rag.services:hybrid_search:233 | Generated search queries: {'semantic_queries': ['explain it'], 'keyword_terms': ['explain', 'it'], 'arabic_terms': [], 'filters': {}}
+2025-02-25 17:38:32.868 | INFO     | apps.chat.routes:query_documents:431 | Successfully queried documents for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-25 17:40:25.458 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 17:40:25.459 | INFO     | __main__:lifespan:40 | Application shutdown complete
+2025-02-25 17:41:18.906 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:41:21.896 | INFO     | __main__:lifespan:18 | Starting up application...
+2025-02-25 17:41:21.896 | INFO     | core.db:init_db:17 | Initializing database...
+2025-02-25 17:41:21.923 | INFO     | core.db:init_db:21 | Database initialization completed successfully
+2025-02-25 17:41:22.047 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-02-25 17:42:09.513 | INFO     | core.vector_store.manager:initialize_store:42 | Vector store initialized successfully
+2025-02-25 17:42:11.850 | INFO     | apps.rag.services:query_documents:486 | Querying documents for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6 with query: explain it
+2025-02-25 17:42:12.950 | ERROR    | apps.rag.services:_generate_search_queries:351 | Search query generation error: 'ChatOpenAI' object has no attribute 'chat'
+2025-02-25 17:42:12.953 | DEBUG    | apps.rag.services:hybrid_search:233 | Generated search queries: {'semantic_queries': ['explain it'], 'keyword_terms': ['explain', 'it'], 'arabic_terms': [], 'filters': {}}
+2025-02-25 17:42:13.434 | DEBUG    | apps.rag.services:query_documents:495 | Found 0 search results
+2025-02-25 17:42:13.462 | INFO     | apps.chat.routes:query_documents:431 | Successfully queried documents for conversation 494087b1-bbfa-44af-a165-25b2ba152ad6
+2025-02-25 17:49:10.794 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-02-25 17:49:10.794 | INFO     | __main__:lifespan:40 | Application shutdown complete

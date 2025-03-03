@@ -1,0 +1,72 @@
+2025-02-24 20:57:34.663 | INFO     | core.db:init_db:10 - Initializing database...
+2025-02-24 20:57:34.785 | INFO     | core.db:init_db:13 - Database initialization completed successfully
+2025-02-24 20:57:51.847 | ERROR    | core.db:get_session:23 - Database session error: 401: Invalid credentials
+2025-02-24 20:59:08.901 | DEBUG    | apps.chat.routes:create_message:48 - Creating message for conversation ecc61337-8613-479e-bd74-9c2a0876bf29
+2025-02-24 20:59:08.953 | INFO     | apps.chat.routes:create_message:86 - Message 90447247-a525-4f09-918c-fbdbd44657f5 created successfully
+2025-02-24 21:05:07.168 | INFO     | core.db:init_db:8 - Initializing database...
+2025-02-24 21:05:07.177 | INFO     | core.db:init_db:11 - Database initialization completed successfully
+2025-02-24 21:06:15.092 | INFO     | __main__:lifespan:15 - Starting up application...
+2025-02-24 21:06:15.092 | INFO     | core.db:init_db:8 - Initializing database...
+2025-02-24 21:06:15.098 | INFO     | core.db:init_db:11 - Database initialization completed successfully
+2025-02-24 21:08:41.256 | INFO     | __main__:lifespan:15 - Starting up application...
+2025-02-24 21:08:41.256 | INFO     | core.db:init_db:8 - Initializing database...
+2025-02-24 21:08:41.258 | INFO     | core.db:init_db:11 - Database initialization completed successfully
+2025-02-24 21:09:25.478 | ERROR    | core.db:get_session:21 - Database session error: 400: Email already registered
+2025-02-24 21:11:10.026 | ERROR    | core.db:get_session:21 - Database session error: 1 validation errors:
+  {'type': 'missing', 'loc': ('response', 'message_id'), 'msg': 'Field required', 'input': Attachment(id=UUID('25ec8b2f-c035-4b5f-a946-868d63e1aa1f'), file_type='application/octet-stream', conversation_id=UUID('ecc61337-8613-479e-bd74-9c2a0876bf29'), created_at=datetime.datetime(2025, 2, 24, 16, 11, 10, 5206), filename='Amended Securities Business Regulations-ar (2).docx', file_path='uploads\\ecc61337-8613-479e-bd74-9c2a0876bf29\\Amended Securities Business Regulations-ar (2).docx', file_size=20905, uploaded_by_id=UUID('26004e91-acdb-4c99-b9ca-6af4e9efa917'))}
+
+2025-02-24 21:14:44.987 | INFO     | __main__:lifespan:15 - Starting up application...
+2025-02-24 21:14:44.987 | INFO     | core.db:init_db:8 - Initializing database...
+2025-02-24 21:14:44.991 | INFO     | core.db:init_db:11 - Database initialization completed successfully
+2025-02-24 21:15:11.717 | INFO     | __main__:lifespan:15 - Starting up application...
+2025-02-24 21:15:11.717 | INFO     | core.db:init_db:8 - Initializing database...
+2025-02-24 21:15:11.722 | INFO     | core.db:init_db:11 - Database initialization completed successfully
+2025-02-24 21:16:01.729 | DEBUG    | apps.chat.routes:upload_attachments:142 - Uploading files to conversation ecc61337-8613-479e-bd74-9c2a0876bf29
+2025-02-24 21:16:01.801 | INFO     | apps.chat.routes:upload_attachments:187 - File Amended Securities Business Regulations-ar (2).docx uploaded successfully
+2025-02-24 21:16:01.805 | INFO     | apps.chat.routes:upload_attachments:187 - File Amended Securities Business Regulations-ar.pdf uploaded successfully
+2025-02-24 21:16:01.827 | ERROR    | core.db:get_session:21 - Database session error: 2 validation errors:
+  {'type': 'missing', 'loc': ('response', 0, 'message_id'), 'msg': 'Field required', 'input': Attachment(id=UUID('d73f0086-35ca-4993-a0ca-c0c6e7b2da32'), file_type='application/octet-stream', conversation_id=UUID('ecc61337-8613-479e-bd74-9c2a0876bf29'), created_at=datetime.datetime(2025, 2, 24, 16, 16, 1, 801387), filename='Amended Securities Business Regulations-ar (2).docx', file_path='uploads\\ecc61337-8613-479e-bd74-9c2a0876bf29\\2025/02\\Amended Securities Business Regulations-ar (2)_20250224_211601_e938ee58.docx', file_size=20905, uploaded_by_id=UUID('26004e91-acdb-4c99-b9ca-6af4e9efa917'))}
+  {'type': 'missing', 'loc': ('response', 1, 'message_id'), 'msg': 'Field required', 'input': Attachment(id=UUID('dc7c43f6-a121-42d0-864e-a6867479cebc'), file_type='application/pdf', conversation_id=UUID('ecc61337-8613-479e-bd74-9c2a0876bf29'), created_at=datetime.datetime(2025, 2, 24, 16, 16, 1, 805524), filename='Amended Securities Business Regulations-ar.pdf', file_path='uploads\\ecc61337-8613-479e-bd74-9c2a0876bf29\\2025/02\\Amended Securities Business Regulations-ar_20250224_211601_52571866.pdf', file_size=111954, uploaded_by_id=UUID('26004e91-acdb-4c99-b9ca-6af4e9efa917'))}
+
+2025-02-24 21:16:40.401 | INFO     | __main__:lifespan:15 - Starting up application...
+2025-02-24 21:16:40.401 | INFO     | core.db:init_db:8 - Initializing database...
+2025-02-24 21:16:40.407 | INFO     | core.db:init_db:11 - Database initialization completed successfully
+2025-02-24 21:17:07.823 | ERROR    | core.db:get_session:21 - Database session error: 400: Email already registered
+2025-02-24 21:18:27.168 | DEBUG    | apps.chat.routes:upload_attachments:142 - Uploading files to conversation 636779ab-5b04-4935-810c-6a63c0c592c0
+2025-02-24 21:18:27.237 | INFO     | apps.chat.routes:upload_attachments:187 - File Amended Securities Business Regulations-ar.pdf uploaded successfully
+2025-02-24 21:18:27.243 | INFO     | apps.chat.routes:upload_attachments:187 - File ipo_use_case_original_documents_3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1).pdf uploaded successfully
+2025-02-24 21:18:27.265 | ERROR    | core.db:get_session:21 - Database session error: 2 validation errors:
+  {'type': 'missing', 'loc': ('response', 0, 'message_id'), 'msg': 'Field required', 'input': Attachment(id=UUID('2c42f82c-1416-4e9d-b947-f485b5ef4752'), file_type='application/pdf', conversation_id=UUID('636779ab-5b04-4935-810c-6a63c0c592c0'), created_at=datetime.datetime(2025, 2, 24, 16, 18, 27, 237740), filename='Amended Securities Business Regulations-ar.pdf', file_path='uploads\\636779ab-5b04-4935-810c-6a63c0c592c0\\2025/02\\Amended Securities Business Regulations-ar_20250224_211827_54de328f.pdf', file_size=111954, uploaded_by_id=UUID('26004e91-acdb-4c99-b9ca-6af4e9efa917'))}
+  {'type': 'missing', 'loc': ('response', 1, 'message_id'), 'msg': 'Field required', 'input': Attachment(id=UUID('b01abf5c-2169-40e3-a0bc-59b0f18823a9'), file_type='application/pdf', conversation_id=UUID('636779ab-5b04-4935-810c-6a63c0c592c0'), created_at=datetime.datetime(2025, 2, 24, 16, 18, 27, 243735), filename='ipo_use_case_original_documents_3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1).pdf', file_path='uploads\\636779ab-5b04-4935-810c-6a63c0c592c0\\2025/02\\ipo_use_case_original_documents_3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1)_20250224_211827_d363c192.pdf', file_size=166821, uploaded_by_id=UUID('26004e91-acdb-4c99-b9ca-6af4e9efa917'))}
+
+2025-02-24 21:20:45.231 | INFO     | __main__:lifespan:15 - Starting up application...
+2025-02-24 21:20:45.231 | INFO     | core.db:init_db:8 - Initializing database...
+2025-02-24 21:20:45.236 | INFO     | core.db:init_db:11 - Database initialization completed successfully
+2025-02-24 21:21:25.009 | DEBUG    | apps.chat.routes:upload_attachments:142 - Uploading files to conversation 636779ab-5b04-4935-810c-6a63c0c592c0
+2025-02-24 21:21:25.082 | INFO     | apps.chat.routes:upload_attachments:187 - File Amended Securities Business Regulations-ar.pdf uploaded successfully
+2025-02-24 21:21:25.086 | INFO     | apps.chat.routes:upload_attachments:187 - File Arabic_ RAG sampels Dataset.pdf uploaded successfully
+2025-02-24 21:21:25.092 | ERROR    | apps.chat.routes:upload_attachments:211 - Error in file upload: (sqlite3.OperationalError) table attachment has no column named message_id
+[SQL: INSERT INTO attachment (id, filename, file_path, file_type, file_size, conversation_id, message_id, uploaded_by_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: [('5921bf9dc2a044a5ac85338006081638', 'Amended Securities Business Regulations-ar.pdf', 'uploads\\636779ab-5b04-4935-810c-6a63c0c592c0\\2025/02\\Amended Securities Business Regulations-ar_20250224_212125_21aff69c.pdf', 'application/pdf', 111954, '636779ab5b044935810c6a63c0c592c0', None, '26004e91acdb4c99b9ca6af4e9efa917', '2025-02-24 16:21:25.082354'), ('f5fd29d778a9480f894f4f332e80a26c', 'Arabic_ RAG sampels Dataset.pdf', 'uploads\\636779ab-5b04-4935-810c-6a63c0c592c0\\2025/02\\Arabic_ RAG sampels Dataset_20250224_212125_46d7a324.pdf', 'application/pdf', 79160, '636779ab5b044935810c6a63c0c592c0', None, '26004e91acdb4c99b9ca6af4e9efa917', '2025-02-24 16:21:25.086152')]]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-02-24 21:21:25.093 | ERROR    | core.db:get_session:21 - Database session error: 500: {'error': 'upload_failed', 'message': 'Failed to process file upload', 'code': 500, 'details': {'error': "(sqlite3.OperationalError) table attachment has no column named message_id\n[SQL: INSERT INTO attachment (id, filename, file_path, file_type, file_size, conversation_id, message_id, uploaded_by_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)]\n[parameters: [('5921bf9dc2a044a5ac85338006081638', 'Amended Securities Business Regulations-ar.pdf', 'uploads\\\\636779ab-5b04-4935-810c-6a63c0c592c0\\\\2025/02\\\\Amended Securities Business Regulations-ar_20250224_212125_21aff69c.pdf', 'application/pdf', 111954, '636779ab5b044935810c6a63c0c592c0', None, '26004e91acdb4c99b9ca6af4e9efa917', '2025-02-24 16:21:25.082354'), ('f5fd29d778a9480f894f4f332e80a26c', 'Arabic_ RAG sampels Dataset.pdf', 'uploads\\\\636779ab-5b04-4935-810c-6a63c0c592c0\\\\2025/02\\\\Arabic_ RAG sampels Dataset_20250224_212125_46d7a324.pdf', 'application/pdf', 79160, '636779ab5b044935810c6a63c0c592c0', None, '26004e91acdb4c99b9ca6af4e9efa917', '2025-02-24 16:21:25.086152')]]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"}}
+2025-02-24 21:23:50.235 | INFO     | __main__:reset_database:35 - Starting database reset...
+2025-02-24 21:23:50.242 | INFO     | __main__:reset_database:38 - Dropping all tables...
+2025-02-24 21:23:50.309 | INFO     | __main__:reset_database:42 - Creating new tables...
+2025-02-24 21:23:50.417 | INFO     | __main__:reset_database:46 - Cleaning uploads directory...
+2025-02-24 21:23:50.425 | INFO     | __main__:clean_uploads_directory:27 - Uploads directory cleaned and recreated
+2025-02-24 21:23:50.425 | INFO     | __main__:reset_database:49 - Database reset completed successfully!
+2025-02-24 21:24:00.325 | INFO     | __main__:lifespan:15 - Starting up application...
+2025-02-24 21:24:00.325 | INFO     | core.db:init_db:8 - Initializing database...
+2025-02-24 21:24:00.344 | INFO     | core.db:init_db:11 - Database initialization completed successfully
+2025-02-24 21:24:10.874 | ERROR    | core.db:get_session:21 - Database session error: 401: Invalid credentials
+2025-02-24 21:25:17.781 | DEBUG    | apps.chat.routes:create_message:47 - Creating message for conversation fee13098-744f-4a7a-a19e-9140d2fc960a
+2025-02-24 21:25:17.806 | INFO     | apps.chat.routes:create_message:85 - Message 9719eb19-57e0-44d1-b387-73497ecf5d78 created successfully
+2025-02-24 21:25:59.510 | DEBUG    | apps.chat.routes:upload_attachments:142 - Uploading files to conversation fee13098-744f-4a7a-a19e-9140d2fc960a
+2025-02-24 21:25:59.582 | INFO     | apps.chat.routes:upload_attachments:187 - File 1st dataset navid RAG.docx uploaded successfully
+2025-02-24 21:25:59.591 | INFO     | apps.chat.routes:upload_attachments:187 - File Amended Securities Business Regulations-ar.pdf uploaded successfully
+2025-02-24 21:26:25.942 | ERROR    | core.db:get_session:21 - Database session error: (builtins.AttributeError) 'str' object has no attribute 'hex'
+[SQL: SELECT attachment.id, attachment.filename, attachment.file_path, attachment.file_type, attachment.file_size, attachment.conversation_id, attachment.message_id, attachment.uploaded_by_id, attachment.created_at 
+FROM attachment 
+WHERE attachment.conversation_id = ? ORDER BY attachment.created_at]
+[parameters: [{}]]
