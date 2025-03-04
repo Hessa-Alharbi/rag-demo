@@ -1,0 +1,239 @@
+2025-03-04 08:52:30.913 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-04 08:52:30.929 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 08:52:30.954 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 08:52:31.087 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 08:52:51.887 | ERROR    | apps.test.routes:test_llm:116 | LLM test failed: Connection error.
+2025-03-04 08:53:22.282 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 08:53:22.288 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-04 08:53:44.449 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-04 08:53:44.457 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 08:53:44.473 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 08:53:44.590 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 09:13:36.757 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 09:13:36.758 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-04 09:20:30.559 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-04 09:20:30.559 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 09:20:30.583 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 09:20:30.738 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:22:24.718 | INFO     | apps.chat.routes:process_query:447 | Processing query request: explain the document for conversation: d3425549-504e-49e0-918c-da08ac0407a7
+2025-03-04 09:24:04.142 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:24:04.174 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:24:04.243 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:24:09.907 | INFO     | apps.rag.services:initialize:73 | RAG service initialized successfully
+2025-03-04 09:24:25.049 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:24:25.126 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:24:56.664 | WARNING  | apps.rag.services:_generate_search_queries:485 | Error generating search queries, falling back to basic expansion: 
+2025-03-04 09:24:56.669 | ERROR    | apps.rag.services:hybrid_search:419 | Error in hybrid search: object list can't be used in 'await' expression
+2025-03-04 09:25:23.029 | DEBUG    | apps.chat.routes:create_message:130 | Creating message for conversation d3425549-504e-49e0-918c-da08ac0407a7
+2025-03-04 09:25:23.179 | INFO     | apps.chat.routes:generate_rag_response:212 | Searching for documents relevant to: 'explain all the documents attached to me in detail.'
+2025-03-04 09:25:36.425 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:25:36.478 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:25:36.490 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:25:38.310 | ERROR    | apps.rag.services:hybrid_search:419 | Error in hybrid search: object list can't be used in 'await' expression
+2025-03-04 09:25:38.310 | WARNING  | apps.chat.routes:generate_rag_response:220 | No relevant documents found for query: explain all the documents attached to me in detail.
+2025-03-04 09:25:38.310 | INFO     | apps.chat.routes:generate_rag_response:229 | Generated response successfully
+2025-03-04 09:32:56.728 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-04 09:32:56.728 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 09:32:56.752 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 09:32:56.929 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:34:02.380 | DEBUG    | apps.chat.routes:create_message:130 | Creating message for conversation d3425549-504e-49e0-918c-da08ac0407a7
+2025-03-04 09:34:39.273 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:34:39.291 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:34:39.352 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:34:43.619 | INFO     | apps.rag.services:initialize:73 | RAG service initialized successfully
+2025-03-04 09:34:43.630 | INFO     | apps.chat.routes:generate_rag_response:212 | Searching for documents relevant to: 'explain all the attached docs'
+2025-03-04 09:34:53.079 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:34:53.130 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:35:27.623 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:35:27.843 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:35:27.861 | ERROR    | apps.rag.services:hybrid_search:424 | Error in hybrid search: object list can't be used in 'await' expression
+2025-03-04 09:35:27.864 | WARNING  | apps.chat.routes:generate_rag_response:220 | No relevant documents found for query: explain all the attached docs
+2025-03-04 09:35:27.865 | INFO     | apps.chat.routes:generate_rag_response:229 | Generated response successfully
+2025-03-04 09:43:59.515 | INFO     | __main__:lifespan:20 | Starting up application...
+2025-03-04 09:43:59.522 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 09:43:59.540 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 09:43:59.540 | INFO     | core.startup:initialize_vector_stores:9 | Initializing vector stores at application startup...
+2025-03-04 09:44:38.575 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:44:38.730 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:44:38.804 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:44:38.804 | INFO     | core.startup:initialize_vector_stores:13 | Vector stores initialized successfully
+2025-03-04 09:44:47.488 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:44:47.521 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:44:52.526 | INFO     | apps.rag.services:initialize:73 | RAG service initialized successfully
+2025-03-04 09:44:52.526 | INFO     | core.startup:initialize_vector_stores:18 | RAG service initialized successfully
+2025-03-04 09:44:52.526 | INFO     | core.startup:startup_event_handler:27 | Running application startup tasks...
+2025-03-04 09:44:52.526 | ERROR    | __main__:lifespan:37 | Failed to start application: This event loop is already running
+2025-03-04 09:47:58.475 | INFO     | __main__:lifespan:20 | Starting up application...
+2025-03-04 09:47:58.482 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 09:47:58.509 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 09:47:58.509 | INFO     | __main__:lifespan:29 | Initializing vector stores...
+2025-03-04 09:47:58.509 | INFO     | core.startup:initialize_vector_stores:9 | Initializing vector stores at application startup...
+2025-03-04 09:48:34.184 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:48:34.313 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:48:34.372 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:48:34.372 | INFO     | core.startup:initialize_vector_stores:13 | Vector stores initialized successfully
+2025-03-04 09:48:43.052 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:48:43.099 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:48:47.600 | INFO     | apps.rag.services:initialize:73 | RAG service initialized successfully
+2025-03-04 09:48:47.600 | INFO     | core.startup:initialize_vector_stores:18 | RAG service initialized successfully
+2025-03-04 09:48:47.600 | INFO     | __main__:lifespan:31 | Vector stores initialized successfully
+2025-03-04 09:50:39.301 | INFO     | apps.chat.routes:process_query:447 | Processing query request: explain it for conversation: d3425549-504e-49e0-918c-da08ac0407a7
+2025-03-04 09:50:52.179 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:50:52.203 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:50:52.259 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:50:56.684 | INFO     | apps.rag.services:initialize:73 | RAG service initialized successfully
+2025-03-04 09:50:59.699 | WARNING  | apps.rag.services:_generate_search_queries:513 | Error generating search queries, falling back to basic expansion: 
+2025-03-04 09:50:59.699 | DEBUG    | apps.rag.services:hybrid_search:360 | Generated search queries: {'semantic_queries': ['explain it'], 'keyword_terms': ['explain', 'it'], 'arabic_terms': [], 'filters': {}}
+2025-03-04 09:51:09.996 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:51:10.034 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:51:19.420 | DEBUG    | apps.rag.services:hybrid_search:374 | Found 0 semantic search results
+2025-03-04 09:51:19.420 | DEBUG    | apps.rag.services:hybrid_search:381 | Trying keyword search with: explain it
+2025-03-04 09:51:44.012 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:51:44.200 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:51:44.208 | DEBUG    | apps.rag.services:hybrid_search:403 | Trying broader search without conversation filter
+2025-03-04 09:52:25.047 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:52:25.711 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:52:25.819 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:54:38.947 | DEBUG    | apps.chat.routes:create_message:130 | Creating message for conversation d3425549-504e-49e0-918c-da08ac0407a7
+2025-03-04 09:54:39.277 | INFO     | apps.chat.routes:generate_rag_response:212 | Searching for documents relevant to: 'explain it'
+2025-03-04 09:54:41.828 | DEBUG    | apps.rag.services:hybrid_search:360 | Generated search queries: {'semantic_queries': ['provide an explanation', 'clarify the concept', 'elaborate on it', 'define it'], 'keyword_terms': ['explain', 'definition', 'clarification'], 'arabic_terms': ['اشرح', 'تفسير'], 'filters': {}}
+2025-03-04 09:54:54.017 | INFO     | core.vector_store.singleton:_initialize:36 | Initializing global vector store
+2025-03-04 09:54:54.096 | DEBUG    | core.vector_store.connection:ensure_connection:37 | Connected to Milvus server version: v2.4.13
+2025-03-04 09:54:54.156 | INFO     | core.vector_store.singleton:_initialize:43 | Vector store singleton initialized successfully
+2025-03-04 09:54:54.158 | DEBUG    | apps.rag.services:hybrid_search:374 | Found 0 semantic search results
+2025-03-04 09:54:54.160 | DEBUG    | apps.rag.services:hybrid_search:381 | Trying keyword search with: explain definition clarification
+2025-03-04 09:57:44.674 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-04 09:57:44.679 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 09:57:44.717 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 09:57:44.891 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 09:59:39.662 | DEBUG    | apps.chat.routes:create_message:130 | Creating message for conversation d3425549-504e-49e0-918c-da08ac0407a7
+2025-03-04 10:00:00.565 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace default
+2025-03-04 10:00:00.575 | INFO     | apps.chat.routes:generate_rag_response:212 | Searching for documents relevant to: 'explain it'
+2025-03-04 10:00:07.262 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace d3425549-504e-49e0-918c-da08ac0407a7
+2025-03-04 10:00:09.778 | WARNING  | core.vector_store.manager:similarity_search:130 | No results found for query: elaborate on it
+2025-03-04 10:00:09.990 | WARNING  | core.vector_store.manager:similarity_search:130 | No results found for query: explain clarify elaborate
+2025-03-04 10:00:11.022 | INFO     | apps.chat.routes:generate_rag_response:229 | Generated response successfully
+2025-03-04 10:02:38.374 | INFO     | apps.chat.routes:process_query:447 | Processing query request: what is this doc about? for conversation: d3425549-504e-49e0-918c-da08ac0407a7
+2025-03-04 10:02:40.715 | WARNING  | core.vector_store.manager:similarity_search:130 | No results found for query: the content of this document?
+2025-03-04 10:02:40.929 | WARNING  | core.vector_store.manager:similarity_search:130 | No results found for query: document content subject information
+2025-03-04 10:03:24.113 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:03:24.113 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-04 10:03:36.561 | INFO     | __main__:reset_database:35 | Starting database reset...
+2025-03-04 10:03:36.561 | INFO     | __main__:reset_database:38 | Dropping all tables...
+2025-03-04 10:03:36.644 | INFO     | __main__:reset_database:42 | Creating new tables...
+2025-03-04 10:03:36.760 | INFO     | __main__:reset_database:46 | Cleaning uploads directory...
+2025-03-04 10:03:36.764 | INFO     | __main__:clean_uploads_directory:27 | Uploads directory cleaned and recreated
+2025-03-04 10:03:36.764 | INFO     | __main__:reset_database:49 | Database reset completed successfully!
+2025-03-04 10:03:45.748 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-03-04 10:03:45.836 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:03:45.841 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-03-04 10:03:46.485 | INFO     | core.vector_store.utils:create_milvus_collection:33 | Created collection with auto-index: document_store
+2025-03-04 10:03:47.129 | INFO     | __main__:reset_vector_store:35 | Creating index...
+2025-03-04 10:03:47.143 | ERROR    | __main__:reset_vector_store:48 | Error resetting vector store: <MilvusException: (code=65535, message=CreateIndex failed: at most one distinct index is allowed per field)>
+2025-03-04 10:03:47.144 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:04:08.202 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-03-04 10:04:08.284 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:04:08.333 | INFO     | __main__:reset_vector_store:27 | Dropping collection: document_store
+2025-03-04 10:04:08.349 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-03-04 10:04:08.910 | INFO     | core.vector_store.utils:create_milvus_collection:33 | Created collection with auto-index: document_store
+2025-03-04 10:04:09.779 | INFO     | __main__:reset_vector_store:35 | Creating index...
+2025-03-04 10:04:09.795 | ERROR    | __main__:reset_vector_store:48 | Error resetting vector store: <MilvusException: (code=65535, message=CreateIndex failed: at most one distinct index is allowed per field)>
+2025-03-04 10:04:09.799 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:07:23.425 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-03-04 10:07:23.519 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:07:23.569 | INFO     | __main__:reset_vector_store:27 | Dropping collection: document_store
+2025-03-04 10:07:23.588 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-03-04 10:07:24.149 | INFO     | core.vector_store.utils:create_milvus_collection:33 | Created collection with auto-index: document_store
+2025-03-04 10:07:24.797 | INFO     | __main__:reset_vector_store:35 | Collection created successfully with auto-index!
+2025-03-04 10:07:24.798 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:07:38.175 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-04 10:07:38.177 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 10:07:38.185 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 10:07:38.257 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:11:34.613 | DEBUG    | apps.chat.routes:upload_attachments:296 | Uploading files to conversation 04d4edbe-db62-4c02-8575-21895e729d70
+2025-03-04 10:11:52.058 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace default
+2025-03-04 10:11:58.454 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace 04d4edbe-db62-4c02-8575-21895e729d70
+2025-03-04 10:12:29.933 | INFO     | apps.chat.routes:process_query:447 | Processing query request: explain the document for conversation: 04d4edbe-db62-4c02-8575-21895e729d70
+2025-03-04 10:13:25.417 | DEBUG    | apps.chat.routes:create_message:130 | Creating message for conversation 04d4edbe-db62-4c02-8575-21895e729d70
+2025-03-04 10:13:25.450 | INFO     | apps.chat.routes:generate_rag_response:212 | Searching for documents relevant to: 'explain the document'
+2025-03-04 10:13:28.647 | INFO     | apps.chat.routes:generate_rag_response:229 | Generated response successfully
+2025-03-04 10:15:54.985 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:15:54.986 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-04 10:27:38.754 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-04 10:27:38.756 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 10:27:38.763 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 10:27:38.842 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:30:14.541 | INFO     | apps.chat.routes:process_query:447 | Processing query request: explain all the attached docs to me for conversation: 04d4edbe-db62-4c02-8575-21895e729d70
+2025-03-04 10:30:32.256 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace 04d4edbe-db62-4c02-8575-21895e729d70
+2025-03-04 10:30:35.675 | WARNING  | core.vector_store.manager:similarity_search:130 | No results found for query: please summarize the attached documents
+2025-03-04 10:30:35.877 | WARNING  | core.vector_store.manager:similarity_search:130 | No results found for query: explain attached documents files summary
+2025-03-04 10:31:34.065 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:31:34.065 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-04 10:31:44.631 | INFO     | __main__:check_collection:16 | Checking collection status...
+2025-03-04 10:31:44.724 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:31:44.768 | ERROR    | __main__:check_collection:51 | Error checking collection: 'Collection' object has no attribute 'stats'
+2025-03-04 10:31:44.871 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:32:04.507 | INFO     | __main__:reset_database:35 | Starting database reset...
+2025-03-04 10:32:04.507 | INFO     | __main__:reset_database:38 | Dropping all tables...
+2025-03-04 10:32:04.601 | INFO     | __main__:reset_database:42 | Creating new tables...
+2025-03-04 10:32:04.715 | INFO     | __main__:reset_database:46 | Cleaning uploads directory...
+2025-03-04 10:32:04.718 | INFO     | __main__:clean_uploads_directory:27 | Uploads directory cleaned and recreated
+2025-03-04 10:32:04.718 | INFO     | __main__:reset_database:49 | Database reset completed successfully!
+2025-03-04 10:32:13.854 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-03-04 10:32:13.948 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:32:14.002 | INFO     | __main__:reset_vector_store:27 | Dropping collection: document_store
+2025-03-04 10:32:14.025 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-03-04 10:32:14.587 | INFO     | core.vector_store.utils:create_milvus_collection:33 | Created collection with auto-index: document_store
+2025-03-04 10:32:15.656 | INFO     | __main__:reset_vector_store:35 | Collection created successfully with auto-index!
+2025-03-04 10:32:15.660 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:32:29.950 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-04 10:32:29.954 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 10:32:29.983 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 10:32:30.076 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:35:55.524 | DEBUG    | apps.chat.routes:upload_attachments:296 | Uploading files to conversation 0c67e280-b569-48be-b550-80ed44d18521
+2025-03-04 10:36:18.514 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace default
+2025-03-04 10:36:26.759 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace 0c67e280-b569-48be-b550-80ed44d18521
+2025-03-04 10:37:20.239 | DEBUG    | apps.chat.routes:create_message:130 | Creating message for conversation 0c67e280-b569-48be-b550-80ed44d18521
+2025-03-04 10:37:20.276 | INFO     | apps.chat.routes:generate_rag_response:212 | Searching for documents relevant to: 'explain the docs'
+2025-03-04 10:37:28.912 | INFO     | apps.chat.routes:generate_rag_response:229 | Generated response successfully
+2025-03-04 10:40:00.615 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:40:00.616 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-04 10:41:35.612 | INFO     | __main__:reset_database:35 | Starting database reset...
+2025-03-04 10:41:35.613 | INFO     | __main__:reset_database:38 | Dropping all tables...
+2025-03-04 10:41:35.688 | INFO     | __main__:reset_database:42 | Creating new tables...
+2025-03-04 10:41:35.799 | INFO     | __main__:reset_database:46 | Cleaning uploads directory...
+2025-03-04 10:41:35.801 | INFO     | __main__:clean_uploads_directory:27 | Uploads directory cleaned and recreated
+2025-03-04 10:41:35.801 | INFO     | __main__:reset_database:49 | Database reset completed successfully!
+2025-03-04 10:41:48.890 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-03-04 10:41:49.000 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:41:49.046 | INFO     | __main__:reset_vector_store:27 | Dropping collection: document_store
+2025-03-04 10:41:49.070 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-03-04 10:41:49.637 | INFO     | core.vector_store.utils:create_milvus_collection:33 | Created collection with auto-index: document_store
+2025-03-04 10:41:50.497 | INFO     | __main__:reset_vector_store:35 | Collection created successfully with auto-index!
+2025-03-04 10:41:50.500 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:49:16.192 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-04 10:49:16.193 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-04 10:49:16.205 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-04 10:49:16.284 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:50:55.361 | DEBUG    | apps.chat.routes:upload_attachments:296 | Uploading files to conversation e5f7c102-7762-4cb9-be7b-b4383ed39b1e
+2025-03-04 10:51:12.503 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace default
+2025-03-04 10:51:20.697 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace e5f7c102-7762-4cb9-be7b-b4383ed39b1e
+2025-03-04 10:52:22.361 | DEBUG    | apps.chat.routes:create_message:130 | Creating message for conversation e5f7c102-7762-4cb9-be7b-b4383ed39b1e
+2025-03-04 10:52:22.439 | INFO     | apps.chat.routes:generate_rag_response:212 | Searching for documents relevant to: 'explain the documents'
+2025-03-04 10:52:27.943 | INFO     | apps.chat.routes:generate_rag_response:229 | Generated response successfully
+2025-03-04 10:55:20.631 | INFO     | apps.chat.routes:process_query:447 | Processing query request: explain the documents in detail for conversation: e5f7c102-7762-4cb9-be7b-b4383ed39b1e
+2025-03-04 10:56:46.988 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-04 10:56:46.988 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-04 10:57:10.171 | INFO     | __main__:reset_database:35 | Starting database reset...
+2025-03-04 10:57:10.174 | INFO     | __main__:reset_database:38 | Dropping all tables...
+2025-03-04 10:57:10.276 | INFO     | __main__:reset_database:42 | Creating new tables...
+2025-03-04 10:57:10.434 | INFO     | __main__:reset_database:46 | Cleaning uploads directory...
+2025-03-04 10:57:10.439 | INFO     | __main__:clean_uploads_directory:27 | Uploads directory cleaned and recreated
+2025-03-04 10:57:10.439 | INFO     | __main__:reset_database:49 | Database reset completed successfully!
+2025-03-04 10:57:27.253 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-03-04 10:57:27.340 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-04 10:57:27.349 | INFO     | __main__:reset_vector_store:27 | Dropping collection: document_store
+2025-03-04 10:57:27.364 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-03-04 10:57:27.939 | INFO     | core.vector_store.utils:create_milvus_collection:33 | Created collection with auto-index: document_store
+2025-03-04 10:57:28.820 | INFO     | __main__:reset_vector_store:35 | Collection created successfully with auto-index!
+2025-03-04 10:57:28.825 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus

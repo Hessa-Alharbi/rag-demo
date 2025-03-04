@@ -19,6 +19,7 @@ dependencies = [
     "langchain[openai]>=0.3.19",
     "langdetect>=1.0.9",
     "loguru>=0.7.3",
+    "nltk>=3.9.1",
     "passlib[bcrypt]>=1.7.4",
     "pyjwt>=2.10.1",
     "pymilvus>=2.5.4",

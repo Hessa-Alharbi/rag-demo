@@ -6,17 +6,14 @@ from apps.chat.models import Conversation, Message, Attachment, MessageRole, Mes
 from apps.chat.schemas import ConversationCreate, ConversationRead, MessageCreate, MessageRead, AttachmentRead
 from apps.chat.utils import FileHandler
 from apps.users.models import User
-from core.db import get_db, get_session
+from core.db import get_session
 from apps.auth.routes import get_current_user
 from core.logger import logger
 from core.errors import APIError
 from apps.rag.services import RAGService
 import asyncio
 from apps.rag.models import Document, DocumentStatus
-from core.errors import ConversationNotFoundError, DatabaseError
-from loguru import logger
 
-from core.vector_store.singleton import VectorStoreSingleton
 
 router = APIRouter()
 rag_service = RAGService()
@@ -205,35 +202,59 @@ async def generate_rag_response(
     session: Session
 ):
     try:
-        # Get relevant documents
+        # Initialize RAG service
+        await rag_service.initialize()
+        
+        # Get conversation history for better context
+        history = get_conversation_history(conversation.id, session)
+        
+        # Get relevant documents with improved hybrid search
+        logger.info(f"Searching for documents relevant to: '{message.content}'")
         context_docs = await rag_service.hybrid_search(
             query=message.content,
             conversation_id=str(conversation.id),
             limit=5
         )
+        
+        if not context_docs:
+            logger.warning(f"No relevant documents found for query: {message.content}")
 
-        # Get conversation history
-        history = get_conversation_history(conversation.id, session)
-
-        # Generate response
+        # Generate response with full context
         response = await rag_service.generate_response(
             query=message.content,
             context_docs=context_docs,
             conversation_history=history
         )
+        
+        logger.info("Generated response successfully")
 
-        # Update assistant message
+        # Update assistant message with response and source metadata
         assistant_message.content = response
         assistant_message.status = MessageStatus.COMPLETED
+        
+        # Include sources in message metadata for reference
+        if context_docs:
+            assistant_message.message_metadata = {
+                "sources": [
+                    {
+                        "id": doc.get("id", ""),
+                        "metadata": doc.get("metadata", {})
+                    }
+                    for doc in context_docs[:3]  # Include top 3 sources
+                ]
+            }
+            
         session.add(assistant_message)
         session.commit()
+        session.refresh(assistant_message)
 
     except Exception as e:
-        logger.error(f"Error generating response: {e}")
+        logger.error(f"Error generating response: {e}", exc_info=True)
         assistant_message.status = MessageStatus.FAILED
         assistant_message.message_metadata = {"error": str(e)}
         session.add(assistant_message)
         session.commit()
+        session.refresh(assistant_message)
         raise
 
 @router.get("/{conversation_id}/messages/", response_model=List[MessageRead])
@@ -319,15 +340,27 @@ async def upload_attachments(
         # Commit to get attachment IDs
         session.commit()
         
-        # Process documents asynchronously
-        rag_service = RAGService()
+        # Initialize RAG service
         await rag_service.initialize()
         
+        # Process documents with progress feedback
         documents = await rag_service.process_attachments(
             attachments=uploaded_attachments,
             conversation_id=conversation_id,
             session=session
         )
+        
+        # Add system message about successful processing
+        system_msg = f"✓ {len(documents)} document(s) processed and ready for questions."
+        system_message = Message(
+            content=system_msg,
+            conversation_id=conversation_id,
+            user_id=current_user.id,
+            role=MessageRole.SYSTEM,
+            status=MessageStatus.COMPLETED
+        )
+        session.add(system_message)
+        session.commit()
         
         return uploaded_attachments
         

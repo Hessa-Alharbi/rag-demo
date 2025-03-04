@@ -31,18 +31,8 @@ def reset_vector_store():
         logger.info(f"Creating new collection: {collection_name}")
         collection = create_milvus_collection(collection_name, settings.EMBEDDING_DIMENSION)
         
-        # Create index
-        logger.info("Creating index...")
-        index_params = {
-            "metric_type": "L2",
-            "index_type": "IVF_FLAT",
-            "params": {"nlist": 1024}
-        }
-        collection.create_index(
-            field_name="embeddings",
-            index_params=index_params
-        )
-        logger.info("Vector store reset completed successfully!")
+        # Skip index creation as create_milvus_collection already creates an auto-index
+        logger.info("Collection created successfully with auto-index!")
         
     except Exception as e:
         logger.error(f"Error resetting vector store: {str(e)}")

@@ -1,9 +1,6 @@
 from typing import List, Dict, Any
 from uuid import UUID
-# from langchain.text_splitter import RecursiveCharacterTextSplitter
-
-from langchain_experimental.text_splitter import SemanticChunker
-from langchain_openai import OpenAIEmbeddings  # Or your preferred embeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document as LangchainDocument
 from loguru import logger
 from apps.chat.models import Attachment
@@ -21,6 +18,9 @@ from langdetect import detect
 import asyncio
 import re
 from core.vector_store.singleton import VectorStoreSingleton
+from core.chunking.semantic_chunker import SemanticChunker
+from core.search.reranker import QueryResultReranker
+from core.language.arabic_utils import ArabicTextProcessor
 
 class RAGService:
     def __init__(self):
@@ -29,13 +29,16 @@ class RAGService:
             self._initialize_lock = asyncio.Lock()
             self._initialized = False
             
-            # Initialize embeddings for semantic chunking
-            self.embeddings = OpenAIEmbeddings()
-            
-            # Initialize text splitter with semantic chunking
-            self.text_splitter = SemanticChunker(
-                self.embeddings
+            # Initialize enhanced semantic chunker instead of basic text splitter
+            self.semantic_chunker = SemanticChunker(
+                chunk_size=self.settings.CHUNK_SIZE,
+                chunk_overlap=self.settings.CHUNK_OVERLAP,
+                preserve_headings=True,
+                respect_semantic_units=True
             )
+            
+            # Initialize query result reranker
+            self.reranker = QueryResultReranker()
             
             # Initialize LLM
             self.llm = ModelFactory.create_llm()
@@ -46,11 +49,12 @@ class RAGService:
             raise RuntimeError(f"Failed to initialize RAGService: {str(e)}")
 
     async def initialize(self):
-        """Initialize global vector store"""
+        """Initialize global vector store and reranker"""
         if not self._initialized:
             async with self._initialize_lock:
                 if not self._initialized:
                     await VectorStoreSingleton.get_instance()
+                    await self.reranker.initialize()
                     self._initialized = True
 
     async def extract_file_content(self, file_path: str) -> str:
@@ -75,7 +79,7 @@ class RAGService:
             raise
 
     async def process_document(self, doc: Document, file_path: str) -> Document:
-        """Process document and add to vector store with improved chunking"""
+        """Process document and add to vector store with improved semantic chunking"""
         try:
             # Get conversation-specific vector store
             vector_store = await VectorStoreSingleton.get_conversation_store(str(doc.conversation_id))
@@ -84,46 +88,50 @@ class RAGService:
             content = await self.extract_file_content(file_path)
             doc.content = content
             
-            # Clean and preprocess content for better chunking
-            content = self._preprocess_content(content)
+            # Clean and semantically chunk content for better retrieval
+            # Use the semantic chunker instead of basic text_splitter
+            chunks = self.semantic_chunker.split_text(content)
             
-            # Create a document object for semantic chunking
-            langchain_doc = [LangchainDocument(
-                page_content=content,
-                metadata={"source": file_path, "title": doc.title}
-            )]
-            
-            # Split into semantic chunks using SemanticChunker
-            chunks = self.text_splitter.create_documents(langchain_doc)
+            # Generate meaningful titles for chunks
+            chunk_titles = self.semantic_chunker.generate_chunk_titles(chunks)
             
             # Prepare chunks for vector store with richer metadata
             texts = []
             metadatas = []
             db_chunks = []
             
-            for i, chunk in enumerate(chunks):
-                # Create a more descriptive chunk title
-                chunk_title = self._generate_chunk_title(chunk.page_content, i)
+            for i, (chunk_text, chunk_title) in enumerate(zip(chunks, chunk_titles)):
+                # Get language of the chunk for better metadata
+                chunk_lang = "unknown"
+                try:
+                    chunk_lang = detect(chunk_text[:100])  # Only use first 100 chars for language detection
+                except:
+                    pass
                 
-                chunk_obj = Chunk(
+                # Create a chunk with enhanced metadata
+                chunk = Chunk(
                     document_id=doc.id,
-                    content=chunk.page_content,
+                    content=chunk_text,
                     chunk_metadata={
                         "index": i,
                         "source": file_path,
                         "title": chunk_title,
-                        "doc_title": doc.title
+                        "doc_title": doc.title,
+                        "language": chunk_lang,
+                        "is_arabic": ArabicTextProcessor.contains_arabic(chunk_text)
                     }
                 )
-                db_chunks.append(chunk_obj)
-                texts.append(chunk.page_content)
+                db_chunks.append(chunk)
+                texts.append(chunk_text)
                 metadatas.append({
                     "document_id": str(doc.id),
                     "conversation_id": str(doc.conversation_id),
                     "chunk_index": i,
                     "source": file_path,
                     "title": chunk_title,
-                    "doc_title": doc.title
+                    "doc_title": doc.title,
+                    "language": chunk_lang,
+                    "is_arabic": ArabicTextProcessor.contains_arabic(chunk_text)
                 })
             
             # Add to vector store
@@ -144,6 +152,31 @@ class RAGService:
             logger.error(f"Error processing document: {e}")
             doc.status = DocumentStatus.FAILED
             raise
+
+    def _preprocess_content(self, content: str) -> str:
+        """Clean and preprocess document content for better chunking"""
+        # Remove excessive whitespace
+        content = re.sub(r'\s+', ' ', content)
+        
+        # Fix common OCR issues
+        content = re.sub(r'([a-z])(\.)([A-Z])', r'\1\2 \3', content)  # Fix sentence boundaries
+        
+        return content.strip()
+        
+    def _generate_chunk_title(self, chunk_text: str, index: int) -> str:
+        """Generate a descriptive title for a chunk"""
+        # Extract first line or first few words
+        first_line = chunk_text.split('\n', 1)[0].strip()
+        
+        # Limit to reasonable length
+        if len(first_line) > 50:
+            first_line = first_line[:50] + "..."
+            
+        # If title is empty or just whitespace, use generic title
+        if not first_line or first_line.isspace():
+            return f"Chunk {index+1}"
+            
+        return first_line
 
     async def _process_document(self, doc: Document, file_path: str) -> Document:
         try:
@@ -173,7 +206,7 @@ class RAGService:
             ]
 
             # Split into chunks
-            chunks = self.text_splitter.create_documents(raw_docs)
+            chunks = self.text_splitter.split_documents(raw_docs)
             
             # Create chunks in database
             db_chunks = []
@@ -186,8 +219,7 @@ class RAGService:
                     content=chunk.page_content,
                     chunk_metadata={
                         "index": i,
-                        **chunk.metadata,
-                        "title": doc.title
+                        **chunk.metadata
                     }
                 )
                 db_chunks.append(db_chunk)
@@ -228,31 +260,6 @@ class RAGService:
                 f"Processing failed: {str(e)}"
             )
             raise
-
-    def _preprocess_content(self, content: str) -> str:
-        """Clean and preprocess document content for better chunking"""
-        # Remove excessive whitespace
-        content = re.sub(r'\s+', ' ', content)
-        
-        # Fix common OCR issues
-        content = re.sub(r'([a-z])(\.)([A-Z])', r'\1\2 \3', content)  # Fix sentence boundaries
-        
-        return content.strip()
-        
-    def _generate_chunk_title(self, chunk_text: str, index: int) -> str:
-        """Generate a descriptive title for a chunk"""
-        # Extract first line or first few words
-        first_line = chunk_text.split('\n', 1)[0].strip()
-        
-        # Limit to reasonable length
-        if len(first_line) > 50:
-            first_line = first_line[:50] + "..."
-            
-        # If title is empty or just whitespace, use generic title
-        if not first_line or first_line.isspace():
-            return f"Chunk {index+1}"
-            
-        return first_line
 
     async def _update_processing_status(
         self,
@@ -303,9 +310,7 @@ class RAGService:
         limit: int = 5
     ) -> List[dict]:
         try:
-            # Get instance of vector store
-            vector_store = await VectorStoreSingleton.get_instance()
-            results = await vector_store.similarity_search(
+            results = await self.vector_store.similarity_search(
                 query,
                 k=limit,
                 filter=filter_metadata
@@ -321,7 +326,7 @@ class RAGService:
         conversation_id: str,
         limit: int = 5
     ) -> List[Dict[str, Any]]:
-        """Enhanced hybrid search with multi-stage retrieval"""
+        """Enhanced hybrid search with multi-stage retrieval and reranking"""
         try:
             # Get conversation-specific vector store
             vector_store = await VectorStoreSingleton.get_conversation_store(conversation_id)
@@ -329,38 +334,61 @@ class RAGService:
             if not query.strip():
                 return []
                 
-            # Generate search queries
-            search_queries = await self._generate_search_queries(query)
-            
-            # Stage 1: Try semantic search with primary query
-            semantic_results = await vector_store.similarity_search(
-                query=search_queries["semantic_queries"][0],
-                k=limit,
-                filter={"conversation_id": conversation_id}
-            )
-            
-            # Stage 2: If no results, try with keyword fallback
-            if not semantic_results and search_queries["keyword_terms"]:
-                keyword_query = " ".join(search_queries["keyword_terms"])
+            # Check if query contains Arabic and apply special handling
+            is_arabic = ArabicTextProcessor.contains_arabic(query)
+            if is_arabic:
+                # Use Arabic-specific query processing
+                query_data = ArabicTextProcessor.preprocess_arabic_query(query)
+                if query_data["keywords"]:
+                    # Try with normalized query first
+                    semantic_results = await vector_store.similarity_search(
+                        query=query_data["normalized"],
+                        k=limit * 2,  # Get more results for reranking
+                        filter={"conversation_id": conversation_id}
+                    )
+                    
+                    # If no results, try with keywords
+                    if not semantic_results and query_data["keywords"]:
+                        keyword_query = " ".join(query_data["keywords"])
+                        semantic_results = await vector_store.similarity_search(
+                            query=keyword_query,
+                            k=limit * 2,
+                            filter={"conversation_id": conversation_id}
+                        )
+            else:
+                # Generate search queries for non-Arabic content
+                search_queries = await self._generate_search_queries(query)
+                
+                # Stage 1: Try semantic search with primary query
                 semantic_results = await vector_store.similarity_search(
-                    query=keyword_query,
-                    k=limit,
+                    query=search_queries["semantic_queries"][0],
+                    k=limit * 2,  # Get more results for reranking
                     filter={"conversation_id": conversation_id}
                 )
+                
+                # Stage 2: If no results, try with keyword fallback
+                if not semantic_results and search_queries["keyword_terms"]:
+                    keyword_query = " ".join(search_queries["keyword_terms"])
+                    semantic_results = await vector_store.similarity_search(
+                        query=keyword_query,
+                        k=limit * 2,
+                        filter={"conversation_id": conversation_id}
+                    )
             
             # Stage 3: If still no results, try with wider search (no conversation filter)
             if not semantic_results:
                 semantic_results = await vector_store.similarity_search(
-                    query=search_queries["semantic_queries"][0],
-                    k=limit,
+                    query=query,
+                    k=limit * 2,
                     filter=None  # Remove conversation filter for wider search
                 )
                 
-            # Rerank results for better accuracy if we have enough results
-            if len(semantic_results) > 1:
-                semantic_results = self._rerank_results(semantic_results, query)
-            
-            return semantic_results
+            # Apply reranking using the specialized reranker
+            if semantic_results:
+                reranked_results = await self.reranker.rerank_results(query, semantic_results, top_k=limit)
+                return reranked_results
+                
+            return []
             
         except Exception as e:
             logger.error(f"Error in hybrid search: {e}")
@@ -632,7 +660,7 @@ class RAGService:
         conversation_id: UUID,
         limit: int = 5
     ) -> Dict[str, Any]:
-        """Query documents with improved error handling and result processing"""
+        """Query documents with improved reranking and result processing"""
         try:
             # Make sure RAG service is initialized
             await self.initialize()
@@ -643,7 +671,7 @@ class RAGService:
             search_results = await self.hybrid_search(
                 query=query,
                 conversation_id=str(conversation_id),
-                limit=limit
+                limit=limit * 2  # Get more results for better reranking
             )
             
             logger.debug(f"Found {len(search_results)} search results")
@@ -666,6 +694,17 @@ class RAGService:
                     "sources": []
                 }
 
+            # Apply semantic reranking for more accurate results
+            if len(search_results) > 1:
+                try:
+                    # Use semantic reranking for better accuracy
+                    reranked_results = await self.reranker.semantic_rerank(query, search_results, top_k=limit)
+                    search_results = reranked_results
+                except Exception as e:
+                    logger.error(f"Error during semantic reranking: {e}")
+                    # If semantic reranking fails, fall back to basic reranking
+                    search_results = search_results[:limit]
+
             # Generate response with chat history context
             response = await self.generate_response(
                 query=query,
@@ -679,7 +718,7 @@ class RAGService:
                     {
                         "content": doc.get("content", ""),
                         "metadata": doc.get("metadata", {}),
-                        "score": doc.get("relevance_score", 0)  # Include relevance score
+                        "score": doc.get("relevance_score", 0) or doc.get("semantic_score", 0)  # Include relevance score
                     }
                     for doc in search_results
                 ]

@@ -2,9 +2,9 @@ from typing import List, Dict, Any, Optional
 from loguru import logger
 from core.config import get_settings
 from langchain_community.vectorstores import FAISS
-from langchain.schema import Document
 import asyncio
 import os
+from langchain_core.documents import Document as LCDocument
 
 class VectorStoreManager:
     def __init__(self):
@@ -39,13 +39,15 @@ class VectorStoreManager:
                         except Exception as e:
                             logger.warning(f"Failed to load existing store, creating new one: {e}")
                             self.store = FAISS.from_texts(
-                                texts=[""], 
-                                embedding=self.embeddings
+                                texts=["initialization text"], 
+                                embedding=self.embeddings,
+                                metadatas=[{"initialization": True}]
                             )
                     else:
                         self.store = FAISS.from_texts(
-                            texts=[""], 
-                            embedding=self.embeddings
+                            texts=["initialization text"], 
+                            embedding=self.embeddings,
+                            metadatas=[{"initialization": True}]
                         )
                         self.store.save_local(self.index_path)
                         logger.info(f"Created new vector store for namespace {namespace}")
@@ -61,21 +63,39 @@ class VectorStoreManager:
         texts: List[str], 
         metadatas: Optional[List[Dict[str, Any]]] = None
     ) -> List[str]:
-        """Add documents to vector store"""
+        """Add documents to vector store with improved metadata handling"""
         if not self._initialized:
             await self.initialize()
 
         try:
+            if not texts:
+                return []
+                
             vector_ids = []
+            documents = []
+            
             for i, (text, metadata) in enumerate(zip(texts, metadatas or [{}] * len(texts))):
-                vector_id = f"vec_{len(self.store.index_to_docstore_id)}_{i}"
-                doc = Document(
+                if not text or not text.strip():
+                    continue  # Skip empty texts
+                    
+                vector_id = f"vec_{self.namespace}_{len(self.store.index_to_docstore_id)}_{i}"
+                doc_metadata = {**metadata, "vector_id": vector_id}
+                
+                # Create document with metadata
+                doc = LCDocument(
                     page_content=text,
-                    metadata={**metadata, "vector_id": vector_id}
+                    metadata=doc_metadata
                 )
-                self.store.add_documents([doc])
+                documents.append(doc)
                 vector_ids.append(vector_id)
+            
+            if documents:
+                self.store.add_documents(documents)
+                # Save after adding new documents
+                self.store.save_local(self.index_path)
+                
             return vector_ids
+            
         except Exception as e:
             logger.error(f"Error adding documents: {e}")
             raise
@@ -86,12 +106,12 @@ class VectorStoreManager:
         k: int = 5,
         filter: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Any]]:
-        """Perform similarity search with improved handling"""
+        """Perform similarity search with improved error handling and scoring"""
         if not self._initialized:
             await self.initialize()
 
         try:
-            if not query.strip():
+            if not query or not query.strip():
                 return []
 
             # Apply pre-processing to query
@@ -99,24 +119,28 @@ class VectorStoreManager:
             
             # Perform search with timeout
             async with asyncio.timeout(10):  # 10 second timeout
-                docs = self.store.similarity_search(
+                # Include similarity scores in search
+                docs_and_scores = self.store.similarity_search_with_score(
                     cleaned_query,
                     k=k,
                     filter=filter
                 )
             
-            if not docs:
+            if not docs_and_scores:
                 logger.warning(f"No results found for query: {cleaned_query}")
                 return []
                 
             # Post-process and format results
             results = []
-            for doc in docs:
+            for doc, score in docs_and_scores:
+                # Convert score to a similarity score (higher is better)
+                similarity = 1.0 / (1.0 + score) if score > 0 else 1.0
+                
                 result = {
                     "id": doc.metadata.get("vector_id", ""),
                     "content": doc.page_content,
                     "metadata": doc.metadata,
-                    "score": doc.metadata.get("score", 0.0)  # Add similarity score if available
+                    "score": similarity
                 }
                 results.append(result)
             
@@ -131,6 +155,19 @@ class VectorStoreManager:
 
     def _preprocess_query(self, query: str) -> str:
         """Clean and prepare query for search"""
-        # Remove extra whitespace
+        # Remove extra whitespace and normalize
         query = " ".join(query.split())
+        
+        # Remove common question prefixes that might affect vector similarity
+        prefixes = [
+            "what is", "how do", "can you tell me", "please explain",
+            "i want to know", "tell me about", "could you describe"
+        ]
+        
+        lower_query = query.lower()
+        for prefix in prefixes:
+            if lower_query.startswith(prefix):
+                query = query[len(prefix):].strip()
+                break
+                
         return query
