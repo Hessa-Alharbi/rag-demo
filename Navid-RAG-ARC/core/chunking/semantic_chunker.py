@@ -18,7 +18,7 @@ except LookupError:
 class SemanticChunker:
     """
     Advanced text chunking with semantic boundary detection and multi-language support.
-    Optimizes chunks for better retrieval in RAG applications.
+    Optimizes chunks for better retrieval in RAG the applications.
     """
     
     def __init__(
