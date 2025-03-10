@@ -1,0 +1,36 @@
+2025-03-09 06:13:50.073 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-09 06:13:50.087 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-09 06:13:50.143 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-09 06:13:50.389 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-09 06:18:40.941 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-09 06:18:40.945 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-09 07:17:30.513 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-09 07:17:30.514 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-09 07:17:30.544 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-09 07:17:30.826 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-09 07:22:07.577 | DEBUG    | apps.chat.routes:upload_attachments:296 | Uploading files to conversation 58d8f161-ffa8-4a1f-862e-160e6ddd07ef
+2025-03-09 07:22:41.141 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace default
+2025-03-09 07:22:49.586 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace 58d8f161-ffa8-4a1f-862e-160e6ddd07ef
+2025-03-09 07:23:32.881 | INFO     | apps.chat.routes:process_query:447 | Processing query request: explain the document for conversation: 58d8f161-ffa8-4a1f-862e-160e6ddd07ef
+2025-03-09 07:23:32.896 | INFO     | apps.rag.services:hybrid_search:351 | Processed query: explain the document (original: explain the document)
+2025-03-09 07:24:29.650 | DEBUG    | apps.chat.routes:create_message:130 | Creating message for conversation 58d8f161-ffa8-4a1f-862e-160e6ddd07ef
+2025-03-09 07:24:29.684 | INFO     | apps.chat.routes:generate_rag_response:212 | Searching for documents relevant to: 'explain the document'
+2025-03-09 07:24:29.699 | INFO     | apps.rag.services:hybrid_search:351 | Processed query: explain the document (original: explain the document)
+2025-03-09 07:24:35.331 | INFO     | apps.chat.routes:generate_rag_response:229 | Generated response successfully
+2025-03-09 07:25:34.328 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-09 07:25:34.328 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-09 07:47:26.086 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-09 07:47:26.089 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-09 07:47:26.102 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-09 07:47:26.183 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-09 07:49:22.338 | DEBUG    | apps.chat.routes:create_message:130 | Creating message for conversation 58d8f161-ffa8-4a1f-862e-160e6ddd07ef
+2025-03-09 07:50:06.765 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace default
+2025-03-09 07:50:08.443 | INFO     | apps.chat.routes:generate_rag_response:212 | Searching for documents relevant to: 'what is this document about?'
+2025-03-09 07:50:16.750 | INFO     | core.vector_store.manager:initialize:53 | Created new vector store for namespace 58d8f161-ffa8-4a1f-862e-160e6ddd07ef
+2025-03-09 07:50:21.209 | INFO     | apps.rag.services:hybrid_search:351 | Processed query: what is this document about? (original: what is this document about?)
+2025-03-09 07:50:21.418 | WARNING  | core.vector_store.manager:similarity_search:130 | No results found for query: the content of this document?
+2025-03-09 07:50:21.629 | WARNING  | core.vector_store.manager:similarity_search:130 | No results found for query: what topics are covered in this document?
+2025-03-09 07:50:21.828 | WARNING  | core.vector_store.manager:similarity_search:130 | No results found for query: can you summarize this document?
+2025-03-09 07:50:25.969 | INFO     | apps.chat.routes:generate_rag_response:229 | Generated response successfully
+2025-03-09 07:51:32.602 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-09 07:51:32.605 | INFO     | __main__:lifespan:41 | Application shutdown complete

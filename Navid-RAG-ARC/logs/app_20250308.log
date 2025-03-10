@@ -1,0 +1,58 @@
+2025-03-08 06:41:02.203 | INFO     | __main__:lifespan:19 | Starting up application...
+2025-03-08 06:41:02.209 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-08 06:41:02.239 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-08 06:41:02.353 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-08 06:56:13.058 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-08 06:56:13.058 | INFO     | __main__:lifespan:41 | Application shutdown complete
+2025-03-08 06:56:35.202 | INFO     | __main__:reset_vector_store:17 | Starting vector store reset...
+2025-03-08 06:56:35.354 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-08 06:56:35.410 | INFO     | __main__:reset_vector_store:31 | Creating new collection: document_store
+2025-03-08 06:56:36.134 | INFO     | core.vector_store.utils:create_milvus_collection:33 | Created collection with auto-index: document_store
+2025-03-08 06:56:37.080 | INFO     | __main__:reset_vector_store:35 | Collection created successfully with auto-index!
+2025-03-08 06:56:37.086 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-08 06:56:57.660 | INFO     | __main__:reset_database:35 | Starting database reset...
+2025-03-08 06:56:57.663 | INFO     | __main__:reset_database:38 | Dropping all tables...
+2025-03-08 06:56:57.921 | INFO     | __main__:reset_database:42 | Creating new tables...
+2025-03-08 06:56:58.167 | INFO     | __main__:reset_database:46 | Cleaning uploads directory...
+2025-03-08 06:56:58.175 | INFO     | __main__:clean_uploads_directory:27 | Uploads directory cleaned and recreated
+2025-03-08 06:56:58.175 | INFO     | __main__:reset_database:49 | Database reset completed successfully!
+2025-03-08 06:57:36.271 | ERROR    | apps.rag.services:__init__:48 | Failed to initialize RAGService: ModelFactory.create_llm() got an unexpected keyword argument 'cache_enabled'
+2025-03-08 07:01:09.394 | ERROR    | apps.rag.services:__init__:45 | Failed to initialize RAGService: 'Settings' object has no attribute 'LLM_MODEL_NAME'
+2025-03-08 07:09:31.562 | INFO     | core.llm.factory:create_llm:147 | Created LLM instance: gpt-4o-mini
+2025-03-08 07:09:32.196 | INFO     | __main__:lifespan:20 | Starting up application...
+2025-03-08 07:09:32.197 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-08 07:09:32.216 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-08 07:09:32.321 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-08 07:09:32.321 | ERROR    | __main__:lifespan:37 | Failed to start application: 'Settings' object has no attribute 'EMBEDDING_MODEL_TYPE'
+2025-03-08 07:09:32.321 | INFO     | core.vector_store.singleton:close_all:128 | Vector store connections closed
+2025-03-08 07:09:32.481 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-08 07:09:32.481 | INFO     | __main__:lifespan:43 | Application shutdown complete
+2025-03-08 07:11:05.979 | INFO     | core.llm.factory:create_llm:147 | Created LLM instance: gpt-4o-mini
+2025-03-08 07:11:06.504 | INFO     | __main__:lifespan:20 | Starting up application...
+2025-03-08 07:11:06.504 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-08 07:11:06.530 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-08 07:11:06.671 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-08 07:11:06.675 | ERROR    | __main__:lifespan:37 | Failed to start application: 'Settings' object has no attribute 'EMBEDDING_MODEL_TYPE'
+2025-03-08 07:11:06.679 | INFO     | core.vector_store.singleton:close_all:128 | Vector store connections closed
+2025-03-08 07:11:06.840 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-08 07:11:06.841 | INFO     | __main__:lifespan:43 | Application shutdown complete
+2025-03-08 07:12:49.671 | INFO     | core.llm.factory:create_llm:147 | Created LLM instance: gpt-4o-mini
+2025-03-08 07:12:50.302 | INFO     | __main__:lifespan:20 | Starting up application...
+2025-03-08 07:12:50.308 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-08 07:12:50.349 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-08 07:12:50.504 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-08 07:12:50.506 | ERROR    | __main__:lifespan:37 | Failed to start application: 'Settings' object has no attribute 'EMBEDDING_MODEL_NAME'
+2025-03-08 07:12:50.509 | INFO     | core.vector_store.singleton:close_all:128 | Vector store connections closed
+2025-03-08 07:12:50.650 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-08 07:12:50.652 | INFO     | __main__:lifespan:43 | Application shutdown complete
+2025-03-08 07:13:40.445 | INFO     | core.llm.factory:create_llm:147 | Created LLM instance: gpt-4o-mini
+2025-03-08 07:13:40.858 | INFO     | __main__:lifespan:20 | Starting up application...
+2025-03-08 07:13:40.859 | INFO     | core.db:init_db:20 | Initializing database...
+2025-03-08 07:13:40.884 | INFO     | core.db:init_db:24 | Database initialization completed successfully
+2025-03-08 07:13:41.034 | INFO     | core.vector_store.connection:ensure_connection:20 | Successfully connected to Milvus
+2025-03-08 07:15:08.062 | INFO     | core.embeddings.factory:create_embeddings:69 | Created embedding model: huggingface:intfloat/multilingual-e5-large-instruct
+2025-03-08 07:15:08.065 | ERROR    | core.vector_store.singleton:_init_default_collection:64 | Error initializing default vector store: type object 'MilvusConnectionManager' has no attribute 'get_connection_args'
+2025-03-08 07:15:08.069 | ERROR    | __main__:lifespan:37 | Failed to start application: type object 'MilvusConnectionManager' has no attribute 'get_connection_args'
+2025-03-08 07:15:08.075 | INFO     | core.vector_store.singleton:close_all:128 | Vector store connections closed
+2025-03-08 07:15:08.101 | INFO     | core.vector_store.connection:close_connection:32 | Disconnected from Milvus
+2025-03-08 07:15:08.119 | INFO     | __main__:lifespan:43 | Application shutdown complete

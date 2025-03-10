@@ -20,6 +20,7 @@ import re
 from core.vector_store.singleton import VectorStoreSingleton
 from core.chunking.semantic_chunker import SemanticChunker
 from core.search.reranker import QueryResultReranker
+from core.search.query_processor import QueryProcessor
 from core.language.arabic_utils import ArabicTextProcessor
 
 class RAGService:
@@ -37,7 +38,8 @@ class RAGService:
                 respect_semantic_units=True
             )
             
-            # Initialize query result reranker
+            # Initialize advanced query processing and reranking components
+            self.query_processor = QueryProcessor()
             self.reranker = QueryResultReranker()
             
             # Initialize LLM
@@ -55,6 +57,7 @@ class RAGService:
                 if not self._initialized:
                     await VectorStoreSingleton.get_instance()
                     await self.reranker.initialize()
+                    await self.query_processor.initialize()
                     self._initialized = True
 
     async def extract_file_content(self, file_path: str) -> str:
@@ -310,8 +313,14 @@ class RAGService:
         limit: int = 5
     ) -> List[dict]:
         try:
+            # Pre-process query 
+            processed_query = await self.query_processor.process_query(query)
+            
+            # Use primary processed query for search
+            search_query = processed_query["processed_query"]
+            
             results = await self.vector_store.similarity_search(
-                query,
+                search_query,
                 k=limit,
                 filter=filter_metadata
             )
@@ -328,64 +337,106 @@ class RAGService:
     ) -> List[Dict[str, Any]]:
         """Enhanced hybrid search with multi-stage retrieval and reranking"""
         try:
+            # Make sure the service is initialized
+            await self.initialize()
+            
             # Get conversation-specific vector store
             vector_store = await VectorStoreSingleton.get_conversation_store(conversation_id)
             
             if not query.strip():
                 return []
+            
+            # Use advanced query processing
+            processed_query = await self.query_processor.process_query(query)
+            logger.info(f"Processed query: {processed_query['processed_query']} (original: {query})")
+            
+            # Use expanded queries for better recall
+            expanded_queries = processed_query["expanded_queries"]
+            if not expanded_queries:
+                expanded_queries = [processed_query["processed_query"]]
+                
+            # Add the original query as a fallback
+            if query not in expanded_queries:
+                expanded_queries.append(query)
+                
+            # Initialize results list
+            all_results = []
                 
             # Check if query contains Arabic and apply special handling
             is_arabic = ArabicTextProcessor.contains_arabic(query)
             if is_arabic:
                 # Use Arabic-specific query processing
                 query_data = ArabicTextProcessor.preprocess_arabic_query(query)
-                if query_data["keywords"]:
-                    # Try with normalized query first
-                    semantic_results = await vector_store.similarity_search(
-                        query=query_data["normalized"],
-                        k=limit * 2,  # Get more results for reranking
-                        filter={"conversation_id": conversation_id}
-                    )
-                    
-                    # If no results, try with keywords
-                    if not semantic_results and query_data["keywords"]:
-                        keyword_query = " ".join(query_data["keywords"])
-                        semantic_results = await vector_store.similarity_search(
-                            query=keyword_query,
-                            k=limit * 2,
-                            filter={"conversation_id": conversation_id}
-                        )
-            else:
-                # Generate search queries for non-Arabic content
-                search_queries = await self._generate_search_queries(query)
                 
-                # Stage 1: Try semantic search with primary query
+                # Try normalized query first
                 semantic_results = await vector_store.similarity_search(
-                    query=search_queries["semantic_queries"][0],
+                    query=query_data["normalized"],
                     k=limit * 2,  # Get more results for reranking
                     filter={"conversation_id": conversation_id}
                 )
                 
-                # Stage 2: If no results, try with keyword fallback
-                if not semantic_results and search_queries["keyword_terms"]:
-                    keyword_query = " ".join(search_queries["keyword_terms"])
-                    semantic_results = await vector_store.similarity_search(
+                all_results.extend(semantic_results)
+                
+                # Try Arabic keywords if normalized query returned few results
+                if len(semantic_results) < limit and query_data["keywords"]:
+                    keyword_query = " ".join(query_data["keywords"])
+                    keyword_results = await vector_store.similarity_search(
                         query=keyword_query,
                         k=limit * 2,
                         filter={"conversation_id": conversation_id}
                     )
+                    # Add results not already in the list
+                    existing_ids = {r.get("id") for r in all_results if "id" in r}
+                    all_results.extend([r for r in keyword_results if r.get("id") not in existing_ids])
+            else:
+                # For non-Arabic queries, use the expanded queries
+                for search_query in expanded_queries[:3]:  # Limit to top 3 expanded queries
+                    semantic_results = await vector_store.similarity_search(
+                        query=search_query,
+                        k=limit,  # Get more results for reranking
+                        filter={"conversation_id": conversation_id}
+                    )
+                    
+                    # Add unique results to the combined list
+                    existing_ids = {r.get("id") for r in all_results if "id" in r}
+                    all_results.extend([r for r in semantic_results if r.get("id") not in existing_ids])
+                    
+                    # If we have enough results, stop querying
+                    if len(all_results) >= limit * 3:
+                        break
             
-            # Stage 3: If still no results, try with wider search (no conversation filter)
-            if not semantic_results:
-                semantic_results = await vector_store.similarity_search(
-                    query=query,
-                    k=limit * 2,
+            # If we still don't have enough results, try without conversation filter
+            if len(all_results) < limit:
+                # Try wider search with primary query
+                wide_results = await vector_store.similarity_search(
+                    query=processed_query["processed_query"],
+                    k=limit,
                     filter=None  # Remove conversation filter for wider search
                 )
                 
-            # Apply reranking using the specialized reranker
-            if semantic_results:
-                reranked_results = await self.reranker.rerank_results(query, semantic_results, top_k=limit)
+                # Add unique results
+                existing_ids = {r.get("id") for r in all_results if "id" in r}
+                all_results.extend([r for r in wide_results if r.get("id") not in existing_ids])
+            
+            # If we have results, apply advanced ensemble reranking
+            if all_results:
+                # Use ensemble reranking for complex queries
+                if processed_query["query_type"] == "complex" and len(query.split()) > 3:
+                    reranked_results = await self.reranker.rerank_results(
+                        query=query, 
+                        results=all_results, 
+                        top_k=limit,
+                        method="ensemble"  # Use sophisticated ensemble method
+                    )
+                else:
+                    # Use simpler keyword reranking for simple queries
+                    reranked_results = await self.reranker.rerank_results(
+                        query=query, 
+                        results=all_results, 
+                        top_k=limit,
+                        method="keyword"
+                    )
+                
                 return reranked_results
                 
             return []
@@ -453,9 +504,21 @@ class RAGService:
             return "I apologize, but I encountered an error while processing your question."
 
     async def _generate_search_queries(self, query: str) -> Dict:
-        """Generate search queries with robust error handling"""
+        """Generate search queries using enhanced query processing"""
         try:
-            # Use simplified prompt format for more reliable parsing
+            # Use the query processor for more sophisticated query processing
+            processed_query = await self.query_processor.process_query(query)
+            
+            # Check if we have meaningful expanded queries from processing
+            if processed_query["expanded_queries"]:
+                return {
+                    "semantic_queries": processed_query["expanded_queries"],
+                    "keyword_terms": processed_query["concepts"],
+                    "arabic_terms": [] if processed_query["language"] != "ar" else [query],
+                    "filters": processed_query["filters"]
+                }
+            
+            # Fall back to original LLM-based approach
             prompt = f"{SEARCH_PROMPT_TEMPLATES['system']}\n\n{SEARCH_PROMPT_TEMPLATES['user'].format(query=query)}"
             
             # Set a reasonable timeout for query generation
@@ -478,32 +541,26 @@ class RAGService:
                 
             except (json.JSONDecodeError, ValueError) as e:
                 logger.error(f"Failed to parse search queries: {str(e)}")
-                # Detect language for fallback
-                is_arabic = False
-                try:
-                    is_arabic = detect(query) == 'ar'
-                except Exception as e:
-                    logger.error(f"Error detecting language: {e}")
                 # Use enhanced query expansion for better fallback
-                return self._get_expanded_queries(query, is_arabic)
+                return self._get_expanded_queries(query, 
+                                                ArabicTextProcessor.contains_arabic(query))
                 
         except (asyncio.TimeoutError, Exception) as e:
             logger.error(f"Error generating search queries: {e}")
-            # Detect language for better fallback
-            is_arabic = False
-            try:
-                is_arabic = detect(query) == 'ar'
-            except:
-                pass
-            return self._get_expanded_queries(query, is_arabic)
+            # Use enhanced query expansion for better fallback
+            return self._get_expanded_queries(query, ArabicTextProcessor.contains_arabic(query))
 
     def _get_expanded_queries(self, query: str, is_arabic: bool = False) -> Dict:
         """Get expanded queries with better keyword extraction"""
         # Extract keywords more intelligently
         keywords = []
         
-        # Basic keyword extraction by removing stopwords and keeping important terms
-        stopwords = {'and', 'or', 'the', 'is', 'at', 'which', 'on', 'a', 'an', 'in', 'for', 'to', 'of', 'with'}
+        # More extensive stopword list for better filtering
+        stopwords = {
+            'and', 'or', 'the', 'is', 'at', 'which', 'on', 'a', 'an', 'in', 'for', 'to', 'of', 'with',
+            'by', 'as', 'but', 'if', 'from', 'then', 'you', 'have', 'had', 'would', 'could', 'should',
+            'were', 'are', 'that', 'this', 'these', 'those', 'there', 'their', 'about'
+        }
         
         # Split by spaces and keep non-stopwords
         words = [w.strip('.,?!:;()[]{}"\'-') for w in query.split()]
@@ -512,9 +569,20 @@ class RAGService:
         # Generate query variations
         query_variations = [query]
         
-        # Add the first half of the query as a variation (if long enough)
-        if len(query.split()) > 4:
-            half_query = ' '.join(query.split()[:len(query.split())//2])
+        # Add multi-word combinations for complex queries
+        if len(keywords) > 2:
+            # Add bigrams and trigrams as variations
+            bigrams = [' '.join(keywords[i:i+2]) for i in range(len(keywords)-1)]
+            trigrams = [' '.join(keywords[i:i+3]) for i in range(len(keywords)-2)] if len(keywords) > 2 else []
+            
+            # Add most relevant combinations
+            if bigrams:
+                query_variations.append(bigrams[0])
+            if trigrams:
+                query_variations.append(trigrams[0])
+            
+            # Add first half of the query as a variation (if long enough)
+            half_query = ' '.join(words[:len(words)//2])
             query_variations.append(half_query)
         
         return {
@@ -524,59 +592,104 @@ class RAGService:
             "filters": {}
         }
 
-    def _rerank_results(self, results: List[Dict], query: str) -> List[Dict]:
-        """Rerank search results using relevance heuristics"""
-        # Sort results by relevance score if available
+    async def query_documents(
+        self,
+        query: str,
+        conversation_id: UUID,
+        limit: int = 5
+    ) -> Dict[str, Any]:
+        """Query documents with improved reranking and result processing"""
         try:
-            # Filter out any empty results
-            results = [r for r in results if r.get("content")]
+            # Make sure RAG service is initialized
+            await self.initialize()
             
-            # Calculate basic relevance scores
-            for result in results:
-                content = result.get("content", "").lower()
-                query_terms = query.lower().split()
-                
-                # Count term frequency
-                term_count = sum(content.count(term) for term in query_terms)
-                
-                # Check for exact phrase matches (higher weight)
-                exact_match = 2 if query.lower() in content else 0
-                
-                # Calculate proximity score (terms appearing close together)
-                proximity_score = 0
-                for i in range(len(query_terms) - 1):
-                    if query_terms[i] in content and query_terms[i+1] in content:
-                        idx1 = content.find(query_terms[i])
-                        idx2 = content.find(query_terms[i+1])
-                        if 0 < abs(idx2 - idx1) < 20:  # Terms within 20 chars
-                            proximity_score += 1
-                
-                # Calculate final score
-                result["relevance_score"] = term_count + exact_match + proximity_score
+            logger.info(f"Querying documents for: {query}")
             
-            # Sort by relevance score (descending)
-            return sorted(results, key=lambda x: x.get("relevance_score", 0), reverse=True)
+            # Process query through advanced query processor 
+            processed_query = await self.query_processor.process_query(query)
+            logger.info(f"Query type: {processed_query['query_type']}, concepts: {processed_query['concepts']}")
             
-        except Exception as e:
-            logger.warning(f"Error during result reranking: {e}")
-            return results  # Return original results if reranking fails
+            # Perform search with improved hybrid search
+            search_results = await self.hybrid_search(
+                query=query,
+                conversation_id=str(conversation_id),
+                limit=limit * 2  # Get more results for better reranking
+            )
+            
+            logger.debug(f"Found {len(search_results)} search results")
+            
+            if not search_results:
+                # Return language-appropriate message
+                try:
+                    lang = detect(query)
+                    message = (
+                        "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال"
+                        if lang == 'ar' else
+                        "I couldn't find any relevant information to answer your question."
+                    )
+                except Exception as e:
+                    logger.error(f"Error detecting language: {e}")
+                    message = "I couldn't find any relevant information to answer your question."
+                    
+                return {
+                    "response": message,
+                    "sources": []
+                }
 
-    def _format_context(self, docs: List[dict]) -> str:
-        """Format retrieved documents into context string with improved structure"""
-        context_parts = []
-        for i, doc in enumerate(docs, 1):
-            # Extract content and metadata
-            content = doc.get("content", "")
-            metadata = doc.get("metadata", {})
-            source = metadata.get("source", f"Document {i}")
-            title = metadata.get("title", f"Section {i}")
-            doc_title = metadata.get("doc_title", "")
+            # Apply semantic reranking for more accurate results
+            if len(search_results) > 1:
+                try:
+                    # For complex queries, use advanced semantic or cross-encoder reranking
+                    if processed_query["query_type"] == "complex" and len(query.split()) > 3:
+                        # Choose more sophisticated reranking for complex queries
+                        reranking_method = "cross_encoder" if len(search_results) <= 10 else "semantic"
+                        reranked_results = await self.reranker.rerank_results(
+                            query=query, 
+                            results=search_results, 
+                            top_k=limit,
+                            method=reranking_method
+                        )
+                    else:
+                        # For simpler queries, use faster keyword reranking
+                        reranked_results = await self.reranker.rerank_results(
+                            query=query, 
+                            results=search_results, 
+                            top_k=limit,
+                            method="keyword"
+                        )
+                    
+                    search_results = reranked_results
+                except Exception as e:
+                    logger.error(f"Error during reranking: {e}")
+                    # If reranking fails, use original results
+                    if len(search_results) > limit:
+                        search_results = search_results[:limit]
+
+            # Generate response with chat history context
+            response = await self.generate_response(
+                query=query,
+                context_docs=search_results
+            )
             
-            # Format with better source information
-            header = f"[Document: {doc_title}] [Section: {title}]"
-            context_parts.append(f"{header}\n{content}\n")
-            
-        return "\n---\n".join(context_parts)
+            # Return response with source documents
+            return {
+                "response": response,
+                "sources": [
+                    {
+                        "content": doc.get("content", ""),
+                        "metadata": doc.get("metadata", {}),
+                        "score": doc.get("ensemble_score", 0) or 
+                               doc.get("semantic_score", 0) or 
+                               doc.get("cross_encoder_score", 0) or
+                               doc.get("relevance_score", 0)  # Include most appropriate score
+                    }
+                    for doc in search_results
+                ]
+            }
+
+        except Exception as e:
+            logger.error(f"Error in document query: {e}", exc_info=True)
+            raise
 
     async def get_document(self, document_id: str, session: Session) -> Document:
         """
@@ -654,76 +767,19 @@ class RAGService:
         session.commit()
         return documents
 
-    async def query_documents(
-        self,
-        query: str,
-        conversation_id: UUID,
-        limit: int = 5
-    ) -> Dict[str, Any]:
-        """Query documents with improved reranking and result processing"""
-        try:
-            # Make sure RAG service is initialized
-            await self.initialize()
+    def _format_context(self, docs: List[dict]) -> str:
+        """Format retrieved documents into context string with improved structure"""
+        context_parts = []
+        for i, doc in enumerate(docs, 1):
+            # Extract content and metadata
+            content = doc.get("content", "")
+            metadata = doc.get("metadata", {})
+            source = metadata.get("source", f"Document {i}")
+            title = metadata.get("title", f"Section {i}")
+            doc_title = metadata.get("doc_title", "")
             
-            logger.info(f"Querying documents for: {query}")
+            # Format with better source information
+            header = f"[Document: {doc_title}] [Section: {title}]"
+            context_parts.append(f"{header}\n{content}\n")
             
-            # Perform search with improved hybrid search
-            search_results = await self.hybrid_search(
-                query=query,
-                conversation_id=str(conversation_id),
-                limit=limit * 2  # Get more results for better reranking
-            )
-            
-            logger.debug(f"Found {len(search_results)} search results")
-            
-            if not search_results:
-                # Return language-appropriate message
-                try:
-                    lang = detect(query)
-                    message = (
-                        "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال"
-                        if lang == 'ar' else
-                        "I couldn't find any relevant information to answer your question."
-                    )
-                except Exception as e:
-                    logger.error(f"Error detecting language: {e}")
-                    message = "I couldn't find any relevant information to answer your question."
-                    
-                return {
-                    "response": message,
-                    "sources": []
-                }
-
-            # Apply semantic reranking for more accurate results
-            if len(search_results) > 1:
-                try:
-                    # Use semantic reranking for better accuracy
-                    reranked_results = await self.reranker.semantic_rerank(query, search_results, top_k=limit)
-                    search_results = reranked_results
-                except Exception as e:
-                    logger.error(f"Error during semantic reranking: {e}")
-                    # If semantic reranking fails, fall back to basic reranking
-                    search_results = search_results[:limit]
-
-            # Generate response with chat history context
-            response = await self.generate_response(
-                query=query,
-                context_docs=search_results
-            )
-            
-            # Return response with source documents
-            return {
-                "response": response,
-                "sources": [
-                    {
-                        "content": doc.get("content", ""),
-                        "metadata": doc.get("metadata", {}),
-                        "score": doc.get("relevance_score", 0) or doc.get("semantic_score", 0)  # Include relevance score
-                    }
-                    for doc in search_results
-                ]
-            }
-
-        except Exception as e:
-            logger.error(f"Error in document query: {e}", exc_info=True)
-            raise
+        return "\n---\n".join(context_parts)

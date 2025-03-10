@@ -114,7 +114,7 @@ Return a JSON array with each document's ID (starting from 1) and score:
 """
 
 RERANKING_TEMPLATE = PromptTemplate(
-     input_variables=["query", "search_results"],
+     input_variables=["query", "documents"],
      template=RERANKING_PROMPT
 )
 
@@ -123,3 +123,65 @@ QUERY_NORMALIZATION_TEMPLATE = """Extract the key search terms from the followin
 Original Query: {query}
 
 Normalized Query (just the key terms, no explanation):"""
+
+CROSS_ENCODER_PROMPT = """You are a cross-encoder that evaluates the relevance between query-document pairs. For each pair, rate how relevant the document is to the query on a scale of 0-10 where:
+- 10: Perfect match with comprehensive answer
+- 7-9: Highly relevant and directly addresses the query
+- 4-6: Moderately relevant with partial information
+- 1-3: Tangentially relevant 
+- 0: Completely irrelevant
+
+Consider:
+1. How directly the document answers the query
+2. Whether the document contains all necessary information
+3. For Arabic content, consider different word forms and dialectal variations
+4. Semantic similarity beyond just keyword matching
+5. Factual accuracy and completeness
+
+The query is: {query}
+
+Query-document pairs:
+{pairs}
+
+Return a JSON array with each pair's document_id and score:
+```json
+[
+  {{"document_id": 0, "score": 8.5}},
+  {{"document_id": 1, "score": 3.2}},
+  {{"document_id": 2, "score": 0.5}}
+]
+```
+
+Only include the JSON array in your response, no explanation or additional text."""
+
+COMPLEX_QUERY_PROCESSING_PROMPT = """You are a query preprocessing expert specialized in analyzing and breaking down complex search queries into structured components. Given a query, identify:
+
+1. Primary intent/goal of the query
+2. Key concepts and entities mentioned
+3. Implied constraints or filters
+4. Temporal aspects (if any)
+5. Relationships between entities
+6. Any negations or exclusions
+
+For Arabic queries, consider morphological variations and dialectal forms.
+
+Query: {query}
+
+Return a JSON object with these components:
+```json
+{{
+  "primary_intent": "main goal of the query",
+  "concepts": ["list", "of", "key", "concepts"],
+  "entities": ["specific", "named", "entities"],
+  "constraints": ["any", "constraints", "or", "filters"],
+  "temporal_aspects": ["time-related", "elements"],
+  "relationships": ["entity1:entity2:relationship"],
+  "exclusions": ["things", "to", "exclude"],
+  "expanded_queries": ["alternative", "query", "formulations"]
+}}
+```"""
+
+COMPLEX_QUERY_PROCESSING_TEMPLATE = PromptTemplate(
+    input_variables=["query"],
+    template=COMPLEX_QUERY_PROCESSING_PROMPT
+)
