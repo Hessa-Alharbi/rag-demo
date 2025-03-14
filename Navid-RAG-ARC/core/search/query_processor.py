@@ -8,7 +8,7 @@ import json
 from loguru import logger
 from langdetect import detect
 from core.llm.factory import ModelFactory
-from core.llm.prompt_templates import COMPLEX_QUERY_PROCESSING_TEMPLATE
+from core.llm.prompt_templates import COMPLEX_QUERY_PROCESSING_TEMPLATE, QUERY_REFORMULATION_TEMPLATE
 from core.language.arabic_utils import ArabicTextProcessor
 
 

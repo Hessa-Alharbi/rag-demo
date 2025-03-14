@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
         logger.info("Application shutdown complete")
 
 
-app = FastAPI(lifespan=lifespan, title="Navid RAG API")
+app = FastAPI(lifespan=lifespan, title="Navid RAG API", root_path="/api")
 
 @app.on_event("startup")
 async def startup_event():

@@ -185,3 +185,105 @@ COMPLEX_QUERY_PROCESSING_TEMPLATE = PromptTemplate(
     input_variables=["query"],
     template=COMPLEX_QUERY_PROCESSING_PROMPT
 )
+
+QUERY_REFORMULATION_TEMPLATE = """You are a query understanding assistant. The user has provided a vague or contextual query that might refer to prior context. 
+Generate 3-5 potential complete, specific queries that represent what the user might be asking about. Consider what phrases like "it", "this", or "these" might refer to.
+
+For Arabic queries, respond in Arabic and consider dialectal variations.
+
+User query: {query}
+
+Potential specific queries (one per line, no numbering):"""
+
+REACT_REASONING_PROMPT = """You are a bilingual (Arabic/English) AI assistant with expertise in reasoning step-by-step to answer questions based on provided context. 
+Follow this ReACT (Reasoning and Action) approach to give clear, accurate answers.
+
+Context information:
+{context}
+
+User question: {question}
+
+Follow these steps:
+1. Thought: First analyze the question and consider what information is needed to answer it.
+2. Search: Identify the most relevant parts of the context that address the question.
+3. Evaluate: Compare different pieces of information and assess their relevance and reliability.
+4. Reasoning: Connect the relevant information step by step to form a logical path to the answer.
+5. Answer: Provide a clear, direct answer based on your reasoning.
+
+- If the question is in Arabic, respond in natural, fluent Arabic.
+- If the question is in English, respond in English.
+- Make your reasoning explicit but concise.
+- Focus on information from the context only.
+- If the context doesn't contain relevant information, acknowledge this limitation.
+- Avoid phrases like "based on the context" or "according to the provided information" in your final answer.
+
+Begin your response with "Thought:" and then work through each step before providing your final answer.
+"""
+
+REACT_REASONING_TEMPLATE = PromptTemplate(
+    input_variables=["context", "question"],
+    template=REACT_REASONING_PROMPT
+)
+
+CONTEXTUAL_SEARCH_PROMPT = """You are a search specialist for an intelligent search system.
+Your task is to analyze the user's current query in the context of their previous conversation.
+
+Current query: {current_query}
+Previous conversation:
+{conversation_history}
+
+Identify what the user is looking for by analyzing:
+1. What the pronouns and references in the current query are referring to
+2. The main topic or subject being discussed in the conversation
+3. The specific information being requested in the current query
+
+Output a more detailed search query that explicitly includes the context that would help retrieve the most relevant information. 
+If the query is in Arabic, respond in Arabic. If in English, respond in English.
+
+Rewritten query (more specific and detailed):"""
+
+CONTEXTUAL_SEARCH_TEMPLATE = PromptTemplate(
+    input_variables=["current_query", "conversation_history"],
+    template=CONTEXTUAL_SEARCH_PROMPT
+)
+
+ARABIC_RESPONSE_VALIDATION_PROMPT = """You are an Arabic language expert reviewing the following AI-generated response to ensure it is natural, fluent, and culturally appropriate.
+
+Original query: {query}
+
+AI-generated response: {response}
+
+Evaluate the response on:
+1. Language naturalness (does it sound like a native Arabic speaker?)
+2. Grammatical correctness 
+3. Cultural appropriateness
+4. Consistency of tone and style
+5. Avoid machine-translation artifacts
+
+If the response needs improvement, rewrite it to sound more natural and human. If it's already good, return it unchanged.
+
+Improved response:"""
+
+CROSS_VALIDATION_PROMPT = """You are an expert fact-checker for AI-generated content. Your task is to review the following response against the provided context for factual accuracy.
+
+Context documents:
+{context_docs}
+
+Generated response: {response}
+
+Question: {query}
+
+Check if:
+1. All factual claims in the response are supported by the context
+2. The response doesn't contain information not found in the context
+3. Numbers, dates, names, and specific details are accurately represented
+4. No logical errors or contradictions exist
+
+If you find any issues, provide a corrected response that maintains the same style and tone but fixes any factual errors.
+
+Corrected response (or 'ACCURATE' if no corrections needed):"""
+
+CROSS_VALIDATION_TEMPLATE = PromptTemplate(
+    input_variables=["context_docs", "response", "query"],
+    template=CROSS_VALIDATION_PROMPT
+)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from typing import List
 from uuid import UUID
 from sqlmodel import Session, select
@@ -431,7 +431,7 @@ async def check_conversation_documents(conversation_id: UUID, session: Session) 
         .where(
             Document.conversation_id == conversation_id,
             Document.status == DocumentStatus.COMPLETED,
-            Document.is_searchable == True
+            Document.is_searchable
         )
     ).all()
     return len(documents) > 0
