@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
         raise
     finally:
         # Close the ML model
-        print("Closing ML  model")
+        print("Closing ML model")
         
         # Cleanup
         MilvusConnectionManager.close_connection()
