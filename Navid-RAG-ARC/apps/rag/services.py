@@ -22,6 +22,7 @@ from core.chunking.semantic_chunker import SemanticChunker
 from core.search.reranker import QueryResultReranker
 from core.search.query_processor import QueryProcessor
 from core.language.arabic_utils import ArabicTextProcessor
+from langchain_community.document_loaders import PyPDFLoader
 
 class RAGService:
     def __init__(self):
@@ -65,10 +66,14 @@ class RAGService:
         ext = Path(file_path).suffix.lower()
         try:
             if (ext == '.pdf'):
-                text = ""
-                with fitz.open(file_path) as doc:
-                    for page in doc:
-                        text += page.get_text()
+                # Use PyPDFLoader instead of fitz
+                loader = PyPDFLoader(file_path)
+                pages = loader.load()
+                # Merge content of all pages with improved formatting
+                text = "\n\n".join(
+                    self.clean_and_format_text(page.page_content)
+                    for page in pages
+                )
                 return text
             elif ext in ['.docx', '.doc']:
                 return docx2txt.process(file_path)
@@ -458,13 +463,13 @@ class RAGService:
                 try:
                     lang = detect(query)
                     return (
-                        "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال"
+                        "I couldn't find sufficient information to answer this question."
                         if lang == 'ar' else
-                        "I cannot find sufficient information to answer this question."
+                        "I couldn't find any relevant information to answer your question."
                     )
                 except Exception as e:
                     logger.error(f"Error detecting language: {e}")
-                    return "I cannot find sufficient information to answer this question."
+                    return "I couldn't find sufficient information to answer this question."
 
             # Format context with improved structure
             formatted_context = self._format_context(context_docs)
@@ -493,6 +498,10 @@ class RAGService:
             answer_parts = full_response.split("Answer:")
             if len(answer_parts) > 1:
                 return answer_parts[-1].strip()
+            
+            # تنظيف وتنسيق النص قبل إرجاعه
+            if full_response:
+                full_response = self.format_response(full_response)
             
             return full_response
 
@@ -623,7 +632,7 @@ class RAGService:
                 try:
                     lang = detect(query)
                     message = (
-                        "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال"
+                        "I couldn't find sufficient information to answer this question."
                         if lang == 'ar' else
                         "I couldn't find any relevant information to answer your question."
                     )
@@ -783,3 +792,110 @@ class RAGService:
             context_parts.append(f"{header}\n{content}\n")
             
         return "\n---\n".join(context_parts)
+
+    def clean_and_format_text(self, text: str) -> str:
+        """Clean and format text"""
+        if not text:
+            return text
+        
+        # Remove HTML tags
+        text = re.sub(r'<[^>]+>', '', text)
+        
+        # Clean unwanted marks and symbols
+        text = re.sub(r'[.•●■□▪️◾]+(?=\s)', '.', text)  # Standardize bullet points
+        text = re.sub(r'["""]', '"', text)  # Standardize quotation marks
+        text = re.sub(r'[''`]', "'", text)
+        
+        # Clean spaces and new lines
+        text = re.sub(r'\s*\n\s*\n\s*', '\n\n', text)  # Standardize empty lines
+        text = re.sub(r' +', ' ', text)  # Remove repeated spaces
+        
+        # Organize lists
+        lines = text.split('\n')
+        formatted_lines = []
+        list_pattern = re.compile(r'^[\d\-\*\.\s•●■]*\s*(.+)$')
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                formatted_lines.append('')
+                continue
+            
+            # Format list items
+            match = list_pattern.match(line)
+            if match:
+                content = match.group(1)
+                if line.startswith(('•', '●', '■', '*', '-')):
+                    formatted_lines.append(f"• {content}")
+                elif re.match(r'^\d+[\.\)]', line):
+                    num = re.match(r'^\d+', line).group()
+                    formatted_lines.append(f"{num}. {content}")
+                else:
+                    formatted_lines.append(line)
+            else:
+                formatted_lines.append(line)
+        
+        # Recombine the text
+        text = '\n'.join(formatted_lines)
+        
+        # Organize paragraphs
+        paragraphs = text.split('\n\n')
+        formatted_paragraphs = []
+        
+        for para in paragraphs:
+            if para.strip():
+                # Determine if the paragraph is a list
+                if any(line.startswith('• ') or re.match(r'^\d+\.', line) 
+                      for line in para.split('\n')):
+                    # Add space before and after the list
+                    formatted_paragraphs.append(f"\n{para}\n")
+                else:
+                    formatted_paragraphs.append(para)
+        
+        text = '\n\n'.join(formatted_paragraphs)
+        
+        # Remove excess spaces at the end
+        text = text.strip()
+        
+        return text
+
+    def format_response(self, response: str) -> str:
+        """Format the final response"""
+        if not response:
+            return response
+        
+        # Clean the text first
+        response = self.clean_and_format_text(response)
+        
+        # Determine the response pattern
+        has_arabic = any('\u0600' <= c <= '\u06FF' for c in response)
+        
+        # Format numbered and bullet lists
+        lines = response.split('\n')
+        formatted_lines = []
+        in_list = False
+        
+        for line in lines:
+            # Determine if the line is part of a list
+            is_list_item = bool(re.match(r'^[\d\-\*\.\s•●■]', line.strip()))
+            
+            if is_list_item:
+                if not in_list:
+                    formatted_lines.append('')  # Space before the list
+                    in_list = True
+            elif in_list:
+                formatted_lines.append('')  # Space after the list
+                in_list = False
+            
+            formatted_lines.append(line)
+        
+        response = '\n'.join(formatted_lines)
+        
+        # Format Arabic paragraphs
+        if has_arabic:
+            # Add space between Arabic paragraphs
+            response = re.sub(r'([.؟!])\s*\n', r'\1\n\n', response)
+            # Improve Arabic punctuation marks
+            response = response.replace('،', '، ').replace('؛', '؛ ')
+        
+        return response.strip()

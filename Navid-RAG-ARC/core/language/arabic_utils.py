@@ -4,40 +4,38 @@ from typing import List, Dict, Any, Optional, Tuple
 from collections import Counter
 import string
 
-# Arabic character ranges
-ARABIC_CHARS = '\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF'
-
-# Extended Arabic stopwords (comprehensive list for better filtering)
-ARABIC_STOPWORDS = {
-    'من', 'إلى', 'عن', 'على', 'في', 'هو', 'هي', 'هم', 'انت', 'انا', 'نحن', 'هذا', 'هذه', 'تلك',
-    'ذلك', 'كان', 'كانت', 'مع', 'عند', 'لكن', 'و', 'ا', 'أن', 'إن', 'لم', 'لن', 'ثم', 'أو', 'ام',
-    'اذا', 'ماذا', 'كيف', 'اين', 'متى', 'لماذا', 'كم', 'اي', 'فى', 'الى', 'الذي', 'التي', 'اللذين',
-    'اللتين', 'الذين', 'اللاتي', 'الذي', 'التي', 'لكن', 'ليت', 'لعل', 'كأن', 'وكأن', 'حتى', 'إذا',
-    'إن', 'أن', 'لن', 'لم', 'ثم', 'سوف', 'قد', 'كي', 'منذ', 'مذ', 'عدا', 'خلا', 'حاشا', 'إما', 'لا',
-    'ولا', 'ما', 'لات', 'كلا', 'ذا', 'ولذا', 'هيا', 'آه', 'آها', 'وا', 'آي', 'آ', 'أي', 'فيما',
-    'ولقد', 'فقد', 'لقد', 'بل', 'مما', 'إما', 'إلا', 'ولا', 'لما', 'بما', 'هلا', 'ألا', 'ولما',
-    'لولا', 'وإن', 'فلا', 'وإلا', 'إذ', 'إذا', 'حيث', 'كلما', 'فإن', 'لو', 'أما', 'إما', 'فإما',
-    'وأما', 'ومن', 'فمن', 'وما', 'فما', 'وإنما', 'ففي', 'وفي', 'ومع', 'فمع', 'وعن', 'فعن', 'وعلى',
-    'فعلى', 'وإلى', 'فإلى', 'كما'
-}
-
-# Define word prefixes in Arabic that could be removed for stemming
-ARABIC_PREFIXES = ['ال', 'بال', 'كال', 'فال', 'لل', 'وال']
-
-# Define word suffixes in Arabic that could be removed for stemming
-ARABIC_SUFFIXES = ['ه', 'ها', 'ك', 'ي', 'هم', 'هن', 'كم', 'كن', 'نا', 'ون', 'ين', 'ان', 'تين', 'تان']
-
-# Diacritics and tatweel characters
-ARABIC_DIACRITICS = '\u064B-\u065F\u0670'
-TATWEEL = '\u0640'
-
 class ArabicTextProcessor:
     """Utilities for processing Arabic text in search and indexing contexts."""
     
+    # نقل المتغيرات العامة داخل الفئة
+    ARABIC_CHARS = '\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF'
+    
+    # Extended Arabic stopwords
+    ARABIC_STOPWORDS = {
+        'من', 'إلى', 'عن', 'على', 'في', 'هو', 'هي', 'هم', 'انت', 'انا', 'نحن', 'هذا', 'هذه', 'تلك',
+        'ذلك', 'كان', 'كانت', 'مع', 'عند', 'لكن', 'و', 'ا', 'أن', 'إن', 'لم', 'لن', 'ثم', 'أو', 'ام',
+        'اذا', 'ماذا', 'كيف', 'اين', 'متى', 'لماذا', 'كم', 'اي', 'فى', 'الى', 'الذي', 'التي', 'اللذين',
+        'اللتين', 'الذين', 'اللاتي', 'الذي', 'التي', 'لكن', 'ليت', 'لعل', 'كأن', 'وكأن', 'حتى', 'إذا',
+        'إن', 'أن', 'لن', 'لم', 'ثم', 'سوف', 'قد', 'كي', 'منذ', 'مذ', 'عدا', 'خلا', 'حاشا', 'إما', 'لا',
+        'ولا', 'ما', 'لات', 'كلا', 'ذا', 'ولذا', 'هيا', 'آه', 'آها', 'وا', 'آي', 'آ', 'أي', 'فيما',
+        'ولقد', 'فقد', 'لقد', 'بل', 'مما', 'إما', 'إلا', 'ولا', 'لما', 'بما', 'هلا', 'ألا', 'ولما',
+        'لولا', 'وإن', 'فلا', 'وإلا', 'إذ', 'إذا', 'حيث', 'كلما', 'فإن', 'لو', 'أما', 'إما', 'فإما',
+        'وأما', 'ومن', 'فمن', 'وما', 'فما', 'وإنما', 'ففي', 'وفي', 'ومع', 'فمع', 'وعن', 'فعن', 'وعلى',
+        'فعلى', 'وإلى', 'فإلى', 'كما'
+    }
+    
+    # Arabic prefixes and suffixes
+    ARABIC_PREFIXES = ['ال', 'بال', 'كال', 'فال', 'لل', 'وال']
+    ARABIC_SUFFIXES = ['ه', 'ها', 'ك', 'ي', 'هم', 'هن', 'كم', 'كن', 'نا', 'ون', 'ين', 'ان', 'تين', 'تان']
+    
+    # Diacritics and tatweel
+    ARABIC_DIACRITICS = '\u064B-\u065F\u0670'
+    TATWEEL = '\u0640'
+
     @staticmethod
     def is_arabic(text: str) -> bool:
         """Check if text contains Arabic characters."""
-        arabic_pattern = re.compile(f'[{ARABIC_CHARS}]')
+        arabic_pattern = re.compile(f'[{ArabicTextProcessor.ARABIC_CHARS}]')
         return bool(arabic_pattern.search(text))
     
     @staticmethod
@@ -48,20 +46,24 @@ class ArabicTextProcessor:
     @staticmethod
     def normalize_arabic(text: str) -> str:
         """
-        Normalize Arabic text for better search matching:
-        - Remove diacritics (tashkeel)
-        - Normalize alef variants
-        - Remove tatweel (kashida)
-        - Normalize Arabic numerals
+        Enhanced normalization of Arabic text with better handling of edge cases
         """
         if not text:
             return text
-            
-        # Remove diacritics
-        text = re.sub(f'[{ARABIC_DIACRITICS}]', '', text)
         
-        # Remove tatweel (kashida)
-        text = re.sub(f'[{TATWEEL}]', '', text)
+        # First, ensure we're working with valid UTF-8
+        try:
+            if not isinstance(text, str):
+                text = str(text)
+            text = text.encode('utf-8', errors='ignore').decode('utf-8')
+        except UnicodeError:
+            text = text.encode('utf-8', errors='replace').decode('utf-8')
+        
+        # Remove diacritics
+        text = re.sub(f'[{ArabicTextProcessor.ARABIC_DIACRITICS}]', '', text)
+        
+        # Remove tatweel
+        text = re.sub(f'[{ArabicTextProcessor.TATWEEL}]', '', text)
         
         # Normalize alef variants
         text = text.replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا')
@@ -75,27 +77,24 @@ class ArabicTextProcessor:
         # Normalize teh marbuta to heh
         text = text.replace('ة', 'ه')
         
-        # Normalize Arabic numerals to Latin
-        digit_map = {'٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', 
-                    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'}
-        for ar, en in digit_map.items():
-            text = text.replace(ar, en)
-            
-        # Remove punctuation and special characters
-        arabic_punctuation = '،؛؟»«""٪'
-        translator = str.maketrans('', '', arabic_punctuation + string.punctuation)
-        text = text.translate(translator)
+        # Normalize lamalef ligatures
+        ligatures = {'ﻻ': 'لا', 'ﻷ': 'لا', 'ﻹ': 'لا', 'ﻵ': 'لا'}
+        for old, new in ligatures.items():
+            text = text.replace(old, new)
+        
+        # Remove non-Arabic numbers and special characters
+        text = re.sub(r'[^\u0600-\u06FF\s]', ' ', text)
         
         # Remove extra whitespace
         text = ' '.join(text.split())
-            
+        
         return text
     
     @staticmethod
     def remove_arabic_stopwords(text: str) -> str:
         """Remove Arabic stopwords from text."""
         words = text.split()
-        filtered_words = [word for word in words if word not in ARABIC_STOPWORDS]
+        filtered_words = [word for word in words if word not in ArabicTextProcessor.ARABIC_STOPWORDS]
         return ' '.join(filtered_words)
     
     @staticmethod
@@ -108,13 +107,13 @@ class ArabicTextProcessor:
             return word
             
         # Try to remove prefixes (only one, from longest to shortest)
-        for prefix in sorted(ARABIC_PREFIXES, key=len, reverse=True):
+        for prefix in sorted(ArabicTextProcessor.ARABIC_PREFIXES, key=len, reverse=True):
             if word.startswith(prefix) and len(word) > len(prefix) + 2:
                 word = word[len(prefix):]
                 break
                 
         # Try to remove suffixes (only one, from longest to shortest)
-        for suffix in sorted(ARABIC_SUFFIXES, key=len, reverse=True):
+        for suffix in sorted(ArabicTextProcessor.ARABIC_SUFFIXES, key=len, reverse=True):
             if word.endswith(suffix) and len(word) > len(suffix) + 2:
                 word = word[:-len(suffix)]
                 break
@@ -145,7 +144,7 @@ class ArabicTextProcessor:
         
         # Extract keywords (remove stopwords and split)
         words = normalized.split()
-        keywords = [w for w in words if w and w not in ARABIC_STOPWORDS]
+        keywords = [w for w in words if w and w not in ArabicTextProcessor.ARABIC_STOPWORDS]
         
         # Generate query expansions (combinations of original, normalized, and stemmed)
         expansions = [query, normalized, stemmed]
@@ -283,7 +282,7 @@ class ArabicTextProcessor:
         
         # Split into words and filter stopwords
         words = normalized.split()
-        filtered_words = [w for w in words if w not in ARABIC_STOPWORDS and len(w) > 1]
+        filtered_words = [w for w in words if w not in ArabicTextProcessor.ARABIC_STOPWORDS and len(w) > 1]
         
         # Count word frequencies
         word_counts = Counter(filtered_words)
