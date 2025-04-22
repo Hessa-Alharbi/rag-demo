@@ -158,6 +158,16 @@ class VectorStoreManager:
         # Remove extra whitespace and normalize
         query = " ".join(query.split())
         
+        # Check if query is in Arabic
+        is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+        
+        if is_arabic:
+            # Import ArabicTextProcessor if not available
+            from core.language.arabic_utils import ArabicTextProcessor
+            # Use Arabic-specific normalization for Arabic queries
+            return ArabicTextProcessor.normalize_arabic(query)
+        
+        # For non-Arabic queries, proceed with standard processing
         # Remove common question prefixes that might affect vector similarity
         prefixes = [
             "what is", "how do", "can you tell me", "please explain",

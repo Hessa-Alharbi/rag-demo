@@ -5,7 +5,7 @@ from langchain.schema import Document as LangchainDocument
 from loguru import logger
 from apps.chat.models import Attachment
 from core.llm.factory import ModelFactory
-from core.llm.prompt_templates import REACT_PROMPT_TEMPLATE, HYBRID_SEARCH_TEMPLATE, SEARCH_PROMPT_TEMPLATES
+from core.llm.prompt_templates import REACT_PROMPT_TEMPLATE, HYBRID_SEARCH_TEMPLATE, SEARCH_PROMPT_TEMPLATES, DIRECT_MATCH_PROMPT_TEMPLATE
 from core.config import get_settings
 from .models import Document, DocumentProcessingEvent, DocumentProcessingStatus, DocumentStatus, Chunk
 from pathlib import Path
@@ -23,6 +23,8 @@ from core.search.reranker import QueryResultReranker
 from core.search.query_processor import QueryProcessor
 from core.language.arabic_utils import ArabicTextProcessor
 from langchain_community.document_loaders import PyPDFLoader
+from core.db import get_session_context
+import os
 
 class RAGService:
     def __init__(self):
@@ -382,17 +384,58 @@ class RAGService:
                 
                 all_results.extend(semantic_results)
                 
-                # Try Arabic keywords if normalized query returned few results
-                if len(semantic_results) < limit and query_data["keywords"]:
-                    keyword_query = " ".join(query_data["keywords"])
-                    keyword_results = await vector_store.similarity_search(
-                        query=keyword_query,
+                # Try with original query as a fallback if normalized didn't work
+                if len(semantic_results) < 2:
+                    original_results = await vector_store.similarity_search(
+                        query=query,
                         k=limit * 2,
                         filter={"conversation_id": conversation_id}
                     )
+                    
                     # Add results not already in the list
                     existing_ids = {r.get("id") for r in all_results if "id" in r}
-                    all_results.extend([r for r in keyword_results if r.get("id") not in existing_ids])
+                    all_results.extend([r for r in original_results if r.get("id") not in existing_ids])
+                
+                # Try individual keywords if we still don't have enough results
+                if len(all_results) < limit and query_data["keywords"]:
+                    # Try each keyword individually for better recall
+                    for keyword in query_data["keywords"]:
+                        if not keyword or len(keyword) < 3:
+                            continue
+                            
+                        keyword_results = await vector_store.similarity_search(
+                            query=keyword,
+                            k=limit,
+                            filter={"conversation_id": conversation_id}
+                        )
+                        
+                        # Add results not already in the list
+                        existing_ids = {r.get("id") for r in all_results if "id" in r}
+                        all_results.extend([r for r in keyword_results if r.get("id") not in existing_ids])
+                        
+                        # Stop if we have enough results
+                        if len(all_results) >= limit * 2:
+                            break
+                            
+                # If we still don't have results, try stems
+                if len(all_results) < limit and query_data.get("stemmed_keywords"):
+                    for stem in query_data["stemmed_keywords"]:
+                        if not stem or len(stem) < 3:
+                            continue
+                            
+                        stem_results = await vector_store.similarity_search(
+                            query=stem,
+                            k=limit,
+                            filter={"conversation_id": conversation_id}
+                        )
+                        
+                        # Add results not already in the list
+                        existing_ids = {r.get("id") for r in all_results if "id" in r}
+                        all_results.extend([r for r in stem_results if r.get("id") not in existing_ids])
+                        
+                        # Stop if we have enough results
+                        if len(all_results) >= limit * 2:
+                            break
             else:
                 # For non-Arabic queries, use the expanded queries
                 for search_query in expanded_queries[:3]:  # Limit to top 3 expanded queries
@@ -463,7 +506,7 @@ class RAGService:
                 try:
                     lang = detect(query)
                     return (
-                        "I couldn't find sufficient information to answer this question."
+                        "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال."
                         if lang == 'ar' else
                         "I couldn't find any relevant information to answer your question."
                     )
@@ -497,13 +540,65 @@ class RAGService:
             # Extract final answer
             answer_parts = full_response.split("Answer:")
             if len(answer_parts) > 1:
-                return answer_parts[-1].strip()
+                full_response = answer_parts[-1].strip()
             
-            # تنظيف وتنسيق النص قبل إرجاعه
-            if full_response:
-                full_response = self.format_response(full_response)
+            # Format the response 
+            formatted_response = self.format_response(full_response)
             
-            return full_response
+            # If format_response returns False, it means we need to try direct text matching
+            if formatted_response is False:
+                # Try direct text matching approach
+                is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+                
+                # Create direct matching function
+                def text_match_score(text, query_terms):
+                    score = 0
+                    for term in query_terms:
+                        if term in text:
+                            score += 1
+                    return score
+                
+                # Prepare query terms
+                if is_arabic:
+                    query_data = ArabicTextProcessor.preprocess_arabic_query(query)
+                    query_terms = [query_data["normalized"]] + query_data["keywords"]
+                else:
+                    query_terms = query.lower().split()
+                
+                # Score each context document by direct text matching
+                scored_docs = []
+                for doc in context_docs:
+                    content = doc.get("content", "")
+                    score = text_match_score(content.lower(), query_terms)
+                    if score > 0:
+                        scored_docs.append((doc, score))
+                
+                # Sort by score
+                scored_docs.sort(key=lambda x: x[1], reverse=True)
+                
+                # If we have direct matches, create a response with them
+                if scored_docs:
+                    best_docs = [doc for doc, _ in scored_docs[:2]]
+                    best_context = self._format_context(best_docs)
+                    
+                    # Generate a new response with the best direct matches
+                    direct_prompt = DIRECT_MATCH_PROMPT_TEMPLATE.format(
+                        context=best_context,
+                        question=query
+                    )
+                    
+                    # Generate response with the new prompt
+                    async with asyncio.timeout(30):
+                        direct_response = await self.llm.agenerate([direct_prompt])
+                        direct_full_response = direct_response.generations[0][0].text.strip()
+                    
+                    # Format the direct response
+                    return self.format_response(direct_full_response) or direct_full_response
+                else:
+                    # If no direct matches, return the original "no information" message
+                    return full_response
+            
+            return formatted_response or full_response
 
         except asyncio.TimeoutError:
             logger.error("Response generation timed out")
@@ -680,20 +775,43 @@ class RAGService:
                 context_docs=search_results
             )
             
-            # Return response with source documents
+            # Enhance source information - ensure file name is included
+            enhanced_sources = []
+            for doc in search_results:
+                metadata = doc.get("metadata", {})
+                
+                # Extract filename from source path if available
+                source_path = metadata.get("source", "")
+                file_name = "Unknown Source"
+                
+                if source_path:
+                    try:
+                        file_name = os.path.basename(source_path)
+                    except (TypeError, AttributeError):
+                        # If source_path isn't a valid path, use it directly
+                        file_name = str(source_path)
+                elif metadata.get("doc_title"):
+                    file_name = metadata.get("doc_title")
+                
+                # Create enhanced source record
+                enhanced_source = {
+                    "content": doc.get("content", ""),
+                    "metadata": {
+                        **metadata,
+                        "file_name": file_name,  # Add explicit file name
+                        "title": metadata.get("title", "Unknown Section")
+                    },
+                    "score": doc.get("ensemble_score", 0) or 
+                           doc.get("semantic_score", 0) or 
+                           doc.get("cross_encoder_score", 0) or
+                           doc.get("relevance_score", 0)  # Include most appropriate score
+                }
+                enhanced_sources.append(enhanced_source)
+            
+            # Return response with enhanced source documents
             return {
                 "response": response,
-                "sources": [
-                    {
-                        "content": doc.get("content", ""),
-                        "metadata": doc.get("metadata", {}),
-                        "score": doc.get("ensemble_score", 0) or 
-                               doc.get("semantic_score", 0) or 
-                               doc.get("cross_encoder_score", 0) or
-                               doc.get("relevance_score", 0)  # Include most appropriate score
-                    }
-                    for doc in search_results
-                ]
+                "sources": enhanced_sources
             }
 
         except Exception as e:
@@ -860,42 +978,89 @@ class RAGService:
         return text
 
     def format_response(self, response: str) -> str:
-        """Format the final response"""
+        """Format the generated response for better readability"""
         if not response:
             return response
-        
-        # Clean the text first
-        response = self.clean_and_format_text(response)
-        
-        # Determine the response pattern
-        has_arabic = any('\u0600' <= c <= '\u06FF' for c in response)
-        
-        # Format numbered and bullet lists
-        lines = response.split('\n')
-        formatted_lines = []
-        in_list = False
-        
-        for line in lines:
-            # Determine if the line is part of a list
-            is_list_item = bool(re.match(r'^[\d\-\*\.\s•●■]', line.strip()))
             
-            if is_list_item:
-                if not in_list:
-                    formatted_lines.append('')  # Space before the list
-                    in_list = True
-            elif in_list:
-                formatted_lines.append('')  # Space after the list
-                in_list = False
+        # Clean up response text
+        response = response.strip()
+        
+        # Handle case where response indicates no information was found
+        no_info_patterns = [
+            "لم أتمكن من العثور على معلومات",
+            "لم يتم العثور على معلومات",
+            "لا توجد معلومات كافية",
+            "I couldn't find any",
+            "I don't have enough information",
+            "I couldn't find sufficient information"
+        ]
+        
+        # If it's a "no information" response but we actually have context docs,
+        # this likely means the system didn't find the answer in context
+        for pattern in no_info_patterns:
+            if pattern in response:
+                # Try to trigger a more thorough search using direct text matching
+                # instead of relying solely on semantic search
+                return False  # Signal that we need to try alternative search
+        
+        # Remove duplicate newlines and extra spaces
+        response = re.sub(r'\n{3,}', '\n\n', response)
+        response = re.sub(r' {2,}', ' ', response)
+        
+        # Ensure proper RTL formatting for Arabic text
+        if any(c for c in response if '\u0600' <= c <= '\u06FF'):
+            response = f"<div dir='rtl'>{response}</div>"
             
-            formatted_lines.append(line)
+        return response
+
+    async def index_document(self, file_path: str, conversation_id: str, metadata: Dict[str, Any] = None) -> Document:
+        """Index a document for a conversation and add it to the vector store"""
+        from sqlmodel import Session
+        from core.db import get_session_context
+        from uuid import uuid4
+        import os
         
-        response = '\n'.join(formatted_lines)
-        
-        # Format Arabic paragraphs
-        if has_arabic:
-            # Add space between Arabic paragraphs
-            response = re.sub(r'([.؟!])\s*\n', r'\1\n\n', response)
-            # Improve Arabic punctuation marks
-            response = response.replace('،', '، ').replace('؛', '؛ ')
-        
-        return response.strip()
+        async with get_session_context() as session:
+            try:
+                # Get the conversation to find the user ID
+                from sqlmodel import select
+                from apps.chat.models import Conversation
+                
+                # Query the conversation to get the user ID
+                conversation = session.exec(
+                    select(Conversation).where(Conversation.id == UUID(conversation_id))
+                ).first()
+                
+                if not conversation:
+                    raise ValueError(f"Conversation with ID {conversation_id} not found")
+                
+                # Create document record with the conversation owner's ID
+                doc = Document(
+                    id=uuid4(),
+                    conversation_id=UUID(conversation_id),
+                    title=os.path.basename(file_path),
+                    source=file_path,
+                    type=Path(file_path).suffix.lower().replace('.', ''),
+                    status=DocumentStatus.PROCESSING,
+                    is_searchable=False,
+                    document_metadata=metadata or {},
+                    created_by_id=conversation.created_by_id  # Add the created_by_id field
+                )
+                
+                session.add(doc)
+                session.commit()
+                session.refresh(doc)
+                
+                # Process the document
+                processed_doc = await self.process_document(doc, file_path)
+                
+                # Update the document in the database
+                session.add(processed_doc)
+                session.commit()
+                
+                return processed_doc
+                
+            except Exception as e:
+                logger.error(f"Error indexing document: {e}")
+                session.rollback()
+                raise

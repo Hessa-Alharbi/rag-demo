@@ -3,7 +3,7 @@ from typing import Dict, Any
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
 from .schemas import TokenPayload
-import jwt
+from jose import jwt 
 import logging
 from uuid import UUID
 

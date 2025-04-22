@@ -1,0 +1,37 @@
+/* Code block styles */
+pre {
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* Inline code styles */
+:not(pre) > code {
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  background-color: rgb(var(--secondary));
+  font-size: 0.875em;
+}
+
+/* Dark mode adjustments */
+.dark pre {
+  background-color: rgb(17, 24, 39);
+}
+
+.dark :not(pre) > code {
+  background-color: rgb(31, 41, 55);
+}
+
+/* RTL support for lists and blockquotes */
+[dir='rtl'] ul,
+[dir='rtl'] ol {
+  padding-right: 1.25rem;
+  padding-left: 0;
+}
+
+[dir='rtl'] blockquote {
+  border-left: none;
+  border-right: 4px solid;
+  padding-left: 0;
+  padding-right: 1rem;
+}

@@ -2,9 +2,9 @@ import os
 from functools import lru_cache
 from pydantic_settings import BaseSettings
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings
 
 class Settings(BaseSettings):
     # Application settings
@@ -79,6 +79,16 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "your-secret-key"  # Should be overridden in production
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    
+    # Celery Configuration
+    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
+    CELERY_TASK_SERIALIZER: str = "json"
+    CELERY_RESULT_SERIALIZER: str = "json"
+    CELERY_ACCEPT_CONTENT: List[str] = ["json"]
+    CELERY_TIMEZONE: str = "UTC"
+    CELERY_ENABLE_UTC: bool = True
+    VECTOR_STORE_PATH: str = "./data/vector_store/faiss_index"
     
     class Config:
         env_file = ".env"

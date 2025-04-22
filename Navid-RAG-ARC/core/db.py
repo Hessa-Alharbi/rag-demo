@@ -1,8 +1,8 @@
 from sqlmodel import SQLModel, Session, create_engine
 from core.config import get_settings
 from loguru import logger
-from contextlib import contextmanager
-from typing import Generator
+from contextlib import contextmanager, asynccontextmanager
+from typing import Generator, AsyncGenerator
 from .errors import DatabaseError
 
 # Import all models to ensure they're registered with proper order
@@ -46,6 +46,23 @@ def get_db() -> Generator[Session, None, None]:
     except Exception as e:
         db.rollback()
         logger.error(f"Database session error: {str(e)}")
+        raise DatabaseError("Database operation failed", original_error=e)
+    finally:
+        db.close()
+
+@asynccontextmanager
+async def get_session_context() -> AsyncGenerator[Session, None]:
+    """
+    Async context manager for database sessions.
+    Can be used with `async with get_session_context() as session:`
+    """
+    db = Session(engine)
+    try:
+        yield db
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Async database session error: {str(e)}")
         raise DatabaseError("Database operation failed", original_error=e)
     finally:
         db.close()

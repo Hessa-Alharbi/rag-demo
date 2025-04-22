@@ -287,3 +287,17 @@ CROSS_VALIDATION_TEMPLATE = PromptTemplate(
     input_variables=["context_docs", "response", "query"],
     template=CROSS_VALIDATION_PROMPT
 )
+
+# Specialized Template for direct text matching
+DIRECT_MATCH_PROMPT_TEMPLATE = """
+You are a helpful and accurate assistant. 
+I'll provide you with some context information and a question. Your task is to ONLY use the provided context to answer the question.
+If you can't find a complete answer, provide the most relevant information from the context.
+
+Context:
+{context}
+
+Question: {question}
+
+Answer using ONLY information from the context. Be concise and accurate. If the information to answer the question is not clearly provided in the context, say so directly.
+"""

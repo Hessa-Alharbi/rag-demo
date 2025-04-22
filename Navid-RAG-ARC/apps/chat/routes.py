@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
-from typing import List
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Body
+from typing import List, Dict, Any, Optional
 from uuid import UUID
 from sqlmodel import Session, select
 from apps.chat.models import Conversation, Message, Attachment, MessageRole, MessageStatus
@@ -13,6 +13,9 @@ from core.errors import APIError
 from apps.rag.services import RAGService
 import asyncio
 from apps.rag.models import Document, DocumentStatus
+from datetime import datetime
+import sys
+import os
 
 
 router = APIRouter()
@@ -232,30 +235,55 @@ async def generate_rag_response(
         assistant_message.content = response
         assistant_message.status = MessageStatus.COMPLETED
         
-        # Include sources in message metadata for reference
+        # Include sources in message metadata for reference with enhanced details
         if context_docs:
+            # Get source documents from the database to have complete information
+            source_docs = []
+            for doc in context_docs[:3]:  # Include top 3 sources
+                metadata = doc.get("metadata", {})
+                
+                # Extract filename from source path if available
+                source_path = metadata.get("source", "")
+                file_name = "Unknown Source"
+                
+                if source_path:
+                    try:
+                        file_name = os.path.basename(source_path)
+                    except (TypeError, AttributeError):
+                        # If source_path isn't a valid path, use it directly
+                        file_name = str(source_path)
+                elif metadata.get("doc_title"):
+                    file_name = metadata.get("doc_title")
+                
+                source_docs.append({
+                    "id": doc.get("id", ""),
+                    "content": doc.get("content", ""),
+                    "metadata": {
+                        **metadata,
+                        "file_name": file_name,  # Add explicit file name
+                        "title": metadata.get("title", "Unknown Section") 
+                    },
+                    "score": doc.get("ensemble_score", 0) or 
+                             doc.get("semantic_score", 0) or 
+                             doc.get("cross_encoder_score", 0) or
+                             doc.get("relevance_score", 0)
+                })
+            
             assistant_message.message_metadata = {
-                "sources": [
-                    {
-                        "id": doc.get("id", ""),
-                        "metadata": doc.get("metadata", {})
-                    }
-                    for doc in context_docs[:3]  # Include top 3 sources
-                ]
+                "sources": source_docs
             }
             
         session.add(assistant_message)
         session.commit()
         session.refresh(assistant_message)
-
     except Exception as e:
-        logger.error(f"Error generating response: {e}", exc_info=True)
+        logger.error(f"Error generating RAG response: {e}")
+        # Update message to show error
+        assistant_message.content = "Sorry, I encountered an error while generating a response."
         assistant_message.status = MessageStatus.FAILED
         assistant_message.message_metadata = {"error": str(e)}
         session.add(assistant_message)
         session.commit()
-        session.refresh(assistant_message)
-        raise
 
 @router.get("/{conversation_id}/messages/", response_model=List[MessageRead])
 async def list_messages(
@@ -496,3 +524,328 @@ async def process_query(
             status_code=500,
             detail={"error": "query_processing_error", "message": str(e)}
         )
+
+@router.post("/query")
+async def chat_query(
+    payload: Dict[str, Any] = Body(...),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Enhanced chat query function that uses RAG services for better responses.
+    """
+    try:
+        # Import manager at runtime to avoid circular imports
+        from main import manager
+        import os
+        
+        logger.info(f"Received chat query: {payload.get('query')}")
+        
+        query = payload.get("query", "")
+        session_id = payload.get("session_id", "")
+        history = payload.get("history", [])
+        
+        # Update WebSocket with processing status
+        if session_id:
+            await manager.send_message({
+                "task_state": "PROCESSING",
+                "result": {
+                    "status": "processing",
+                    "message": "Processing query using RAG",
+                    "state": {
+                        "initialized": True,
+                        "current_file": "",
+                        "processing_status": {
+                            "status": "PROCESSING",
+                            "message": f"Processing query: {query[:30]}..."
+                        },
+                        "initialized_objects": {}
+                    },
+                    "session_id": session_id
+                },
+                "session_id": session_id,
+                "pipeline_state": {
+                    "initialized": True,
+                    "processing_status": {
+                        "status": "PROCESSING",
+                        "message": "Processing query"
+                    }
+                }
+            }, session_id)
+        
+        # Get documents associated with this conversation
+        from apps.rag.models import Document
+        
+        try:
+            # Handle different session_id formats (with/without hyphens)
+            conv_id = session_id.replace("-", "")
+            conversation_uuid = UUID(conv_id)
+            
+            documents = session.exec(
+                select(Document).where(Document.conversation_id == conversation_uuid)
+            ).all()
+            
+            logger.info(f"Found {len(documents)} documents for conversation {session_id}")
+        except Exception as e:
+            logger.error(f"Error retrieving documents: {str(e)}")
+            documents = []
+        
+        if not documents:
+            response = "يرجى تحميل المستندات أولاً قبل طرح الأسئلة."
+            
+            # Return results
+            result = {
+                "fused_answer": response,
+                "docs": [],
+                "chat_history": [
+                    *history,
+                    {
+                        "type": "ai",
+                        "content": response,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                ],
+                "session_id": session_id
+            }
+            
+            # Complete processing
+            await manager.send_message({
+                "task_state": "SUCCESS",
+                "result": {
+                    "status": "completed",
+                    "message": "Query processed",
+                    "state": {
+                        "initialized": True,
+                        "processing_status": {
+                            "status": "COMPLETED",
+                            "message": "Query processed"
+                        }
+                    },
+                    "session_id": session_id
+                },
+                "session_id": session_id
+            }, session_id)
+            
+            return result
+        
+        # Use RAG service for better search and response generation
+        await rag_service.initialize()
+        
+        # Get conversation history for context
+        conv_history = []
+        if history:
+            for msg in history:
+                conv_history.append({
+                    "role": "user" if msg.get("type") == "human" else "assistant",
+                    "content": msg.get("content", ""),
+                    "created_at": msg.get("timestamp", datetime.now().isoformat())
+                })
+        
+        # Use hybrid search to find relevant document sections
+        logger.info(f"Performing hybrid search for query: '{query}'")
+        context_docs = await rag_service.hybrid_search(
+            query=query,
+            conversation_id=str(conversation_uuid),
+            limit=5
+        )
+        
+        # Prepare context docs with enhanced metadata
+        enhanced_context_docs = []
+        for doc in context_docs:
+            metadata = doc.get("metadata", {})
+            
+            # Extract filename from source path if available
+            source_path = metadata.get("source", "")
+            file_name = "Unknown Source"
+            
+            if source_path:
+                try:
+                    file_name = os.path.basename(source_path)
+                except (TypeError, AttributeError):
+                    # If source_path isn't a valid path, use it directly
+                    file_name = str(source_path)
+            elif metadata.get("doc_title"):
+                file_name = metadata.get("doc_title")
+                
+            enhanced_context_docs.append({
+                "content": doc.get("content", ""),
+                "metadata": {
+                    **metadata,
+                    "file_name": file_name,
+                    "title": metadata.get("title", "Unknown Section")
+                },
+                "score": doc.get("ensemble_score", 0) or 
+                        doc.get("semantic_score", 0) or 
+                        doc.get("cross_encoder_score", 0) or
+                        doc.get("relevance_score", 0)
+            })
+        
+        if not enhanced_context_docs:
+            logger.warning(f"No relevant documents found for query: {query}")
+            enhanced_context_docs = []
+            
+            # Check if query is in Arabic
+            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+            
+            # Fallback to improved text search if hybrid search returns nothing
+            for doc in documents:
+                if not doc.content:
+                    continue
+                
+                # Use enhanced text search approach
+                if is_arabic:
+                    # Import ArabicTextProcessor for better Arabic handling
+                    from core.language.arabic_utils import ArabicTextProcessor
+                    
+                    # Normalize query for better matching
+                    normalized_query = ArabicTextProcessor.normalize_arabic(query)
+                    query_keywords = ArabicTextProcessor.preprocess_arabic_query(query)["keywords"]
+                    
+                    # Normalize document content
+                    normalized_content = ArabicTextProcessor.normalize_arabic(doc.content)
+                    paragraphs = normalized_content.split('\n\n')
+                    
+                    for i, paragraph in enumerate(paragraphs):
+                        # Match on normalized text and keywords for better recall
+                        if normalized_query in paragraph or any(keyword in paragraph for keyword in query_keywords if keyword):
+                            # Add this paragraph as a "document" with metadata
+                            original_paragraph = doc.content.split('\n\n')[i] if i < len(doc.content.split('\n\n')) else paragraph
+                            
+                            # Get file name from metadata or title
+                            file_name = doc.title
+                            if hasattr(doc, 'doc_metadata') and doc.doc_metadata:
+                                if isinstance(doc.doc_metadata, dict):
+                                    file_name = doc.doc_metadata.get('original_filename', doc.title)
+                            
+                            enhanced_context_docs.append({
+                                "content": original_paragraph,
+                                "metadata": {
+                                    "document_id": str(doc.id),
+                                    "title": doc.title,
+                                    "paragraph": i,
+                                    "file_name": file_name
+                                },
+                                "score": 2.0 if normalized_query in paragraph else 1.0  # Higher score for better matches
+                            })
+                            
+                            # Limit to 5 paragraphs per document
+                            if len(enhanced_context_docs) >= 5:
+                                break
+                else:
+                    # Simple text search for non-Arabic - find paragraphs that contain any of the query words
+                    query_words = query.lower().split()
+                    paragraphs = doc.content.split('\n\n')
+                    
+                    for i, paragraph in enumerate(paragraphs):
+                        if any(word.lower() in paragraph.lower() for word in query_words):
+                            # Get file name from metadata or title
+                            file_name = doc.title
+                            if hasattr(doc, 'doc_metadata') and doc.doc_metadata:
+                                if isinstance(doc.doc_metadata, dict):
+                                    file_name = doc.doc_metadata.get('original_filename', doc.title)
+                            
+                            # Add this paragraph as a "document" with metadata
+                            enhanced_context_docs.append({
+                                "content": paragraph,
+                                "metadata": {
+                                    "document_id": str(doc.id),
+                                    "title": doc.title,
+                                    "paragraph": i,
+                                    "file_name": file_name
+                                },
+                                "score": 1.0  # Dummy score
+                            })
+                            
+                            # Limit to 5 paragraphs per document
+                            if len(enhanced_context_docs) >= 5:
+                                break
+        
+        # Generate response using RAG
+        logger.info("Generating response with RAG service")
+        response = await rag_service.generate_response(
+            query=query,
+            context_docs=enhanced_context_docs,
+            conversation_history=conv_history
+        )
+        
+        # If still no proper response, create a basic one
+        if not response or response.strip() == "":
+            if enhanced_context_docs:
+                # Create context by joining paragraphs
+                context = "\n\n".join([d.get("content", "") for d in enhanced_context_docs])
+                response = f"وجدت المعلومات التالية حول '{query}':\n\n{context[:1000]}..."
+            else:
+                response = "لم أتمكن من العثور على معلومات كافية حول استفسارك."
+        
+        # Add response to chat history
+        new_history = [
+            *history,
+            {
+                "type": "ai",
+                "content": response,
+                "timestamp": datetime.now().isoformat(),
+                "context_docs": enhanced_context_docs
+            }
+        ]
+        
+        # Create result object with the enhanced context documents
+        result = {
+            "fused_answer": response,
+            "docs": enhanced_context_docs,
+            "chat_history": new_history,
+            "session_id": session_id
+        }
+        
+        # Update WebSocket with success state
+        await manager.send_message({
+            "task_state": "SUCCESS",
+            "result": {
+                "status": "completed",
+                "message": "Query processed successfully",
+                "state": {
+                    "initialized": True,
+                    "processing_status": {
+                        "status": "COMPLETED",
+                        "message": "Query processed successfully"
+                    }
+                },
+                "session_id": session_id,
+                "docs": enhanced_context_docs,
+                "fused_answer": response
+            },
+            "session_id": session_id
+        }, session_id)
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error processing query: {str(e)}", exc_info=True)
+        
+        # Send error message through WebSocket
+        if session_id:
+            try:
+                await manager.send_message({
+                    "task_state": "ERROR",
+                    "result": {
+                        "status": "error",
+                        "message": f"Error processing query: {str(e)}",
+                        "state": {
+                            "initialized": True,
+                            "processing_status": {
+                                "status": "ERROR",
+                                "message": "Query processing failed"
+                            }
+                        }
+                    },
+                    "session_id": session_id
+                }, session_id)
+            except Exception as ws_error:
+                logger.error(f"Error sending WebSocket error message: {str(ws_error)}")
+        
+        # Return error to client
+        return {
+            "error": "query_processing_error",
+            "message": str(e),
+            "chat_history": history,
+            "session_id": session_id
+        }
