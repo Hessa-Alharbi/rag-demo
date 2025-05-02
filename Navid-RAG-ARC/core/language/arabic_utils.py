@@ -46,7 +46,8 @@ class ArabicTextProcessor:
     @staticmethod
     def normalize_arabic(text: str) -> str:
         """
-        Enhanced normalization of Arabic text with better handling of edge cases
+        معالجة النص العربي مع الحفاظ على شكل الحروف الأصلي.
+        تزيل فقط التشكيل والتطويل والمسافات الزائدة.
         """
         if not text:
             return text
@@ -65,28 +66,13 @@ class ArabicTextProcessor:
         # Remove tatweel
         text = re.sub(f'[{ArabicTextProcessor.TATWEEL}]', '', text)
         
-        # Normalize alef variants
-        text = text.replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا')
+        # معالجة المسافات الزائدة
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip()
         
-        # Normalize ya and alef maksura
-        text = text.replace('ى', 'ي').replace('ئ', 'ي')
-        
-        # Normalize hamza forms
-        text = text.replace('ؤ', 'و')
-        
-        # Normalize teh marbuta to heh
-        text = text.replace('ة', 'ه')
-        
-        # Normalize lamalef ligatures
-        ligatures = {'ﻻ': 'لا', 'ﻷ': 'لا', 'ﻹ': 'لا', 'ﻵ': 'لا'}
-        for old, new in ligatures.items():
-            text = text.replace(old, new)
-        
-        # Remove non-Arabic numbers and special characters
-        text = re.sub(r'[^\u0600-\u06FF\s]', ' ', text)
-        
-        # Remove extra whitespace
-        text = ' '.join(text.split())
+        # لا نقوم بأي تطبيع للحروف - نحتفظ بالنص الأصلي
+        # الحفاظ على الهمزات كما هي (ء، أ، إ، آ، ؤ، ئ)
+        # الحفاظ على الألف المقصورة (ى) والتاء المربوطة (ة) كما هي
         
         return text
     

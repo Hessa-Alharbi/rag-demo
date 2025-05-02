@@ -113,6 +113,36 @@ export default function ChatInterface() {
   const [isInitializing, setIsInitializing] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  // مفتاح التخزين المحلي للمحادثة
+  const getStorageKey = () => `chat_messages_${id}`;
+
+  // حفظ المحادثة في التخزين المحلي
+  const saveMessagesToLocalStorage = (msgs: Message[]) => {
+    try {
+      if (typeof window !== 'undefined' && id) {
+        localStorage.setItem(getStorageKey(), JSON.stringify(msgs));
+      }
+    } catch (e) {
+      console.error('Error saving messages to localStorage:', e);
+    }
+  };
+
+  // استرجاع المحادثة من التخزين المحلي
+  const loadMessagesFromLocalStorage = (): Message[] | null => {
+    try {
+      if (typeof window !== 'undefined' && id) {
+        const saved = localStorage.getItem(getStorageKey());
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      }
+      return null;
+    } catch (e) {
+      console.error('Error loading messages from localStorage:', e);
+      return null;
+    }
+  };
 
   // Initialize chat with welcome message
   useEffect(() => {
@@ -127,12 +157,22 @@ export default function ChatInterface() {
 
     // If we have a session ID directly, initialize the chat
     if (!isTaskId && id) {
-      setMessages([{ 
-        id: "1", 
-        role: "assistant", 
-        content: `Chat session initialized. How can I help you today?` 
-      }]);
-      setIsInitializing(false);
+      // محاولة تحميل المحادثة من التخزين المحلي أولاً
+      const savedMessages = loadMessagesFromLocalStorage();
+      
+      if (savedMessages && savedMessages.length > 0) {
+        console.log("Loaded chat messages from localStorage:", savedMessages.length);
+        setMessages(savedMessages);
+        setIsInitializing(false);
+      } else {
+        // إذا لم تكن هناك رسائل مخزنة، ابدأ محادثة جديدة
+        setMessages([{ 
+          id: "1", 
+          role: "assistant", 
+          content: `Chat session initialized. How can I help you today?` 
+        }]);
+        setIsInitializing(false);
+      }
     }
     
     // Show loading message
@@ -154,6 +194,13 @@ export default function ChatInterface() {
 
     return () => clearTimeout(timeout);
   }, [id, isTaskId, sessionId, router, isInitializing, error]);
+
+  // حفظ الرسائل عند تغييرها
+  useEffect(() => {
+    if (messages.length > 0 && !isInitializing && id) {
+      saveMessagesToLocalStorage(messages);
+    }
+  }, [messages, isInitializing, id]);
 
   // Handle WebSocket errors
   useEffect(() => {
@@ -194,8 +241,12 @@ export default function ChatInterface() {
     try {
       console.log("Sending message to chat using RAG:", userInput)
       
-      // تحويل المعرف إلى نوع نصي (string)
+      // تحويل المعرف إلى نوع نصي (string) وتحقق من قيمته
       const chatId = typeof id === 'string' ? id : Array.isArray(id) ? id[0] : String(id)
+      
+      if (!chatId) {
+        throw new Error("Invalid chat session ID");
+      }
       
       // إرسال الاستعلام إلى نظام RAG المتقدم
       const response = await sendChatMessage(chatId, userInput)
@@ -206,7 +257,7 @@ export default function ChatInterface() {
       const assistantMessage: Message = {
         id: response.id || String(Date.now() + 1),
         role: "assistant",
-        content: response.content || "لم أتمكن من معالجة استعلامك. يرجى المحاولة مرة أخرى.",
+        content: response.content || "I couldn't process your query. Please try again.",
         context_docs: response.context_docs || []
       }
       
@@ -220,7 +271,7 @@ export default function ChatInterface() {
         {
           id: String(Date.now() + 1),
           role: "system",
-          content: `خطأ: ${err.message || "حدث خطأ أثناء إرسال رسالتك."}`,
+          content: `Error: ${err.message || "An error occurred while sending your message."}`,
         },
       ])
     } finally {
@@ -262,7 +313,7 @@ export default function ChatInterface() {
       <ErrorAlert />
       
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-4">
+        <ScrollArea className="h-full p-2">
           <div className="max-w-4xl mx-auto space-y-4 pb-20">
             {messages.map((message) => (
               <MessageDisplay key={message.id} message={message} />
@@ -289,7 +340,7 @@ export default function ChatInterface() {
         </ScrollArea>
       </div>
       
-      <div className="border-t bg-background p-4">
+      <div className="border-t bg-background p-2">
         <form
           onSubmit={handleSubmit}
           className="max-w-4xl mx-auto flex items-end gap-2"
@@ -297,7 +348,7 @@ export default function ChatInterface() {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="اكتب رسالتك هنا..."
+            placeholder="Type your message here..."
             className="min-h-24 md:min-h-12 resize-none bg-background"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -307,7 +358,7 @@ export default function ChatInterface() {
             }}
           />
           <Button type="submit" disabled={isTyping}>
-            إرسال
+            Send
           </Button>
         </form>
       </div>

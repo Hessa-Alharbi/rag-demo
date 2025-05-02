@@ -301,3 +301,9 @@ Question: {question}
 
 Answer using ONLY information from the context. Be concise and accurate. If the information to answer the question is not clearly provided in the context, say so directly.
 """
+
+# Language validation template
+LANGUAGE_VALIDATION_TEMPLATE = PromptTemplate(
+    input_variables=["query", "response"],
+    template=ARABIC_RESPONSE_VALIDATION_PROMPT
+)

@@ -182,7 +182,8 @@ async def reindex_conversation_documents(
                         
                         # إذا كان النص عربي، أضف نسخاً معالجة للبحث الأفضل
                         if is_arabic:
-                            # أضف النسخة المطبعة
+                            # أضف نسخة مع إزالة التشكيل والتطويل فقط
+                            # دون تغيير أي حرف
                             normalized_text = ArabicTextProcessor.normalize_arabic(chunk_text)
                             texts.append(normalized_text)
                             metadatas.append({
@@ -195,18 +196,7 @@ async def reindex_conversation_documents(
                                 "variant": "normalized"
                             })
                             
-                            # أضف نسخة مع تبديل الحروف الشائعة
-                            variant_text = normalized_text.replace("ة", "ه").replace("ى", "ي").replace("أ", "ا").replace("إ", "ا")
-                            texts.append(variant_text)
-                            metadatas.append({
-                                "document_id": str(doc.id),
-                                "conversation_id": str(doc.conversation_id),
-                                "chunk_index": i,
-                                "title": chunk_title,
-                                "doc_title": doc.title,
-                                "is_arabic": is_arabic,
-                                "variant": "variant"
-                            })
+                            # نحذف نسخة تبديل الحروف الشائعة لأنها تغير الحروف الأصلية
                             
                             # استخرج وفهرس العبارات الرئيسية بشكل منفصل للمطابقة الأفضل
                             key_phrases = ArabicTextProcessor.extract_arabic_keywords(chunk_text, max_keywords=5)

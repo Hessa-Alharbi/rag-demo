@@ -1,9 +1,11 @@
 import axios from 'axios';
 
 // Determine the base URL based on the environment
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   // تغيير عنوان الخادم ليشير إلى خدمة Navid-RAG-ARC
-  return 'http://localhost:8000';
+  return process.env.NODE_ENV === 'production' 
+    ? '/api' 
+    : 'https://4161-2a02-cb80-4271-93aa-dc2c-9eea-2d8e-7325.ngrok-free.app/api';
 };
 
 const apiClient = axios.create({
@@ -30,6 +32,15 @@ apiClient.interceptors.request.use(
       }
     }
     
+    // Add Authorization header with token if available
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
+      if (token && config.headers) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+        console.log('Adding auth token to request');
+      }
+    }
+    
     // Log requests for debugging
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     
@@ -48,7 +59,54 @@ apiClient.interceptors.response.use(
     console.log(`API Response: ${response.status} ${response.config.url}`);
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // Check if error is due to authorization (401) and we haven't tried refreshing yet
+    if (error.response?.status === 401 && 
+        !originalRequest._retry && 
+        typeof window !== 'undefined') {
+      
+      console.log('Token expired, attempting to refresh...');
+      originalRequest._retry = true;
+      
+      try {
+        // Get refresh token from storage
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) {
+          console.error('No refresh token available');
+          // Redirect to login page if no refresh token
+          window.location.href = '/auth/login';
+          return Promise.reject(error);
+        }
+        
+        // Call the refresh endpoint
+        const response = await axios.post(`${getBaseUrl()}/auth/refresh`, {
+          refresh_token: refreshToken
+        });
+        
+        if (response.data?.access_token) {
+          // Update tokens in storage
+          localStorage.setItem('access_token', response.data.access_token);
+          localStorage.setItem('refresh_token', response.data.refresh_token);
+          
+          // Update authorization header in the original request
+          originalRequest.headers['Authorization'] = `Bearer ${response.data.access_token}`;
+          
+          // Retry the original request with the new token
+          return axios(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error('Failed to refresh token:', refreshError);
+        
+        // Clear tokens and redirect to login on refresh failure
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/auth/login';
+        return Promise.reject(error);
+      }
+    }
+    
     // Format error response for easier handling
     let errorMessage = 'An unknown error occurred';
     let statusCode = 500;

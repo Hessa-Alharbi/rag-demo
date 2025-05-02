@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRecentConversations, Conversation } from '@/lib/chat-service';
 
-// مفتاح التخزين المحلي
+// Local storage key
 const STORAGE_KEY = 'recent_conversations';
 
 export function useRecentConversations() {
@@ -9,7 +9,7 @@ export function useRecentConversations() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // استرجاع المحادثات من التخزين المحلي
+  // Retrieve conversations from local storage
   const loadFromLocalStorage = useCallback(() => {
     try {
       const storedData = localStorage.getItem(STORAGE_KEY);
@@ -20,14 +20,16 @@ export function useRecentConversations() {
           return true;
         }
       }
+      setConversations([]); // Ensure we always set a valid array
       return false;
     } catch (err) {
       console.error('Failed to load conversations from localStorage:', err);
+      setConversations([]); // Ensure we always set a valid array
       return false;
     }
   }, []);
 
-  // حفظ المحادثات في التخزين المحلي
+  // Save conversations to local storage
   const saveToLocalStorage = useCallback((data: Conversation[]) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -43,14 +45,14 @@ export function useRecentConversations() {
       setIsLoading(true);
       setError(null);
       
-      // محاولة جلب المحادثات من الواجهة الخلفية
+      // Attempt to fetch conversations from the backend
       const data = await getRecentConversations();
       
-      if (data && data.length > 0) {
+      if (Array.isArray(data) && data.length > 0) {
         setConversations(data);
         saveToLocalStorage(data);
       } else {
-        // إذا لم تتمكن من جلب المحادثات، قم بتحميلها من التخزين المحلي
+        // If unable to fetch conversations, load them from local storage
         if (!loadFromLocalStorage()) {
           setConversations([]);
         }
@@ -59,24 +61,26 @@ export function useRecentConversations() {
       console.error('Failed to fetch conversations:', err);
       setError('Failed to load recent conversations');
       
-      // في حالة الخطأ، حاول تحميل المحادثات من التخزين المحلي
-      loadFromLocalStorage();
+      // In case of error, try loading conversations from local storage
+      if (!loadFromLocalStorage()) {
+        setConversations([]); // Ensure we set a valid array if localStorage also fails
+      }
     } finally {
       setIsLoading(false);
     }
   }, [loadFromLocalStorage, saveToLocalStorage]);
 
   useEffect(() => {
-    // البدء باستعادة المحادثات من التخزين المحلي لتحسين تجربة المستخدم
+    // Start by retrieving conversations from local storage to improve user experience
     const hasLocalData = loadFromLocalStorage();
     
-    // ثم محاولة جلب البيانات المحدثة من الخادم
+    // Then attempt to fetch updated data from the server
     fetchConversations();
     
-    // إعداد تحديث دوري (كل 5 دقائق)
+    // Set up periodic updates (every 5 minutes)
     const intervalId = setInterval(fetchConversations, 5 * 60 * 1000);
     
-    // تنظيف المؤقت عند إزالة المكون
+    // Clean up timer when component is removed
     return () => clearInterval(intervalId);
   }, [fetchConversations, loadFromLocalStorage]);
 

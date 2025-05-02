@@ -14,6 +14,11 @@ class ConversationRead(BaseModel):
     created_by_id: UUID
     created_at: datetime
     updated_at: datetime
+    last_message: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
 
 class MessageCreate(BaseModel):
     content: str

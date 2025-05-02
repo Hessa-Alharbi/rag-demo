@@ -14,28 +14,46 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
-# Add a test user for development/testing purposes
-def get_current_user(session: Session = Depends(get_session)):
-    # FOR TESTING PURPOSES ONLY - return a fake user
-    # Check if test user exists
-    test_user = session.exec(select(User).where(User.email == "test@example.com")).first()
-    
-    if not test_user:
-        # Create test user
-        test_user = User(
-            id=uuid4(),
-            email="test@example.com",
-            username="test_user",
-            hashed_password="DEVELOPMENT_MODE_NO_PASSWORD",
-            is_active=True,
-            first_name="Test",
-            last_name="User"
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)], 
+    session: Session = Depends(get_session)
+) -> User:
+    """
+    Get the current authenticated user from the access token
+    """
+    try:
+        # Verify the token
+        payload = AuthUtils.verify_token(token)
+        
+        # Check if it's an access token
+        if payload.type != "access":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token type"
+            )
+        
+        # Get the user from the database
+        user = session.exec(select(User).where(User.id == UUID(payload.sub))).first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found"
+            )
+            
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account is inactive"
+            )
+            
+        return user
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials"
         )
-        session.add(test_user)
-        session.commit()
-        session.refresh(test_user)
-    
-    return test_user
 
 
 @router.post("/register", response_model=UserResponse)

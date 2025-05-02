@@ -5,6 +5,7 @@ from core.llm.prompt_templates import RERANKING_PROMPT, QUERY_NORMALIZATION_TEMP
 from collections import Counter
 from core.language.arabic_utils import ArabicTextProcessor
 from core.search.rank_fusion import RankFusion
+from core.config import get_settings
 
 class QueryResultReranker:
     """
@@ -20,7 +21,14 @@ class QueryResultReranker:
     async def initialize(self):
         """Initialize the reranker with LLM model"""
         if self.llm is None:
+            settings = get_settings()
+            logger.info(f"Initializing reranker with LLM provider: {settings.LLM_PROVIDER}, model: {settings.LLM_MODEL}")
             self.llm = ModelFactory.create_llm()
+            # Ensure we're using the configured model, not a hardcoded one
+            if hasattr(self.llm, 'model_name'):
+                logger.info(f"Reranker using model: {self.llm.model_name}")
+            elif hasattr(self.llm, 'repo_id'):
+                logger.info(f"Reranker using model: {self.llm.repo_id}")
     
     async def rerank_results(
         self,

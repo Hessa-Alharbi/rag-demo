@@ -60,7 +60,7 @@ app = FastAPI(lifespan=lifespan, title="Navid RAG API", root_path="/api")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Frontend URL
+    allow_origins=["https://f3c5-2a02-cb80-4271-93aa-dc2c-9eea-2d8e-7325.ngrok-free.app", "http://localhost:3000"],  # Frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -212,10 +212,11 @@ async def initialize_chat(file: UploadFile = File(...), session: Session = Depen
         try:
             if file.filename.lower().endswith('.pdf'):
                 from langchain_community.document_loaders import PyPDFLoader
-                # استخدام PyPDFLoader بدلاً من PyPDF2 للنصوص العربية
+                # استخدام PyPDFLoader مع الحفاظ على النص الأصلي دون تعديل
                 loader = PyPDFLoader(file_path)
                 pages = loader.load()
                 text = "\n\n".join(page.page_content for page in pages)
+                # نحتفظ بالنص كما هو دون أي معالجة إضافية
                 doc.content = text
             elif file.filename.lower().endswith(('.docx', '.doc')):
                 import docx2txt
@@ -272,7 +273,8 @@ async def initialize_chat(file: UploadFile = File(...), session: Session = Depen
                 
                 # إذا كان النص عربي، أضف نسخًا معالجة للبحث الأفضل
                 if is_arabic:
-                    # أضف النسخة المطبعة
+                    # نضيف نسخة إضافية مع إزالة التشكيل والتطويل فقط
+                    # ولكن دون تغيير أي حرف
                     normalized_text = ArabicTextProcessor.normalize_arabic(chunk_text)
                     texts.append(normalized_text)
                     metadatas.append({
@@ -285,18 +287,7 @@ async def initialize_chat(file: UploadFile = File(...), session: Session = Depen
                         "variant": "normalized"
                     })
                     
-                    # أضف نسخة مع تبديل الحروف الشائعة
-                    variant_text = normalized_text.replace("ة", "ه").replace("ى", "ي").replace("أ", "ا").replace("إ", "ا")
-                    texts.append(variant_text)
-                    metadatas.append({
-                        "document_id": str(doc.id),
-                        "conversation_id": str(doc.conversation_id),
-                        "chunk_index": i,
-                        "title": chunk_title,
-                        "doc_title": doc.title,
-                        "is_arabic": is_arabic,
-                        "variant": "variant"
-                    })
+                    # نحذف نسخة تبديل الحروف الشائعة لأنها تغير الحروف الأصلية
                     
                     # استخرج وفهرس الكلمات المفتاحية
                     key_phrases = ArabicTextProcessor.extract_arabic_keywords(chunk_text, max_keywords=5)

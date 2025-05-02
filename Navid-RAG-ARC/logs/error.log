@@ -589,3 +589,248 @@ b.send(JSON.stringify(a));c.classList.add("feedback-hidden");d.classList.remove(
 2025-03-04 10:03:47.143 | ERROR    | __main__:reset_vector_store:48 | Error resetting vector store: <MilvusException: (code=65535, message=CreateIndex failed: at most one distinct index is allowed per field)>
 2025-03-04 10:04:09.795 | ERROR    | __main__:reset_vector_store:48 | Error resetting vector store: <MilvusException: (code=65535, message=CreateIndex failed: at most one distinct index is allowed per field)>
 2025-03-04 10:31:44.768 | ERROR    | __main__:check_collection:51 | Error checking collection: 'Collection' object has no attribute 'stats'
+2025-04-15 05:01:37.367 | ERROR    | core.vector_store.manager:initialize:58 | Failed to initialize vector store: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-04-15 05:01:37.367 | ERROR    | apps.chat.routes:upload_attachments:368 | Error in file upload: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-04-15 05:01:37.375 | ERROR    | core.middleware:error_handler:11 | Unhandled error: APIError.__init__() got an unexpected keyword argument 'error'
+2025-04-15 05:06:44.687 | ERROR    | core.vector_store.manager:initialize:58 | Failed to initialize vector store: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-04-15 05:06:44.687 | ERROR    | apps.chat.routes:upload_attachments:368 | Error in file upload: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-04-15 05:06:44.691 | ERROR    | core.middleware:error_handler:11 | Unhandled error: APIError.__init__() got an unexpected keyword argument 'error'
+2025-04-15 05:47:02.680 | ERROR    | core.vector_store.manager:initialize:58 | Failed to initialize vector store: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-04-15 05:47:02.680 | ERROR    | apps.chat.routes:upload_attachments:368 | Error in file upload: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-04-15 05:47:02.680 | ERROR    | core.middleware:error_handler:11 | Unhandled error: APIError.__init__() got an unexpected keyword argument 'error'
+2025-04-15 05:58:48.115 | ERROR    | core.vector_store.manager:initialize:58 | Failed to initialize vector store: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-04-15 05:58:48.117 | ERROR    | apps.chat.routes:upload_attachments:368 | Error in file upload: Could not import faiss python package. Please install it with `pip install faiss-gpu` (for CUDA supported GPU) or `pip install faiss-cpu` (depending on Python version).
+2025-04-15 05:58:48.120 | ERROR    | core.middleware:error_handler:11 | Unhandled error: APIError.__init__() got an unexpected keyword argument 'error'
+2025-04-15 06:17:03.356 | ERROR    | core.search.reranker:rerank_results:76 | Error during reranking: type object 'ArabicTextProcessor' has no attribute 'ARABIC_STOPWORDS'
+2025-04-15 06:17:04.685 | ERROR    | apps.rag.services:generate_response:534 | Error generating response: cannot access local variable 'main_text' where it is not associated with a value
+2025-04-15 06:34:09.730 | ERROR    | core.search.reranker:rerank_results:76 | Error during reranking: type object 'ArabicTextProcessor' has no attribute 'ARABIC_STOPWORDS'
+2025-04-15 07:27:24.243 | ERROR    | apps.rag.services:extract_file_content:85 | Error extracting content from file: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:27:24.243 | ERROR    | apps.rag.services:process_document:159 | Error processing document: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:27:24.243 | ERROR    | apps.rag.services:process_attachments:766 | Error processing document 3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1).pdf: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:40:00.593 | ERROR    | apps.rag.services:extract_file_content:85 | Error extracting content from file: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:40:00.593 | ERROR    | apps.rag.services:process_document:159 | Error processing document: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:40:00.593 | ERROR    | apps.rag.services:process_attachments:766 | Error processing document 3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1).pdf: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:42:40.897 | ERROR    | apps.rag.services:extract_file_content:85 | Error extracting content from file: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:42:40.897 | ERROR    | apps.rag.services:process_document:159 | Error processing document: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:42:40.897 | ERROR    | apps.rag.services:process_attachments:766 | Error processing document 3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1).pdf: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:55:09.023 | ERROR    | apps.rag.services:extract_file_content:81 | Error extracting content from file: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:55:09.025 | ERROR    | apps.rag.services:process_document:155 | Error processing document: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 07:55:09.025 | ERROR    | apps.rag.services:process_attachments:762 | Error processing document 3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1).pdf: get_text() got an unexpected keyword argument 'encoding'
+2025-04-15 10:16:01.379 | ERROR    | apps.rag.services:extract_file_content:98 | Error extracting content from file: Document.__init__() got an unexpected keyword argument 'encoding'
+2025-04-15 10:16:01.379 | ERROR    | apps.rag.services:process_document:172 | Error processing document: Document.__init__() got an unexpected keyword argument 'encoding'
+2025-04-15 10:16:01.389 | ERROR    | apps.rag.services:process_attachments:779 | Error processing document 3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1).pdf: Document.__init__() got an unexpected keyword argument 'encoding'
+2025-04-15 11:02:47.655 | ERROR    | apps.rag.services:extract_file_content:78 | Error extracting content from file: name 'PDFExtractor' is not defined
+2025-04-15 11:02:47.656 | ERROR    | apps.rag.services:process_document:152 | Error processing document: name 'PDFExtractor' is not defined
+2025-04-15 11:02:47.656 | ERROR    | apps.rag.services:process_attachments:759 | Error processing document 3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1).pdf: name 'PDFExtractor' is not defined
+2025-04-15 11:10:01.279 | ERROR    | apps.chat.routes:process_query:494 | Error processing query: APIError.__init__() got an unexpected keyword argument 'error'
+2025-04-15 11:10:48.042 | ERROR    | apps.chat.routes:process_query:494 | Error processing query: APIError.__init__() got an unexpected keyword argument 'error'
+2025-04-15 11:15:46.271 | ERROR    | core.search.reranker:rerank_results:76 | Error during reranking: type object 'ArabicTextProcessor' has no attribute 'ARABIC_STOPWORDS'
+2025-04-15 11:27:31.263 | ERROR    | core.search.reranker:rerank_results:76 | Error during reranking: type object 'ArabicTextProcessor' has no attribute 'ARABIC_STOPWORDS'
+2025-04-15 13:54:04.411 | ERROR    | apps.rag.services:extract_file_content:82 | Error extracting content from file: can only concatenate str (not "dict") to str
+2025-04-15 13:54:04.411 | ERROR    | apps.rag.services:process_document:156 | Error processing document: can only concatenate str (not "dict") to str
+2025-04-15 13:54:04.427 | ERROR    | apps.rag.services:process_attachments:763 | Error processing document 3-2-ar-Procedures_of_suspending_the_trading_of_listed_securities (1).pdf: can only concatenate str (not "dict") to str
+2025-04-16 05:25:12.139 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-16 05:25:12.140 | ERROR    | __main__:lifespan:33 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-16 06:16:12.459 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-16 06:16:12.459 | ERROR    | __main__:lifespan:33 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-16 06:18:48.301 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-16 06:18:48.301 | ERROR    | __main__:lifespan:33 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-16 06:20:47.248 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-16 06:20:47.249 | ERROR    | __main__:lifespan:33 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-16 06:49:59.360 | ERROR    | core.search.reranker:rerank_results:76 | Error during reranking: type object 'ArabicTextProcessor' has no attribute 'ARABIC_STOPWORDS'
+2025-04-16 07:04:16.010 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-20 14:55:11.604 | ERROR    | apps.rag.services:__init__:51 | Failed to initialize RAGService: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+2025-04-20 15:10:57.858 | ERROR    | apps.rag.services:__init__:51 | Failed to initialize RAGService: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable
+2025-04-20 18:20:27.451 | ERROR    | core.middleware:error_handler:11 | Unhandled error: (sqlite3.IntegrityError) NOT NULL constraint failed: user.username
+[SQL: INSERT INTO user (id, username, email, hashed_password, first_name, last_name, age, is_active, created_at, updated_at, organization_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('e7ad76cac82c4dd7b356d10fd81dfd7b', None, 'test@example.com', 'DEVELOPMENT_MODE_NO_PASSWORD', 'Test', 'User', None, 1, '2025-04-20 15:20:27.443820', '2025-04-20 15:20:27.443820', None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-04-20 18:21:08.303 | ERROR    | core.middleware:error_handler:11 | Unhandled error: (sqlite3.IntegrityError) NOT NULL constraint failed: user.username
+[SQL: INSERT INTO user (id, username, email, hashed_password, first_name, last_name, age, is_active, created_at, updated_at, organization_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('8e92aafd46384dbc9f2cce7730f9ab88', None, 'test@example.com', 'DEVELOPMENT_MODE_NO_PASSWORD', 'Test', 'User', None, 1, '2025-04-20 15:21:08.303274', '2025-04-20 15:21:08.303274', None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-04-20 18:26:56.131 | ERROR    | core.middleware:error_handler:11 | Unhandled error: (sqlite3.IntegrityError) NOT NULL constraint failed: user.username
+[SQL: INSERT INTO user (id, username, email, hashed_password, first_name, last_name, age, is_active, created_at, updated_at, organization_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('543be5e6eb10405ead23617e420b43b5', None, 'test@example.com', 'DEVELOPMENT_MODE_NO_PASSWORD', 'Test', 'User', None, 1, '2025-04-20 15:26:56.128689', '2025-04-20 15:26:56.128689', None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-04-20 19:13:24.847 | ERROR    | apps.rag.services:index_document:940 | Error indexing document: (sqlite3.IntegrityError) NOT NULL constraint failed: document.created_by_id
+[SQL: INSERT INTO document (id, title, content, doc_metadata, status, vector_ids, conversation_id, created_by_id, created_at, updated_at, current_status, is_searchable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('cd752c98073a483f8f1519d99ccbef82', 'Amended Securities Business Regulations-ar.pdf', '', '{}', 'PROCESSING', '[]', '5c78412306fd46d3a747e0463b074e72', None, '2025-04-20 16:13:24.625524', '2025-04-20 16:13:24.625524', 'QUEUED', 0)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-04-20 19:13:24.859 | ERROR    | core.db:get_session_context:65 | Async database session error: (sqlite3.IntegrityError) NOT NULL constraint failed: document.created_by_id
+[SQL: INSERT INTO document (id, title, content, doc_metadata, status, vector_ids, conversation_id, created_by_id, created_at, updated_at, current_status, is_searchable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('cd752c98073a483f8f1519d99ccbef82', 'Amended Securities Business Regulations-ar.pdf', '', '{}', 'PROCESSING', '[]', '5c78412306fd46d3a747e0463b074e72', None, '2025-04-20 16:13:24.625524', '2025-04-20 16:13:24.625524', 'QUEUED', 0)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-04-20 19:13:24.864 | ERROR    | main:process_file:248 | Error indexing document: Database operation failed
+2025-04-20 19:14:11.996 | ERROR    | apps.rag.services:index_document:940 | Error indexing document: (sqlite3.IntegrityError) NOT NULL constraint failed: document.created_by_id
+[SQL: INSERT INTO document (id, title, content, doc_metadata, status, vector_ids, conversation_id, created_by_id, created_at, updated_at, current_status, is_searchable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('9f0e3ac2962741f887ce3ecf55ed4e2c', 'PC procedures - AR.pdf', '', '{}', 'PROCESSING', '[]', 'f24d520990194891b785bb1a662df7e8', None, '2025-04-20 16:14:11.980631', '2025-04-20 16:14:11.980631', 'QUEUED', 0)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-04-20 19:14:11.996 | ERROR    | core.db:get_session_context:65 | Async database session error: (sqlite3.IntegrityError) NOT NULL constraint failed: document.created_by_id
+[SQL: INSERT INTO document (id, title, content, doc_metadata, status, vector_ids, conversation_id, created_by_id, created_at, updated_at, current_status, is_searchable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('9f0e3ac2962741f887ce3ecf55ed4e2c', 'PC procedures - AR.pdf', '', '{}', 'PROCESSING', '[]', 'f24d520990194891b785bb1a662df7e8', None, '2025-04-20 16:14:11.980631', '2025-04-20 16:14:11.980631', 'QUEUED', 0)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-04-20 19:14:11.996 | ERROR    | main:process_file:248 | Error indexing document: Database operation failed
+2025-04-20 19:19:25.540 | ERROR    | core.vector_store.manager:initialize:58 | Failed to initialize vector store: The paging file is too small for this operation to complete. (os error 1455)
+2025-04-20 19:19:25.540 | ERROR    | apps.rag.services:process_document:162 | Error processing document: The paging file is too small for this operation to complete. (os error 1455)
+2025-04-20 19:19:25.540 | ERROR    | apps.rag.services:index_document:953 | Error indexing document: The paging file is too small for this operation to complete. (os error 1455)
+2025-04-20 19:19:25.551 | ERROR    | core.db:get_session_context:65 | Async database session error: The paging file is too small for this operation to complete. (os error 1455)
+2025-04-20 19:19:25.556 | ERROR    | main:process_file:251 | Error indexing document: Database operation failed
+2025-04-20 21:07:17.940 | ERROR    | apps.chat.routes:process_query:496 | Error processing query: APIError.__init__() got an unexpected keyword argument 'error'
+2025-04-21 06:59:23.198 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-21 06:59:23.198 | ERROR    | main:lifespan:43 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-21 07:15:08.459 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-21 07:15:08.460 | ERROR    | main:lifespan:43 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-21 07:21:28.441 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-21 07:21:28.443 | ERROR    | main:lifespan:43 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-21 07:21:52.453 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-21 07:21:52.453 | ERROR    | main:lifespan:43 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-21 16:38:37.801 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-21 16:40:14.370 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-22 16:58:34.989 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-22 18:26:53.323 | ERROR    | main:process_document_in_background:398 | Error processing document 7344fe63-5683-4c5b-af64-b5f8903ce096: 'Document' object has no attribute 'source'
+2025-04-22 18:27:18.512 | ERROR    | apps.chat.routes:chat_query:563 | Error retrieving documents: badly formed hexadecimal UUID string
+2025-04-22 19:19:46.169 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-22 19:19:53.349 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-22 19:19:55.746 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-22 19:34:25.088 | ERROR    | apps.chat.routes:chat_query:788 | Error in RAG processing: 'Document' object has no attribute 'source'
+2025-04-22 21:01:40.807 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-22 22:35:26.081 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-23 10:28:03.797 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-23 11:41:06.915 | ERROR    | main:query_document:629 | Error processing query: Textual SQL expression 'SELECT * FROM document WH...' should be explicitly declared as text('SELECT * FROM document WH...')
+2025-04-23 11:43:45.849 | ERROR    | main:query_document:629 | Error processing query: Textual SQL expression 'SELECT * FROM document WH...' should be explicitly declared as text('SELECT * FROM document WH...')
+2025-04-23 11:44:02.977 | ERROR    | main:query_document:629 | Error processing query: Textual SQL expression 'SELECT * FROM document WH...' should be explicitly declared as text('SELECT * FROM document WH...')
+2025-04-23 18:17:38.546 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:38.653 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:38.756 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:38.822 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:38.881 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:38.931 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:38.992 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:39.046 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:39.096 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:39.169 | ERROR    | apps.chat.routes:clear_all_conversations:1053 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:17:39.219 | ERROR    | apps.chat.routes:clear_all_conversations:1077 | Error clearing conversations: This Session's transaction has been rolled back due to a previous exception during flush. To begin a new transaction with this Session, first issue Session.rollback(). Original exception was: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlite3.IntegrityError) NOT NULL constraint failed: chunk.document_id
+[SQL: UPDATE chunk SET document_id=? WHERE chunk.id = ?]
+[parameters: [(None, '01b06931c3bd48afa6c2799fbab5028a'), (None, '0812e91cf81d4f13b1d8973fc098880a'), (None, '0d4ec7bf1ba94bf18f7697b8d3ab05a9'), (None, '1a7e8cb79e614fec864dd182ee6edb93'), (None, '2439b4f955884fa9a916f32c713dfd98'), (None, '2bbe8d287b074cd085ec700a6644ff23'), (None, '2f455fe80c8545a195614cf8327abfc3'), (None, '302ab7246e8a4526a842141f59e8e6f6')  ... displaying 10 of 22 total bound parameter sets ...  (None, 'fb3e1b20edaa4ab4a8cab23655933f21'), (None, 'fd50459ad550479a85a88647f9091e16')]]
+(Background on this error at: https://sqlalche.me/e/20/gkpj) (Background on this error at: https://sqlalche.me/e/20/7s2a)
+2025-04-23 18:25:09.393 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:09.472 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:09.546 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:09.621 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:09.689 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:09.763 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:09.845 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:09.920 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.001 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.100 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.206 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.280 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.346 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.396 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.444 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.516 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.548 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.575 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.608 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.648 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.690 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.732 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.781 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.842 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.888 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.947 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:10.980 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.012 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.045 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.078 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.103 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.137 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.168 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.209 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.238 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.268 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.301 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.326 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.362 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.390 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.415 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.448 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.481 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.507 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.538 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.571 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.605 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.645 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.670 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.694 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.719 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.752 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-23 18:25:11.777 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-26 13:27:20.045 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-27 12:25:44.557 | ERROR    | main:initialize_chat:261 | Error processing small document: 'NoneType' object has no attribute 'initialize'
+2025-04-27 12:28:14.752 | ERROR    | apps.chat.routes:chat_query:868 | Error processing query: 'NoneType' object has no attribute 'initialize'
+2025-04-27 12:29:36.629 | ERROR    | apps.chat.routes:chat_query:868 | Error processing query: 'NoneType' object has no attribute 'initialize'
+2025-04-27 12:31:18.079 | ERROR    | apps.chat.routes:chat_query:868 | Error processing query: 'NoneType' object has no attribute 'initialize'
+2025-04-27 12:40:25.853 | ERROR    | apps.chat.routes:chat_query:878 | Error processing query: 'NoneType' object has no attribute 'initialize'
+2025-04-27 12:44:13.098 | ERROR    | apps.chat.routes:chat_query:868 | Error processing query: 'NoneType' object has no attribute 'initialize'
+2025-04-28 16:03:08.929 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 
+2025-04-28 16:14:01.922 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-28 16:14:02.160 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-28 16:14:02.213 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-28 16:14:02.264 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-28 16:14:02.311 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-28 16:14:02.358 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-28 16:14:02.423 | ERROR    | apps.chat.routes:clear_all_conversations:1066 | Error deleting document from vector store: 'RAGService' object has no attribute 'delete_document'
+2025-04-29 10:07:27.395 | ERROR    | apps.rag.services:__init__:53 | Failed to initialize RAGService: Unsupported LLM provider: huggingface
+2025-04-29 10:19:02.606 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 403, message='Forbidden', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 10:19:04.756 | ERROR    | apps.rag.services:generate_response:604 | Error generating response: 403, message='Forbidden', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 10:19:34.897 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 403, message='Forbidden', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 10:19:36.508 | ERROR    | apps.rag.services:generate_response:604 | Error generating response: 403, message='Forbidden', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 10:20:00.973 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 403, message='Forbidden', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 10:20:01.797 | ERROR    | apps.rag.services:generate_response:604 | Error generating response: 403, message='Forbidden', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 10:24:09.739 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: Expecting value: line 1 column 1 (char 0)
+2025-04-29 10:31:47.091 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: Expecting value: line 1 column 1 (char 0)
+2025-04-29 10:32:26.582 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: Expecting value: line 1 column 1 (char 0)
+2025-04-29 10:32:57.032 | ERROR    | apps.rag.services:generate_response:601 | Response generation timed out
+2025-04-29 10:33:12.264 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: Expecting value: line 1 column 1 (char 0)
+2025-04-29 10:34:17.337 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: Expecting value: line 1 column 1 (char 0)
+2025-04-29 10:42:19.200 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:42:19.200 | ERROR    | main:lifespan:47 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:42:37.445 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:42:37.447 | ERROR    | main:lifespan:47 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:42:56.299 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:42:56.299 | ERROR    | main:lifespan:47 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:43:14.722 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:43:14.722 | ERROR    | main:lifespan:47 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:44:03.892 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:44:03.893 | ERROR    | main:lifespan:47 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:44:21.615 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 10:44:21.616 | ERROR    | main:lifespan:47 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 11:01:50.894 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 11:01:50.895 | ERROR    | main:lifespan:47 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 11:05:27.910 | ERROR    | main:initialize_chat:319 | خطأ أثناء فهرسة المستند: "'repo_id'"
+2025-04-29 11:09:18.519 | ERROR    | core.search.query_processor:_process_complex_query:269 | Complex query processing error: 403, message='Forbidden', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 11:09:21.632 | ERROR    | apps.rag.services:generate_response:624 | Error generating response: 403, message='Forbidden', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 11:39:10.354 | ERROR    | core.vector_store.connection:ensure_connection:22 | Failed to connect to Milvus: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 11:39:10.354 | ERROR    | main:lifespan:47 | Failed to start application: <MilvusException: (code=2, message=Fail connecting to server on localhost:19530, illegal connection params or server unavailable)>
+2025-04-29 11:45:22.666 | ERROR    | core.search.query_processor:_process_complex_query:272 | Complex query processing error: 404, message='Not Found', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 11:45:23.653 | ERROR    | apps.rag.services:generate_response:624 | Error generating response: 404, message='Not Found', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 12:33:14.895 | ERROR    | core.search.query_processor:_process_complex_query:281 | Complex query processing error: 404, message='Not Found', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 12:33:17.410 | ERROR    | apps.rag.services:generate_response:624 | Error generating response: 404, message='Not Found', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-04-29 13:28:03.748 | ERROR    | core.search.query_processor:_process_complex_query:281 | Complex query processing error: Expecting value: line 1 column 1 (char 0)
+2025-04-29 13:45:01.506 | ERROR    | core.search.query_processor:_process_complex_query:281 | Complex query processing error: Expecting value: line 1 column 1 (char 0)
+2025-04-30 11:02:33.725 | ERROR    | apps.rag.services:_post_process_response:766 | LANGUAGE ERROR: Query is in Arabic but response is in another language
+2025-04-30 11:12:19.243 | ERROR    | apps.rag.services:_post_process_response:799 | LANGUAGE ERROR: Query is in Arabic but response has insufficient Arabic content (152/2233 chars)
+2025-04-30 11:14:02.087 | ERROR    | apps.rag.services:_post_process_response:799 | LANGUAGE ERROR: Query is in Arabic but response has insufficient Arabic content (89/1209 chars)
+2025-04-30 11:26:42.453 | ERROR    | apps.rag.services:_post_process_response:801 | LANGUAGE ERROR: Query is in Arabic but response has insufficient Arabic content (26/743 chars)
+2025-04-30 11:32:04.844 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'repo_id'"
+2025-04-30 13:03:08.563 | ERROR    | main:initialize_chat:319 | خطأ أثناء فهرسة المستند: "'endpoint_url'"
+2025-04-30 14:10:35.063 | ERROR    | main:initialize_chat:319 | خطأ أثناء فهرسة المستند: "'endpoint_url'"
+2025-04-30 14:11:37.356 | ERROR    | apps.chat.routes:chat_query:822 | Error processing query: RAGService.generate_response() got an unexpected keyword argument 'context_docs'
+2025-04-30 14:31:35.268 | ERROR    | main:initialize_chat:319 | خطأ أثناء فهرسة المستند: "'endpoint_url'"
+2025-04-30 14:58:03.885 | ERROR    | main:initialize_chat:319 | خطأ أثناء فهرسة المستند: "'endpoint_url'"
+2025-04-30 15:03:51.376 | ERROR    | main:initialize_chat:319 | خطأ أثناء فهرسة المستند: "'endpoint_url'"
+2025-04-30 22:11:55.877 | ERROR    | core.vector_store.manager:initialize:58 | Failed to initialize vector store: The paging file is too small for this operation to complete. (os error 1455)
+2025-04-30 22:11:55.877 | ERROR    | main:initialize_chat:319 | خطأ أثناء فهرسة المستند: The paging file is too small for this operation to complete. (os error 1455)

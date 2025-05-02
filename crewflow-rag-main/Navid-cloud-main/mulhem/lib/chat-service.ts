@@ -66,6 +66,18 @@ function isArabicDocument(docTitle: string): boolean {
          docTitle.includes('لائحة');
 }
 
+ /**
+ * Generate a safe random ID
+ */
+function generateSafeId(): string {
+  try {
+    return Math.random().toString(36).substring(2, 10);
+  } catch (e) {
+    // Fallback if toString or substring fails
+    return Date.now().toString();
+  }
+}
+
 /**
  * Generate a fallback response
  */
@@ -79,7 +91,7 @@ function generateFallbackResponse(message: string, documentTitle: string): ChatR
     : `I've analyzed the document "${documentTitle}". Please let me know what specific information you're looking for in this document.`;
   
   return {
-    id: Math.random().toString(36).substring(2, 10),
+    id: generateSafeId(),
     content,
     created_at: new Date().toISOString(),
     role: "assistant",
@@ -92,6 +104,12 @@ function generateFallbackResponse(message: string, documentTitle: string): ChatR
  */
 export async function sendChatMessage(conversationId: string, message: string): Promise<ChatResponse> {
   try {
+    // Validate inputs
+    if (!conversationId) {
+      console.error('Missing conversation ID');
+      throw new Error('Missing conversation ID');
+    }
+
     console.log(`Sending message to conversation ${conversationId}`, message);
     
     // استدعاء نقطة نهاية API في الباكند - استخدام النظام الموجود فقط
@@ -117,7 +135,7 @@ export async function sendChatMessage(conversationId: string, message: string): 
       
       if (content) {
         return {
-          id: Math.random().toString(36).substring(2, 10),
+          id: generateSafeId(),
           content: content,
           created_at: new Date().toISOString(),
           role: "assistant",
@@ -127,10 +145,10 @@ export async function sendChatMessage(conversationId: string, message: string): 
       }
     }
     
-    // إذا لم يتم العثور على محتوى، إرجاع رسالة افتراضية
+    // If no content was found, return a default message
     return {
-      id: Math.random().toString(36).substring(2, 10),
-      content: "لم أتمكن من العثور على إجابة مناسبة لسؤالك في المستند.",
+      id: generateSafeId(),
+      content: "I couldn't find a suitable answer to your question in the document.",
       created_at: new Date().toISOString(),
       role: "assistant",
       context_docs: []
@@ -139,14 +157,40 @@ export async function sendChatMessage(conversationId: string, message: string): 
   } catch (error: any) {
     console.error('API request failed:', error);
     
-    // إرجاع رسالة خطأ
+    // Return error message
     return {
-      id: Math.random().toString(36).substring(2, 10),
-      content: "حدث خطأ أثناء معالجة طلبك. يرجى التحقق من اتصالك بالخادم والمحاولة مرة أخرى.",
+      id: generateSafeId(),
+      content: "An error occurred while processing your request. Please check your connection to the server and try again.",
       created_at: new Date().toISOString(),
       role: "assistant",
       context_docs: []
     };
+  }
+}
+
+/**
+ * Initialize a new chat with a file
+ */
+export async function initializeChat(file: File): Promise<{ sessionId: string, conversationId: string }> {
+  try {
+    console.log(`Initializing chat with file ${file.name}`);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await apiClient.post('/initialize', formData);
+    
+    if (response.data && response.data.session_id) {
+      return {
+        sessionId: response.data.session_id,
+        conversationId: response.data.conversation_id || response.data.session_id
+      };
+    }
+    
+    throw new Error('Failed to initialize chat session');
+  } catch (error) {
+    console.error('Error initializing chat:', error);
+    throw error;
   }
 }
 
@@ -157,7 +201,7 @@ export async function getRecentConversations(): Promise<Conversation[]> {
   try {
     console.log('Fetching recent conversations');
     
-    // تصحيح مسار API - استخدام المسار الصحيح بدون مقطع chat/
+    // Correct API path for the recent conversations
     const response = await apiClient.get<Conversation[]>('/recent-conversations');
     
     console.log('Recent conversations response:', response.status);
@@ -180,8 +224,8 @@ export async function getRecentConversations(): Promise<Conversation[]> {
 export async function deleteConversation(conversationId: string): Promise<boolean> {
   try {
     console.log(`Deleting conversation ${conversationId}`);
-    // استدعاء نقطة النهاية لحذف المحادثة
-    const response = await apiClient.delete(`/chat/${conversationId}`);
+    // Use the appropriate API endpoint for the backend
+    const response = await apiClient.delete(`/conversations/${conversationId}`);
     console.log('Delete conversation response:', response.status);
     return response.status === 200 || response.status === 204;
   } catch (error) {
@@ -196,7 +240,7 @@ export async function deleteConversation(conversationId: string): Promise<boolea
 export async function clearAllConversations(): Promise<{ success: boolean; count?: number }> {
   try {
     console.log('Clearing all conversations');
-    // استدعاء نقطة النهاية لحذف جميع المحادثات
+    // Call the correct endpoint to delete all conversations
     const response = await apiClient.delete('/clear-conversations');
     console.log('Clear conversations response:', response.status);
     

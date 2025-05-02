@@ -5,7 +5,7 @@ from langchain.schema import Document as LangchainDocument
 from loguru import logger
 from apps.chat.models import Attachment
 from core.llm.factory import ModelFactory
-from core.llm.prompt_templates import REACT_PROMPT_TEMPLATE, HYBRID_SEARCH_TEMPLATE, SEARCH_PROMPT_TEMPLATES, DIRECT_MATCH_PROMPT_TEMPLATE
+from core.llm.prompt_templates import REACT_PROMPT_TEMPLATE, HYBRID_SEARCH_TEMPLATE, SEARCH_PROMPT_TEMPLATES, DIRECT_MATCH_PROMPT_TEMPLATE, LANGUAGE_VALIDATION_TEMPLATE
 from core.config import get_settings
 from .models import Document, DocumentProcessingEvent, DocumentProcessingStatus, DocumentStatus, Chunk
 from pathlib import Path
@@ -68,14 +68,11 @@ class RAGService:
         ext = Path(file_path).suffix.lower()
         try:
             if (ext == '.pdf'):
-                # Use PyPDFLoader instead of fitz
+                # استخدام PyPDFLoader مع الحفاظ على النص الأصلي
                 loader = PyPDFLoader(file_path)
                 pages = loader.load()
-                # Merge content of all pages with improved formatting
-                text = "\n\n".join(
-                    self.clean_and_format_text(page.page_content)
-                    for page in pages
-                )
+                # ضم محتوى الصفحات مع الحفاظ على النص الأصلي
+                text = "\n\n".join(page.page_content for page in pages)
                 return text
             elif ext in ['.docx', '.doc']:
                 return docx2txt.process(file_path)
@@ -499,113 +496,303 @@ class RAGService:
         context_docs: List[Dict[str, Any]],
         conversation_history: List[Dict[str, Any]] = None
     ) -> str:
-        """Generate response with improved context handling"""
+        """توليد استجابة بناءً على السياق المقدم"""
         try:
-            if not context_docs:
-                # Detect language and return appropriate message
-                try:
-                    lang = detect(query)
-                    return (
-                        "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال."
-                        if lang == 'ar' else
-                        "I couldn't find any relevant information to answer your question."
-                    )
-                except Exception as e:
-                    logger.error(f"Error detecting language: {e}")
-                    return "I couldn't find sufficient information to answer this question."
-
-            # Format context with improved structure
-            formatted_context = self._format_context(context_docs)
+            # الحصول على إعدادات النموذج
+            settings = get_settings()
+            logger.info(f"Using LLM provider: {settings.LLM_PROVIDER}, model: {settings.LLM_MODEL}")
             
-            # Add conversation history if available
+            # التحقق من وجود مستندات سياق
+            if not context_docs:
+                # التحقق من اللغة وإرجاع رسالة مناسبة
+                is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+                return (
+                    "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال."
+                    if is_arabic else
+                    "I couldn't find sufficient information to answer this question."
+                )
+
+            # معالجة وتحسين السياق
+            optimized_contexts = self._prioritize_and_organize_contexts(context_docs, query)
+            formatted_context = self._format_context(optimized_contexts)
+            
+            # إضافة سجل المحادثة إذا كان متاحًا
             history_context = ""
             if conversation_history:
                 history_context = "\nPrevious conversation:\n" + "\n".join(
                     f"{msg['role']}: {msg['content']}"
-                    for msg in conversation_history[-3:]  # Last 3 messages
+                    for msg in conversation_history[-3:]  # آخر 3 رسائل
                 )
-
-            # Create prompt with both context and history
-            prompt = REACT_PROMPT_TEMPLATE.format(
+            
+            # الحصول على قالب المطالبة المناسب
+            prompt_template = self._select_specialized_prompt(query, context_docs)
+            
+            # إنشاء مطالبة كاملة مع السياق والتاريخ
+            prompt = prompt_template.format(
                 context=formatted_context + history_context,
                 question=query
             )
             
-            # Generate response with timeout
-            async with asyncio.timeout(30):  # 30 second timeout
+            # التحقق من اللغة العربية وإضافة تعليمات مناسبة
+            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+            if is_arabic:
+                arabic_instruction = "IMPORTANT: This question is in Arabic. You must answer in Arabic language only.\n\n"
+                prompt = arabic_instruction + prompt
+            
+            # توليد الاستجابة مع مهلة زمنية محددة
+            async with asyncio.timeout(30):  # مهلة 30 ثانية
                 response = await self.llm.agenerate([prompt])
+                raw_response = response.generations[0][0].text.strip()
                 
-            full_response = response.generations[0][0].text.strip()
-            
-            # Extract final answer
-            answer_parts = full_response.split("Answer:")
-            if len(answer_parts) > 1:
-                full_response = answer_parts[-1].strip()
-            
-            # Format the response 
-            formatted_response = self.format_response(full_response)
-            
-            # If format_response returns False, it means we need to try direct text matching
-            if formatted_response is False:
-                # Try direct text matching approach
-                is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+                # استخراج الإجابة النهائية إذا لزم الأمر
+                if "Answer:" in raw_response:
+                    answer_parts = raw_response.split("Answer:")
+                    raw_response = answer_parts[-1].strip()
                 
-                # Create direct matching function
-                def text_match_score(text, query_terms):
-                    score = 0
-                    for term in query_terms:
-                        if term in text:
-                            score += 1
-                    return score
+                # تطبيق معالجة ما بعد التوليد
+                processed_response = self._post_process_response(raw_response, query)
                 
-                # Prepare query terms
-                if is_arabic:
-                    query_data = ArabicTextProcessor.preprocess_arabic_query(query)
-                    query_terms = [query_data["normalized"]] + query_data["keywords"]
-                else:
-                    query_terms = query.lower().split()
+                # التحقق من جودة الاستجابة
+                if not self._validate_response_quality(processed_response, query):
+                    logger.info("Response quality insufficient, attempting refinement")
+                    return await self._generate_refined_response(query, context_docs)
                 
-                # Score each context document by direct text matching
-                scored_docs = []
-                for doc in context_docs:
-                    content = doc.get("content", "")
-                    score = text_match_score(content.lower(), query_terms)
-                    if score > 0:
-                        scored_docs.append((doc, score))
-                
-                # Sort by score
-                scored_docs.sort(key=lambda x: x[1], reverse=True)
-                
-                # If we have direct matches, create a response with them
-                if scored_docs:
-                    best_docs = [doc for doc, _ in scored_docs[:2]]
-                    best_context = self._format_context(best_docs)
-                    
-                    # Generate a new response with the best direct matches
-                    direct_prompt = DIRECT_MATCH_PROMPT_TEMPLATE.format(
-                        context=best_context,
-                        question=query
-                    )
-                    
-                    # Generate response with the new prompt
-                    async with asyncio.timeout(30):
-                        direct_response = await self.llm.agenerate([direct_prompt])
-                        direct_full_response = direct_response.generations[0][0].text.strip()
-                    
-                    # Format the direct response
-                    return self.format_response(direct_full_response) or direct_full_response
-                else:
-                    # If no direct matches, return the original "no information" message
-                    return full_response
-            
-            return formatted_response or full_response
+                return processed_response
 
         except asyncio.TimeoutError:
             logger.error("Response generation timed out")
-            return "I apologize, but I'm having trouble generating a response right now. Please try again."
+            # إرجاع رسالة خطأ مناسبة للغة
+            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+            return (
+                "أعتذر، لقد استغرقت العملية وقتًا طويلًا. يرجى المحاولة مرة أخرى."
+                if is_arabic else 
+                "I apologize, but I'm having trouble generating a response right now. Please try again."
+            )
         except Exception as e:
             logger.error(f"Error generating response: {e}")
-            return "I apologize, but I encountered an error while processing your question."
+            # إرجاع رسالة خطأ مناسبة للغة
+            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+            return (
+                "أعتذر، لقد حدث خطأ أثناء معالجة سؤالك."
+                if is_arabic else 
+                "I apologize, but I encountered an error while processing your question."
+            )
+
+    def _select_specialized_prompt(self, query: str, context_docs: List[Dict[str, Any]]):
+        """Select the most appropriate prompt template based on query type and language"""
+        from core.llm.prompt_templates import REACT_PROMPT_TEMPLATE
+        
+        # استخدام قالب REACT_PROMPT_TEMPLATE الافتراضي لجميع الاستعلامات
+        logger.info("Using default REACT_PROMPT_TEMPLATE")
+        return REACT_PROMPT_TEMPLATE
+
+    def _prioritize_and_organize_contexts(self, context_docs: List[Dict[str, Any]], query: str) -> List[Dict[str, Any]]:
+        """Prioritize and organize context documents for better response generation"""
+        # Clone the context docs to avoid modifying original
+        docs = context_docs.copy()
+        
+        # First, identify query language and key terms
+        is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+        
+        # Extract key terms from query for relevance calculation
+        if is_arabic:
+            query_data = ArabicTextProcessor.preprocess_arabic_query(query)
+            key_terms = [query_data["normalized"]] + query_data["keywords"]
+        else:
+            # Simple English tokenization
+            key_terms = [term.lower() for term in re.findall(r'\b\w+\b', query)]
+            # Remove English stopwords
+            stopwords = {'a', 'an', 'the', 'and', 'or', 'but', 'if', 'then', 'is', 'are', 'was', 'were'}
+            key_terms = [term for term in key_terms if term not in stopwords]
+        
+        # Score documents by term overlap and position of key terms
+        scored_docs = []
+        for doc in docs:
+            content = doc.get("content", "").lower()
+            
+            # Calculate initial score based on term overlap
+            term_score = sum(10 for term in key_terms if term.lower() in content)
+            
+            # Bonus for terms appearing early in the content
+            for term in key_terms:
+                term_lower = term.lower()
+                if term_lower in content:
+                    # Position weight: earlier = better
+                    position = content.find(term_lower)
+                    position_score = max(10 - (position / 100), 0) if position >= 0 else 0
+                    term_score += position_score
+            
+            # Bonus for shorter, more focused content
+            length_factor = min(1.0, 500 / max(len(content), 1))
+            term_score *= (0.5 + 0.5 * length_factor)
+            
+            # Use existing semantic score if available
+            semantic_score = doc.get("semantic_score", 0) or doc.get("score", 0)
+            
+            # Combine scores with preference for semantic matching
+            final_score = (semantic_score * 0.7) + (term_score * 0.3)
+            
+            scored_docs.append((doc, final_score))
+        
+        # Sort by score (descending)
+        scored_docs.sort(key=lambda x: x[1], reverse=True)
+        
+        # Extract reorganized docs
+        organized_docs = [doc for doc, _ in scored_docs]
+        
+        # Optionally, truncate very long documents to focus on most relevant parts
+        for i in range(len(organized_docs)):
+            content = organized_docs[i].get("content", "")
+            if len(content) > 1000:  # If content is very long
+                # Find positions of key terms
+                positions = []
+                for term in key_terms:
+                    term_lower = term.lower()
+                    pos = content.lower().find(term_lower)
+                    if pos >= 0:
+                        positions.append(pos)
+                
+                if positions:
+                    # Calculate a central position around which to extract content
+                    center_pos = sum(positions) // len(positions)
+                    
+                    # Extract a window around this position
+                    start_pos = max(0, center_pos - 400)
+                    end_pos = min(len(content), center_pos + 600)
+                    
+                    # Get the truncated content with context indication
+                    truncated = content[start_pos:end_pos]
+                    if start_pos > 0:
+                        truncated = "... " + truncated
+                    if end_pos < len(content):
+                        truncated = truncated + " ..."
+                    
+                    # Update the document content
+                    organized_docs[i]["content"] = truncated
+        
+        return organized_docs
+
+    def _post_process_response(self, response: str, query: str) -> str:
+        """تنظيف وتحسين بسيط للاستجابة"""
+        if not response:
+            return response
+        
+        # تنظيف الاستجابة
+        response = response.strip()
+        
+        # إزالة علامات الاقتباس والمراجع
+        response = re.sub(r'\[\d+\]', '', response)
+        response = re.sub(r'\(Source: [^)]+\)', '', response)
+        response = re.sub(r'\(المصدر: [^)]+\)', '', response)
+        
+        # تنظيف المسافات والتنسيق
+        response = re.sub(r'\s{2,}', ' ', response)
+        response = re.sub(r'[.،,؛;:]{2,}', '.', response)
+        
+        # التأكد من وجود علامة ترقيم في النهاية
+        if not response.endswith(('.', '!', '?', '؟', '.')):
+            response += '.'
+        
+        return response
+
+    def _validate_response_quality(self, response: str, query: str) -> bool:
+        """تحقق بسيط من جودة الاستجابة"""
+        # التحقق من وجود استجابة
+        if not response:
+            return False
+            
+        # التحقق من الحد الأدنى للطول
+        if len(response) < 10:
+            return False
+            
+        # التحقق من عدم وجود عبارات الخطأ الشائعة
+        error_phrases = [
+            "I apologize",
+            "I cannot provide",
+            "I don't have access",
+            "لا أستطيع",
+            "لا يمكنني",
+            "المعلومات غير متوفرة"
+        ]
+        
+        for phrase in error_phrases:
+            if phrase in response:
+                return False
+                
+        return True
+
+    async def _generate_refined_response(self, query: str, context_docs: List[Dict[str, Any]]) -> str:
+        """يولد استجابة محسنة عندما تكون جودة الاستجابة الأولية غير كافية"""
+        try:
+            # استخدام أكثر 3 مستندات صلة
+            key_docs = context_docs[:min(3, len(context_docs))]
+            
+            # تنسيق السياق من هذه المستندات المهمة فقط
+            focused_context = self._format_context(key_docs)
+            
+            # استخدام قالب المطابقة المباشرة للحصول على إجابة أكثر دقة
+            from core.llm.prompt_templates import DIRECT_MATCH_PROMPT_TEMPLATE
+            
+            prompt = DIRECT_MATCH_PROMPT_TEMPLATE.format(
+                context=focused_context,
+                question=query
+            )
+            
+            # توليد الاستجابة مع مهلة زمنية
+            async with asyncio.timeout(30):
+                response = await self.llm.agenerate([prompt])
+                
+            reasoned_response = response.generations[0][0].text.strip()
+            
+            # استخراج الإجابة النهائية إذا كانت بصيغة معينة
+            if "Answer:" in reasoned_response:
+                answer_parts = reasoned_response.split("Answer:")
+                final_answer = answer_parts[-1].strip()
+            else:
+                final_answer = reasoned_response
+            
+            # تطبيق معالجة ما بعد التوليد
+            return self._post_process_response(final_answer, query)
+            
+        except Exception as e:
+            logger.error(f"Error in refined response generation: {e}")
+            # استخدام طريقة استخراج مباشرة في حالة الفشل
+            return self._extract_direct_answer(query, context_docs)
+            
+    def _extract_direct_answer(self, query: str, context_docs: List[Dict[str, Any]]) -> str:
+        """استخراج إجابة مباشرة من السياق"""
+        try:
+            # التحقق من لغة الاستعلام
+            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+            
+            # ترتيب المستندات حسب الصلة
+            sorted_docs = sorted(
+                context_docs, 
+                key=lambda x: float(x.get('relevance_score', 0)), 
+                reverse=True
+            )
+            
+            # استخراج أهم المقاطع
+            top_passages = [doc.get('content', '') for doc in sorted_docs[:3]]
+            
+            # تنسيق الرد
+            if is_arabic:
+                return f"""عذراً، لم أتمكن من صياغة إجابة مناسبة، ولكن إليك بعض المعلومات ذات الصلة:
+
+{' '.join(top_passages)}"""
+            else:
+                return f"""I couldn't generate a complete answer, but here's some relevant information:
+
+{' '.join(top_passages)}"""
+                
+        except Exception as e:
+            logger.error(f"Error in direct answer extraction: {e}")
+            # رسالة خطأ بناءً على اللغة
+            return (
+                "عذراً، لم أتمكن من استخراج إجابة مناسبة من المعلومات المتاحة."
+                if is_arabic else 
+                "I apologize, but I couldn't extract a suitable answer from the available information."
+            )
 
     async def _generate_search_queries(self, query: str) -> Dict:
         """Generate search queries using enhanced query processing"""
@@ -919,7 +1106,13 @@ class RAGService:
         # Remove HTML tags
         text = re.sub(r'<[^>]+>', '', text)
         
-        # Clean unwanted marks and symbols
+        # للنصوص العربية، نحافظ على النص كما هو دون معالجة
+        if ArabicTextProcessor.contains_arabic(text):
+            # نزيل فقط المسافات الزائدة
+            text = re.sub(r'\s+', ' ', text)
+            return text.strip()
+        
+        # Clean unwanted marks and symbols (للنصوص غير العربية فقط)
         text = re.sub(r'[.•●■□▪️◾]+(?=\s)', '.', text)  # Standardize bullet points
         text = re.sub(r'["""]', '"', text)  # Standardize quotation marks
         text = re.sub(r'[''`]', "'", text)
@@ -978,39 +1171,18 @@ class RAGService:
         return text
 
     def format_response(self, response: str) -> str:
-        """Format the generated response for better readability"""
+        """تنسيق بسيط للاستجابة"""
         if not response:
             return response
             
-        # Clean up response text
+        # تنظيف النص
         response = response.strip()
+        response = re.sub(r'\n{3,}', '\n\n', response)  # تنظيف الأسطر المتكررة
+        response = re.sub(r' {2,}', ' ', response)  # تنظيف المسافات المتكررة
         
-        # Handle case where response indicates no information was found
-        no_info_patterns = [
-            "لم أتمكن من العثور على معلومات",
-            "لم يتم العثور على معلومات",
-            "لا توجد معلومات كافية",
-            "I couldn't find any",
-            "I don't have enough information",
-            "I couldn't find sufficient information"
-        ]
+        # إزالة علامات الاقتباس
+        response = re.sub(r'\[\d+\]', '', response)
         
-        # If it's a "no information" response but we actually have context docs,
-        # this likely means the system didn't find the answer in context
-        for pattern in no_info_patterns:
-            if pattern in response:
-                # Try to trigger a more thorough search using direct text matching
-                # instead of relying solely on semantic search
-                return False  # Signal that we need to try alternative search
-        
-        # Remove duplicate newlines and extra spaces
-        response = re.sub(r'\n{3,}', '\n\n', response)
-        response = re.sub(r' {2,}', ' ', response)
-        
-        # Ensure proper RTL formatting for Arabic text
-        if any(c for c in response if '\u0600' <= c <= '\u06FF'):
-            response = f"<div dir='rtl'>{response}</div>"
-            
         return response
 
     async def index_document(self, file_path: str, conversation_id: str, metadata: Dict[str, Any] = None) -> Document:

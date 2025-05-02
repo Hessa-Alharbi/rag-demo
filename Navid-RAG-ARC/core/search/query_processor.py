@@ -10,6 +10,7 @@ from langdetect import detect
 from core.llm.factory import ModelFactory
 from core.llm.prompt_templates import COMPLEX_QUERY_PROCESSING_TEMPLATE, QUERY_REFORMULATION_TEMPLATE
 from core.language.arabic_utils import ArabicTextProcessor
+from core.config import get_settings
 
 
 class QueryProcessor:
@@ -29,6 +30,8 @@ class QueryProcessor:
         if not self._initialized:
             async with self._initialize_lock:
                 if not self._initialized:
+                    settings = get_settings()
+                    logger.info(f"Initializing query processor with LLM provider: {settings.LLM_PROVIDER}, model: {settings.LLM_MODEL}")
                     self.llm = ModelFactory.create_llm()
                     self._initialized = True
     
@@ -201,7 +204,7 @@ class QueryProcessor:
         Process a complex query using LLM-based analysis
         
         Args:
-            query: The user query
+            query: User query
             language: Detected language
             
         Returns:
@@ -209,7 +212,23 @@ class QueryProcessor:
         """
         processed_query = self._basic_preprocessing(query)
         
+        # تحقق مما إذا كان الاستعلام باللغة العربية
+        is_arabic = language == 'ar' or ArabicTextProcessor.contains_arabic(query)
+        
+        # إذا كان الاستعلام بالعربية، استخدم _process_simple_query مباشرة لتجنب أخطاء معالجة JSON
+        if is_arabic:
+            return await self._process_simple_query(query, 'ar')
+        
         try:
+            # Log LLM details before using it
+            settings = get_settings()
+            if hasattr(self.llm, 'repo_id'):
+                repo_id = self.llm.repo_id
+                logger.info(f"Using HuggingFace LLM with repo_id: {repo_id}, Settings LLM_MODEL: {settings.LLM_MODEL}")
+            elif hasattr(self.llm, 'model_name'):
+                model_name = self.llm.model_name
+                logger.info(f"Using LLM with model_name: {model_name}, Settings LLM_MODEL: {settings.LLM_MODEL}")
+                
             # Use LLM to analyze complex query
             async with asyncio.timeout(5):  # 5 second timeout
                 prompt = COMPLEX_QUERY_PROCESSING_TEMPLATE.format(query=query)
@@ -269,6 +288,13 @@ class QueryProcessor:
             logger.error(f"Complex query processing error: {e}")
             # Fallback to simple processing
             return await self._process_simple_query(query, language)
+            
+    async def _process_arabic_complex_query(self, query: str, processed_query: str) -> Dict[str, Any]:
+        """
+        هذه الدالة لم تعد مستخدمة. نستخدم الآن _process_simple_query للاستعلامات العربية.
+        """
+        # نستخدم معالجة بسيطة فقط
+        return await self._process_simple_query(query, 'ar')
     
     async def generate_search_variations(self, query: str, max_variations: int = 3) -> List[str]:
         """
