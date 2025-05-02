@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, Form, Body, Depends
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, Form, Body, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
@@ -16,6 +16,7 @@ import shutil
 from apps.auth.routes import get_current_user
 from core.db import get_session
 from sqlmodel import Session
+from apps.chat.schemas import ConversationRead
 
 from apps.admin.routes import router as admin_router
 from apps.auth.routes import router as auth_router
@@ -383,6 +384,31 @@ async def handle_query(
     
     # Pass the request to the chat_query function
     return await chat_query(payload, session, current_user)
+
+# Add a direct endpoint for recent conversations
+@app.get("/recent-conversations", response_model=List[ConversationRead])
+async def get_recent_conversations_route(
+    current_user = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    limit: int = 10
+):
+    """
+    Top-level route for getting recent conversations that forwards to the chat router handler
+    """
+    from apps.chat.routes import get_recent_conversations
+    return await get_recent_conversations(current_user, session, limit)
+
+# Add a direct endpoint for clearing all conversations
+@app.delete("/clear-conversations", status_code=status.HTTP_200_OK)
+async def clear_all_conversations_route(
+    current_user = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """
+    Top-level route for clearing all conversations that forwards to the chat router handler
+    """
+    from apps.chat.routes import clear_all_conversations
+    return await clear_all_conversations(current_user, session)
 
 
 if __name__ == '__main__':

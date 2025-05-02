@@ -12,7 +12,7 @@ from core.logger import logger
 from core.errors import APIError
 from apps.rag.services import RAGService
 import asyncio
-from apps.rag.models import Document, DocumentStatus
+from apps.rag.models import Document, DocumentStatus, Chunk
 from datetime import datetime
 import sys
 import os
@@ -849,3 +849,262 @@ async def chat_query(
             "chat_history": history,
             "session_id": session_id
         }
+
+@router.get("/recent-conversations", response_model=List[ConversationRead])
+async def get_recent_conversations(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    limit: int = 10
+):
+    """
+    Get the most recent conversations for the current user
+    """
+    # Query for conversations, ordered by update time
+    conversations = session.exec(
+        select(Conversation)
+        .where(Conversation.created_by_id == current_user.id)
+        .order_by(Conversation.updated_at.desc())
+        .limit(limit)
+    ).all()
+    
+    # Enhance response with last message content
+    result = []
+    for conv in conversations:
+        # Get the last message for each conversation
+        last_message = session.exec(
+            select(Message)
+            .where(Message.conversation_id == conv.id)
+            .order_by(Message.created_at.desc())
+            .limit(1)
+        ).first()
+        
+        # Create a dict from the conversation object
+        conv_dict = {
+            "id": conv.id,
+            "title": conv.title,
+            "created_by_id": conv.created_by_id,
+            "created_at": conv.created_at,
+            "updated_at": conv.updated_at,
+            "last_message": None
+        }
+        
+        # Add last message if available
+        if last_message:
+            # Truncate message to a preview
+            preview = last_message.content
+            if len(preview) > 50:
+                preview = preview[:50] + "..."
+            
+            # Add to dict
+            conv_dict["last_message"] = preview
+        
+        # Create a ConversationRead object
+        result.append(ConversationRead(**conv_dict))
+    
+    return result
+
+@router.delete("/{conversation_id}", status_code=status.HTTP_200_OK)
+async def delete_conversation(
+    conversation_id: UUID,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """
+    Delete a conversation and all its messages, attachments, and documents
+    """
+    try:
+        # Verify conversation access
+        conversation = await verify_conversation_access(
+            conversation_id=conversation_id,
+            user_id=current_user.id,
+            session=session
+        )
+        
+        logger.info(f"Deleting conversation {conversation_id} for user {current_user.id}")
+        
+        # 1. Delete all messages in the conversation
+        messages = session.exec(
+            select(Message)
+            .where(Message.conversation_id == conversation_id)
+        ).all()
+        
+        for message in messages:
+            session.delete(message)
+            
+        # 2. Delete all attachments in the conversation
+        attachments = session.exec(
+            select(Attachment)
+            .where(Attachment.conversation_id == conversation_id)
+        ).all()
+        
+        for attachment in attachments:
+            try:
+                # Try to delete the file from disk
+                file_path = attachment.file_path
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            except Exception as e:
+                logger.error(f"Error deleting attachment file: {e}")
+            
+            session.delete(attachment)
+            
+        # 3. Delete all documents associated with the conversation
+        documents = session.exec(
+            select(Document)
+            .where(Document.conversation_id == conversation_id)
+        ).all()
+        
+        for document in documents:
+            try:
+                # Use RAG service to properly delete document from vector store
+                await rag_service.delete_document(document.id, session)
+            except Exception as e:
+                logger.error(f"Error deleting document from vector store: {e}")
+                
+                # Fallback: Just delete from database
+                session.delete(document)
+        
+        # 4. Finally delete the conversation itself
+        session.delete(conversation)
+        
+        # Commit all changes
+        session.commit()
+        
+        return {
+            "status": "success",
+            "message": "Conversation deleted successfully"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error deleting conversation: {e}", exc_info=True)
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete conversation: {str(e)}"
+        )
+
+@router.delete("/clear-conversations", status_code=status.HTTP_200_OK)
+async def clear_all_conversations(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """
+    Delete all conversations for the current user
+    """
+    try:
+        logger.info(f"Clearing all conversations for user {current_user.id}")
+        
+        # Get all user's conversations
+        conversations = session.exec(
+            select(Conversation)
+            .where(Conversation.created_by_id == current_user.id)
+        ).all()
+        
+        if not conversations:
+            return {
+                "status": "success",
+                "message": "No conversations to delete",
+                "deleted_count": 0
+            }
+        
+        total_conversations = len(conversations)
+        deleted_count = 0
+        
+        # Delete each conversation
+        for conversation in conversations:
+            try:
+                # 1. Delete all messages in the conversation
+                messages = session.exec(
+                    select(Message)
+                    .where(Message.conversation_id == conversation.id)
+                ).all()
+                
+                for message in messages:
+                    session.delete(message)
+                
+                # 2. Delete all attachments in the conversation
+                attachments = session.exec(
+                    select(Attachment)
+                    .where(Attachment.conversation_id == conversation.id)
+                ).all()
+                
+                for attachment in attachments:
+                    try:
+                        # Try to delete the file from disk
+                        file_path = attachment.file_path
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                    except Exception as e:
+                        logger.error(f"Error deleting attachment file: {e}")
+                    
+                    session.delete(attachment)
+                
+                # 3. Find all documents associated with the conversation
+                documents = session.exec(
+                    select(Document)
+                    .where(Document.conversation_id == conversation.id)
+                ).all()
+                
+                for document in documents:
+                    try:
+                        # 3.1 First, find and delete all chunks related to this document
+                        # هذه الخطوة ضرورية قبل حذف المستند بسبب قيد NOT NULL على حقل document_id
+                        chunks = session.exec(
+                            select(Chunk)
+                            .where(Chunk.document_id == document.id)
+                        ).all()
+                        
+                        for chunk in chunks:
+                            session.delete(chunk)
+                        
+                        # Flush session to ensure chunk deletions are processed
+                        session.flush()
+                        
+                        # 3.2 Then use RAG service to properly delete document from vector store
+                        await rag_service.delete_document(document.id, session)
+                    except Exception as e:
+                        logger.error(f"Error deleting document from vector store: {e}", exc_info=True)
+                        
+                        try:
+                            # Fallback: Just delete chunks and document from database directly
+                            chunks = session.exec(
+                                select(Chunk)
+                                .where(Chunk.document_id == document.id)
+                            ).all()
+                            
+                            for chunk in chunks:
+                                session.delete(chunk)
+                            
+                            # Delete the document after chunks
+                            session.delete(document)
+                        except Exception as inner_e:
+                            logger.error(f"Error during fallback document deletion: {inner_e}", exc_info=True)
+                
+                # 4. Finally delete the conversation itself
+                session.delete(conversation)
+                deleted_count += 1
+                
+                # Commit after each conversation to avoid large transaction
+                session.commit()
+                
+            except Exception as e:
+                logger.error(f"Error deleting conversation {conversation.id}: {e}", exc_info=True)
+                # Rollback the current conversation's transaction
+                session.rollback()
+                # Continue with next conversation instead of failing completely
+                continue
+        
+        return {
+            "status": "success",
+            "message": f"Successfully deleted {deleted_count} conversations out of {total_conversations}",
+            "deleted_count": deleted_count,
+            "total_count": total_conversations
+        }
+        
+    except Exception as e:
+        logger.error(f"Error clearing conversations: {e}", exc_info=True)
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to clear conversations: {str(e)}"
+        )

@@ -19,6 +19,14 @@ export interface ChatRequest {
   temperature?: number;
 }
 
+export interface ChatMessage {
+  id: string;
+  content: string;
+  role: "user" | "assistant" | "system";
+  created_at: string;
+  context_docs?: Array<any>;
+}
+
 export interface ChatResponse {
   id: string;
   content?: string;
@@ -38,6 +46,14 @@ export interface ChatResponse {
     };
     score?: number;
   }>;
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  last_message?: string;
 }
 
 /**
@@ -131,5 +147,69 @@ export async function sendChatMessage(conversationId: string, message: string): 
       role: "assistant",
       context_docs: []
     };
+  }
+}
+
+/**
+ * Fetch recent conversations from the API
+ */
+export async function getRecentConversations(): Promise<Conversation[]> {
+  try {
+    console.log('Fetching recent conversations');
+    
+    // تصحيح مسار API - استخدام المسار الصحيح بدون مقطع chat/
+    const response = await apiClient.get<Conversation[]>('/recent-conversations');
+    
+    console.log('Recent conversations response:', response.status);
+    
+    if (response.data) {
+      console.log('Recent conversations data:', response.data);
+      return response.data;
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error fetching recent conversations:', error);
+    return [];
+  }
+}
+
+/**
+ * Delete a conversation
+ */
+export async function deleteConversation(conversationId: string): Promise<boolean> {
+  try {
+    console.log(`Deleting conversation ${conversationId}`);
+    // استدعاء نقطة النهاية لحذف المحادثة
+    const response = await apiClient.delete(`/chat/${conversationId}`);
+    console.log('Delete conversation response:', response.status);
+    return response.status === 200 || response.status === 204;
+  } catch (error) {
+    console.error('Error deleting conversation:', error);
+    return false;
+  }
+}
+
+/**
+ * Clear all conversations
+ */
+export async function clearAllConversations(): Promise<{ success: boolean; count?: number }> {
+  try {
+    console.log('Clearing all conversations');
+    // استدعاء نقطة النهاية لحذف جميع المحادثات
+    const response = await apiClient.delete('/clear-conversations');
+    console.log('Clear conversations response:', response.status);
+    
+    if (response.status === 200 || response.status === 204) {
+      return { 
+        success: true,
+        count: response.data?.deleted_count || 0
+      };
+    }
+    
+    return { success: false };
+  } catch (error) {
+    console.error('Error clearing conversations:', error);
+    return { success: false };
   }
 }
