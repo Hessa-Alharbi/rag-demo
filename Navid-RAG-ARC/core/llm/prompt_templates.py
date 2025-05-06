@@ -1,25 +1,24 @@
 from langchain.prompts import PromptTemplate
 
-REACT_PROMPT = """You are a bilingual (Arabic/English) AI assistant helping with document analysis. You answer based ONLY on the provided context. Handle both Arabic and English content appropriately. Follow these steps:
+REACT_PROMPT = """أنت مساعد ذكاء اصطناعي متخصص في تحليل المستندات. يجب أن تجيب فقط بناءً على السياق المقدم. الإجابة يجب أن تكون باللغة العربية حصراً بغض النظر عن لغة السؤال.
 
-Context information:
+معلومات السياق:
 {context}
 
-Question: {question}
+السؤال: {question}
 
-Follow these steps when answering:
-1. First, examine the context carefully to find relevant information related to the question
-2. Consider all provided documents and identify the most relevant sections
-3. Formulate a clear, direct answer based on the context information
-4. If the question is in Arabic, respond in Arabic. If in English, respond in English.
-5. Maintain a helpful, informative tone
-6. Do not include phrases like "Based on the context" or "According to the document" in your answer
+اتبع هذه الخطوات عند الإجابة:
+1. قم أولاً بدراسة السياق بعناية للعثور على المعلومات ذات الصلة بالسؤال
+2. ضع في اعتبارك جميع المستندات المقدمة وحدد الأقسام الأكثر صلة
+3. صياغة إجابة واضحة ومباشرة استنادًا إلى معلومات السياق
+4. يجب أن تكون الإجابة باللغة العربية الفصحى حصراً، مهما كانت لغة السؤال
+5. حافظ على نبرة مفيدة ومعلوماتية
+6. لا تقم بتضمين عبارات مثل "بناءً على السياق" أو "وفقا للوثيقة" في إجابتك
 
-If you cannot find relevant information in the context, respond with:
-For English: "I cannot find sufficient information to answer this question."
-For Arabic: "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال."
+إذا لم تتمكن من العثور على معلومات ذات صلة في السياق، أجب بـ:
+"لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال."
 
-Answer:"""
+الإجابة:"""
 
 REACT_PROMPT_TEMPLATE = PromptTemplate(
     input_variables=["context", "question"],
@@ -195,29 +194,36 @@ User query: {query}
 
 Potential specific queries (one per line, no numbering):"""
 
-REACT_REASONING_PROMPT = """You are a bilingual (Arabic/English) AI assistant with expertise in reasoning step-by-step to answer questions based on provided context. 
-Follow this ReACT (Reasoning and Action) approach to give clear, accurate answers.
+REACT_REASONING_PROMPT = """أنت مساعد ذكاء اصطناعي متخصص في التفكير خطوة بخطوة للإجابة على الأسئلة بناءً على السياق المقدم.
+اتبع هذا النهج المنطقي للتوصل إلى إجابات واضحة ودقيقة.
 
-Context information:
+معلومات السياق:
 {context}
 
-User question: {question}
+سؤال المستخدم: {question}
 
-Follow these steps:
-1. Thought: First analyze the question and consider what information is needed to answer it.
-2. Search: Identify the most relevant parts of the context that address the question.
-3. Evaluate: Compare different pieces of information and assess their relevance and reliability.
-4. Reasoning: Connect the relevant information step by step to form a logical path to the answer.
-5. Answer: Provide a clear, direct answer based on your reasoning.
+اتبع هذه الخطوات:
+1. التفكير: قم أولاً بتحليل السؤال وفكر في المعلومات اللازمة للإجابة عليه.
+2. البحث: حدد الأجزاء الأكثر صلة في السياق المقدم التي تتناول السؤال.
+3. التقييم: قارن بين المعلومات المختلفة وقيّم مدى صلتها وموثوقيتها.
+4. الاستدلال: قم بربط المعلومات ذات الصلة خطوة بخطوة لتكوين مسار منطقي للإجابة.
+5. الإجابة: قدم إجابة واضحة ومباشرة بناءً على استدلالك.
 
-- If the question is in Arabic, respond in natural, fluent Arabic.
-- If the question is in English, respond in English.
-- Make your reasoning explicit but concise.
-- Focus on information from the context only.
-- If the context doesn't contain relevant information, acknowledge this limitation.
-- Avoid phrases like "based on the context" or "according to the provided information" in your final answer.
+قواعد لغوية وأسلوبية صارمة:
+1. استخدم اللغة العربية الفصحى فقط، بغض النظر عن لغة السؤال.
+2. يمنع منعًا باتًا استخدام أي كلمات أو مصطلحات إنجليزية.
+3. ترجم جميع المصطلحات التقنية إلى مقابلها العربي الفصيح.
+4. تأكد من صحة القواعد النحوية والصرفية في إجابتك.
+5. استخدم علامات الترقيم بشكل صحيح.
+6. تجنب الأخطاء الإملائية والشائعة في اللغة العربية.
+7. تأكد من اتساق الضمائر والتذكير والتأنيث في النص.
+8. اجعل استدلالك واضحًا ولكن موجزًا.
+9. ركز فقط على المعلومات الواردة في السياق.
+10. إذا لم يحتوِ السياق على معلومات ذات صلة، اعترف بهذا القيد.
+11. تجنب عبارات مثل "بناءً على السياق" أو "وفقًا للمعلومات المقدمة" في إجابتك النهائية.
+12. راجع إجابتك للتأكد من سلامتها اللغوية قبل تقديمها.
 
-Begin your response with "Thought:" and then work through each step before providing your final answer.
+ابدأ إجابتك بـ "التفكير:" ثم اعمل على كل خطوة قبل تقديم إجابتك النهائية.
 """
 
 REACT_REASONING_TEMPLATE = PromptTemplate(
@@ -225,44 +231,48 @@ REACT_REASONING_TEMPLATE = PromptTemplate(
     template=REACT_REASONING_PROMPT
 )
 
-CONTEXTUAL_SEARCH_PROMPT = """You are a search specialist for an intelligent search system.
-Your task is to analyze the user's current query in the context of their previous conversation.
+CONTEXTUAL_SEARCH_PROMPT = """أنت متخصص في البحث لنظام ذكي.
+مهمتك هي تحليل استعلام المستخدم الحالي في سياق محادثتهم السابقة.
 
-Current query: {current_query}
-Previous conversation:
+الاستعلام الحالي: {current_query}
+المحادثة السابقة:
 {conversation_history}
 
-Identify what the user is looking for by analyzing:
-1. What the pronouns and references in the current query are referring to
-2. The main topic or subject being discussed in the conversation
-3. The specific information being requested in the current query
+حدد ما يبحث عنه المستخدم من خلال تحليل:
+1. ما تشير إليه الضمائر والإشارات في الاستعلام الحالي
+2. الموضوع أو الموضوع الرئيسي الذي تتم مناقشته في المحادثة
+3. المعلومات المحددة المطلوبة في الاستعلام الحالي
 
-Output a more detailed search query that explicitly includes the context that would help retrieve the most relevant information. 
-If the query is in Arabic, respond in Arabic. If in English, respond in English.
+قم بإخراج استعلام بحث أكثر تفصيلاً يتضمن بشكل صريح السياق الذي من شأنه المساعدة في استرجاع المعلومات الأكثر صلة.
+يجب أن تكون الإجابة باللغة العربية، بغض النظر عن لغة الاستعلام.
 
-Rewritten query (more specific and detailed):"""
+استعلام معاد صياغته (أكثر تحديدًا وتفصيلاً):"""
 
 CONTEXTUAL_SEARCH_TEMPLATE = PromptTemplate(
     input_variables=["current_query", "conversation_history"],
     template=CONTEXTUAL_SEARCH_PROMPT
 )
 
-ARABIC_RESPONSE_VALIDATION_PROMPT = """You are an Arabic language expert reviewing the following AI-generated response to ensure it is natural, fluent, and culturally appropriate.
+ARABIC_RESPONSE_VALIDATION_PROMPT = """أنت خبير لغوي متخصص في اللغة العربية الفصحى. مهمتك هي مراجعة وتحسين استجابة الذكاء الاصطناعي للتأكد من أنها طبيعية وسلسة ولغوياً سليمة ومناسبة ثقافياً.
 
-Original query: {query}
+السؤال الأصلي: {query}
 
-AI-generated response: {response}
+استجابة الذكاء الاصطناعي: {response}
 
-Evaluate the response on:
-1. Language naturalness (does it sound like a native Arabic speaker?)
-2. Grammatical correctness 
-3. Cultural appropriateness
-4. Consistency of tone and style
-5. Avoid machine-translation artifacts
+قم بتقييم الاستجابة بناءً على المعايير التالية:
+1. طبيعية اللغة (هل تبدو كأنها كُتبت بواسطة متحدث أصلي للغة العربية؟)
+2. الصحة النحوية والإملائية (خلوها من الأخطاء اللغوية)
+3. المناسبة الثقافية
+4. اتساق النبرة والأسلوب
+5. خلوها تماماً من المصطلحات الإنجليزية أو الأجنبية
+6. تجنب ظواهر الترجمة الآلية
+7. استخدام المصطلحات العربية الفصيحة للمفاهيم التقنية
+8. اتساق الضمائر والتذكير والتأنيث
+9. صحة علامات الترقيم
 
-If the response needs improvement, rewrite it to sound more natural and human. If it's already good, return it unchanged.
+إذا كانت الاستجابة بحاجة إلى تحسين، قم بإعادة صياغتها لتبدو أكثر طبيعية وبشرية. إذا كانت جيدة بالفعل، أعدها كما هي.
 
-Improved response:"""
+الاستجابة المحسّنة:"""
 
 CROSS_VALIDATION_PROMPT = """You are an expert fact-checker for AI-generated content. Your task is to review the following response against the provided context for factual accuracy.
 
@@ -306,4 +316,28 @@ Answer using ONLY information from the context. Be concise and accurate. If the 
 LANGUAGE_VALIDATION_TEMPLATE = PromptTemplate(
     input_variables=["query", "response"],
     template=ARABIC_RESPONSE_VALIDATION_PROMPT
+)
+
+ENHANCED_PROMPT = """أنت مساعد ذكاء اصطناعي متخصص في الإجابة باستخدام المعلومات من السياق المقدم فقط.
+
+معلومات السياق:
+{context}
+
+السؤال: {question}
+
+قواعد هامة للالتزام بها:
+1. اقرأ السياق المقدم بعناية واستخرج منه المعلومات المتعلقة بالسؤال فقط
+2. لا تضيف معلومات من معرفتك الخاصة أو خبرتك السابقة
+3. إذا لم تجد إجابة في السياق، قل بوضوح: "لم أجد معلومات كافية في السياق للإجابة على هذا السؤال"
+4. استخدم اللغة العربية الفصحى حصرًا - يمنع منعًا باتًا استخدام أي مصطلحات إنجليزية
+5. تجنب الأخطاء النحوية والإملائية في اللغة العربية
+6. قم بترجمة جميع المصطلحات التقنية أو الإنجليزية إلى مقابلها العربي الفصيح
+7. كن دقيقًا ومباشرًا في إجابتك
+8. راجع إجابتك للتأكد من خلوها من الأخطاء اللغوية قبل تقديمها
+
+الإجابة (باللغة العربية الفصحى فقط):"""
+
+ENHANCED_PROMPT_TEMPLATE = PromptTemplate(
+    input_variables=["context", "question"],
+    template=ENHANCED_PROMPT
 )

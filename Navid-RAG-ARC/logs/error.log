@@ -834,3 +834,688 @@ b.send(JSON.stringify(a));c.classList.add("feedback-hidden");d.classList.remove(
 2025-04-30 15:03:51.376 | ERROR    | main:initialize_chat:319 | خطأ أثناء فهرسة المستند: "'endpoint_url'"
 2025-04-30 22:11:55.877 | ERROR    | core.vector_store.manager:initialize:58 | Failed to initialize vector store: The paging file is too small for this operation to complete. (os error 1455)
 2025-04-30 22:11:55.877 | ERROR    | main:initialize_chat:319 | خطأ أثناء فهرسة المستند: The paging file is too small for this operation to complete. (os error 1455)
+2025-05-05 22:46:36.797 | ERROR    | apps.rag.services:generate_response:666 | Error generating response: 'PromptTemplate' object is not subscriptable
+2025-05-05 22:46:36.852 | ERROR    | apps.rag.services:generate_response:667 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 579, in generate_response
+    prompt_template = self._select_specialized_prompt(query, context_docs)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 708, in _select_specialized_prompt
+    logger.debug(f"REACT_PROMPT_TEMPLATE content preview: {REACT_PROMPT_TEMPLATE[:100]}...")
+                                                           ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+TypeError: 'PromptTemplate' object is not subscriptable
+
+2025-05-05 22:46:36.858 | ERROR    | apps.rag.services:generate_response:670 | !!!! RETURNING ERROR: عذرًا، حدث خطأ أثناء معالجة الاستعلام. يرجى التأكد من تشغيل نموذج اللغة.
+2025-05-05 23:08:03.246 | ERROR    | apps.rag.services:generate_response:689 | Error generating response: type object 'datetime.datetime' has no attribute 'datetime'
+2025-05-05 23:08:03.251 | ERROR    | apps.rag.services:generate_response:690 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 511, in generate_response
+    cache_key = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + '_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
+                                                                                            ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-05-05 23:08:03.251 | ERROR    | apps.rag.services:generate_response:693 | !!!! RETURNING ERROR: عذرًا، حدث خطأ أثناء معالجة الاستعلام. يرجى التأكد من تشغيل نموذج اللغة.
+2025-05-05 23:08:48.779 | ERROR    | apps.rag.services:generate_response:689 | Error generating response: type object 'datetime.datetime' has no attribute 'datetime'
+2025-05-05 23:08:48.784 | ERROR    | apps.rag.services:generate_response:690 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 511, in generate_response
+    cache_key = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + '_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
+                                                                                            ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-05-05 23:08:48.784 | ERROR    | apps.rag.services:generate_response:693 | !!!! RETURNING ERROR: عذرًا، حدث خطأ أثناء معالجة الاستعلام. يرجى التأكد من تشغيل نموذج اللغة.
+2025-05-05 23:09:01.312 | ERROR    | apps.rag.services:generate_response:689 | Error generating response: type object 'datetime.datetime' has no attribute 'datetime'
+2025-05-05 23:09:01.322 | ERROR    | apps.rag.services:generate_response:690 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 511, in generate_response
+    cache_key = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + '_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
+                                                                                            ^^^^^^^^^^^^^^^^^
+AttributeError: type object 'datetime.datetime' has no attribute 'datetime'
+
+2025-05-05 23:09:01.322 | ERROR    | apps.rag.services:generate_response:693 | !!!! RETURNING ERROR: عذرًا، حدث خطأ أثناء معالجة الاستعلام. يرجى التأكد من تشغيل نموذج اللغة.
+2025-05-05 23:19:11.321 | ERROR    | apps.rag.services:generate_response:689 | Error generating response: module 'datetime' has no attribute 'now'
+2025-05-05 23:19:11.371 | ERROR    | apps.rag.services:generate_response:690 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 511, in generate_response
+    cache_key = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + '_' + datetime.now().strftime('%Y%m%d%H%M%S%f')
+                                                                                            ^^^^^^^^^^^^
+AttributeError: module 'datetime' has no attribute 'now'
+
+2025-05-05 23:19:11.384 | ERROR    | apps.rag.services:generate_response:693 | !!!! RETURNING ERROR: عذرًا، حدث خطأ أثناء معالجة الاستعلام. يرجى التأكد من تشغيل نموذج اللغة.
+2025-05-06 07:53:41.215 | ERROR    | apps.rag.services:generate_response:552 | ---> النموذج يعيد استجابة فارغة!
+2025-05-06 07:53:41.215 | ERROR    | apps.rag.services:generate_response:560 | نموذج اللغة غير متاح: نموذج اللغة يعيد استجابة فارغة
+2025-05-06 07:53:41.226 | ERROR    | apps.rag.services:generate_response:561 | ---> Error details: نموذج اللغة يعيد استجابة فارغة
+2025-05-06 07:53:41.265 | ERROR    | apps.rag.services:generate_response:562 | ---> Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 553, in generate_response
+    raise RuntimeError("نموذج اللغة يعيد استجابة فارغة")
+RuntimeError: نموذج اللغة يعيد استجابة فارغة
+
+2025-05-06 07:53:41.273 | ERROR    | apps.rag.services:generate_response:567 | !!!! RETURNING UNIQUE ERROR FROM GENERATE_RESPONSE: UNIQUE-GENERATE-ERROR-ABC1234: النموذج اللغوي غير متوفر حالياً في وظيفة generate_response! [رمز الخطأ: GEN-ERROR-56789]
+2025-05-06 07:59:33.427 | ERROR    | apps.rag.services:generate_response:574 | ---> النموذج يعيد استجابة فارغة!
+2025-05-06 07:59:33.430 | ERROR    | apps.rag.services:generate_response:582 | نموذج اللغة غير متاح: نموذج اللغة يعيد استجابة فارغة
+2025-05-06 07:59:33.430 | ERROR    | apps.rag.services:generate_response:583 | ---> Error details: نموذج اللغة يعيد استجابة فارغة
+2025-05-06 07:59:33.433 | ERROR    | apps.rag.services:generate_response:584 | ---> Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 575, in generate_response
+    raise RuntimeError("نموذج اللغة يعيد استجابة فارغة")
+RuntimeError: نموذج اللغة يعيد استجابة فارغة
+
+2025-05-06 07:59:33.433 | ERROR    | apps.rag.services:generate_response:589 | !!!! RETURNING UNIQUE ERROR FROM GENERATE_RESPONSE: UNIQUE-GENERATE-ERROR-ABC1234: النموذج اللغوي غير متوفر حالياً في وظيفة generate_response! [رمز الخطأ: GEN-ERROR-56789]
+2025-05-06 10:43:02.474 | ERROR    | core.llm.factory:create_llm:190 | ERROR CREATING HUGGINGFACE ENDPOINT: 1 validation error for HuggingFaceEndpoint
+  Value error, Could not authenticate with huggingface_hub. Please check your API token. [type=value_error, input_value={'endpoint_url': 'https:/...s.huggingface.cloud/v1'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/value_error
+2025-05-06 10:43:02.553 | ERROR    | core.llm.factory:create_llm:191 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 179, in create_llm
+    endpoint = HuggingFaceEndpoint(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\load\serializable.py", line 130, in __init__
+    super().__init__(*args, **kwargs)
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 214, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for HuggingFaceEndpoint
+  Value error, Could not authenticate with huggingface_hub. Please check your API token. [type=value_error, input_value={'endpoint_url': 'https:/...s.huggingface.cloud/v1'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/value_error
+
+2025-05-06 10:43:02.553 | ERROR    | core.llm.factory:create_llm:199 | CRITICAL ERROR in create_llm: 1 validation error for HuggingFaceEndpoint
+  Value error, Could not authenticate with huggingface_hub. Please check your API token. [type=value_error, input_value={'endpoint_url': 'https:/...s.huggingface.cloud/v1'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/value_error
+2025-05-06 10:43:02.556 | ERROR    | core.llm.factory:create_llm:200 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 179, in create_llm
+    endpoint = HuggingFaceEndpoint(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\load\serializable.py", line 130, in __init__
+    super().__init__(*args, **kwargs)
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 214, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for HuggingFaceEndpoint
+  Value error, Could not authenticate with huggingface_hub. Please check your API token. [type=value_error, input_value={'endpoint_url': 'https:/...s.huggingface.cloud/v1'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/value_error
+
+2025-05-06 10:44:46.406 | ERROR    | core.llm.factory:create_llm:190 | ERROR CREATING HUGGINGFACE ENDPOINT: 1 validation error for HuggingFaceEndpoint
+  Value error, Could not authenticate with huggingface_hub. Please check your API token. [type=value_error, input_value={'endpoint_url': 'https:/...s.huggingface.cloud/v1'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/value_error
+2025-05-06 10:44:46.411 | ERROR    | core.llm.factory:create_llm:191 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 179, in create_llm
+    endpoint = HuggingFaceEndpoint(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\load\serializable.py", line 130, in __init__
+    super().__init__(*args, **kwargs)
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 214, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for HuggingFaceEndpoint
+  Value error, Could not authenticate with huggingface_hub. Please check your API token. [type=value_error, input_value={'endpoint_url': 'https:/...s.huggingface.cloud/v1'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/value_error
+
+2025-05-06 10:44:46.413 | ERROR    | core.llm.factory:create_llm:199 | CRITICAL ERROR in create_llm: 1 validation error for HuggingFaceEndpoint
+  Value error, Could not authenticate with huggingface_hub. Please check your API token. [type=value_error, input_value={'endpoint_url': 'https:/...s.huggingface.cloud/v1'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/value_error
+2025-05-06 10:44:46.417 | ERROR    | core.llm.factory:create_llm:200 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 179, in create_llm
+    endpoint = HuggingFaceEndpoint(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\load\serializable.py", line 130, in __init__
+    super().__init__(*args, **kwargs)
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 214, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for HuggingFaceEndpoint
+  Value error, Could not authenticate with huggingface_hub. Please check your API token. [type=value_error, input_value={'endpoint_url': 'https:/...s.huggingface.cloud/v1'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/value_error
+
+2025-05-06 11:46:30.734 | ERROR    | apps.chat.routes:process_query:544 | نموذج اللغة غير متاح: 402, message='Payment Required', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-05-06 11:46:30.734 | ERROR    | apps.chat.routes:process_query:565 | Error processing query: 503: نموذج اللغة غير متاح: 402, message='Payment Required', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-05-06 11:58:43.356 | ERROR    | apps.rag.services:initialize:102 | Error initializing RAG service: 'RAGService' object has no attribute '_create_vector_store'
+2025-05-06 11:58:43.364 | ERROR    | apps.rag.services:initialize:103 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 78, in initialize
+    self.vector_store = self._create_vector_store()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'RAGService' object has no attribute '_create_vector_store'
+
+2025-05-06 11:58:43.364 | ERROR    | apps.chat.routes:upload_attachments:418 | Error in file upload: 'RAGService' object has no attribute '_create_vector_store'
+2025-05-06 11:58:43.370 | ERROR    | core.middleware:error_handler:11 | Unhandled error: APIError.__init__() got an unexpected keyword argument 'error'
+2025-05-06 12:04:23.775 | ERROR    | apps.chat.routes:process_query:544 | نموذج اللغة غير متاح: 402, message='Payment Required', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-05-06 12:04:23.787 | ERROR    | apps.chat.routes:process_query:565 | Error processing query: 503: نموذج اللغة غير متاح: 402, message='Payment Required', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-05-06 12:04:55.425 | ERROR    | apps.chat.routes:process_query:544 | نموذج اللغة غير متاح: 402, message='Payment Required', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-05-06 12:04:55.426 | ERROR    | apps.chat.routes:process_query:565 | Error processing query: 503: نموذج اللغة غير متاح: 402, message='Payment Required', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-05-06 12:26:33.863 | ERROR    | apps.chat.routes:process_query:582 | نموذج اللغة غير متاح: 402, message='Payment Required', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-05-06 12:26:34.231 | ERROR    | apps.chat.routes:process_query:583 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\chat\routes.py", line 567, in process_query
+    test_response = await asyncio.wait_for(
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\llms.py", line 1229, in agenerate
+    return await self._agenerate_helper(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\llms.py", line 1043, in _agenerate_helper
+    await self._agenerate(
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\llms.py", line 1563, in _agenerate
+    await self._acall(prompt, stop=stop, run_manager=run_manager, **kwargs)
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_huggingface\llms\huggingface_endpoint.py", line 343, in _acall
+    response = await self.async_client.post(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\huggingface_hub\inference\_generated\_async_client.py", line 267, in post
+    return await self._inner_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\huggingface_hub\inference\_generated\_async_client.py", line 358, in _inner_post
+    raise error
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\huggingface_hub\inference\_generated\_async_client.py", line 323, in _inner_post
+    response.raise_for_status()
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\aiohttp\client_reqrep.py", line 1161, in raise_for_status
+    raise ClientResponseError(
+aiohttp.client_exceptions.ClientResponseError: 402, message='Payment Required', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+
+2025-05-06 12:26:34.233 | ERROR    | apps.chat.routes:process_query:604 | Error processing query: 503: نموذج اللغة غير متاح: 402, message='Payment Required', url='https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407'
+2025-05-06 12:38:12.098 | ERROR    | core.llm.factory:create_llm:194 | ERROR CREATING LLM: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:38:12.101 | ERROR    | core.llm.factory:create_llm:195 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 137, in create_llm
+    model.repo_id = "yehia-7b-preview-red"
+    ^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "ChatOpenAI" object has no field "repo_id"
+
+2025-05-06 12:38:12.101 | ERROR    | apps.rag.services:__init__:80 | Failed to initialize RAGService: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:38:19.193 | ERROR    | core.llm.factory:create_llm:194 | ERROR CREATING LLM: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:38:19.196 | ERROR    | core.llm.factory:create_llm:195 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 137, in create_llm
+    model.repo_id = "yehia-7b-preview-red"
+    ^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "ChatOpenAI" object has no field "repo_id"
+
+2025-05-06 12:38:19.197 | ERROR    | apps.rag.services:__init__:80 | Failed to initialize RAGService: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:46:57.994 | ERROR    | apps.rag.services:__init__:109 | Failed to initialize RAGService: cannot access local variable 'asyncio' where it is not associated with a value
+2025-05-06 12:47:18.687 | ERROR    | apps.rag.services:__init__:109 | Failed to initialize RAGService: cannot access local variable 'asyncio' where it is not associated with a value
+2025-05-06 12:47:25.173 | ERROR    | apps.rag.services:__init__:109 | Failed to initialize RAGService: cannot access local variable 'asyncio' where it is not associated with a value
+2025-05-06 12:47:31.599 | ERROR    | apps.rag.services:__init__:109 | Failed to initialize RAGService: cannot access local variable 'asyncio' where it is not associated with a value
+2025-05-06 12:47:37.612 | ERROR    | apps.rag.services:__init__:109 | Failed to initialize RAGService: cannot access local variable 'asyncio' where it is not associated with a value
+2025-05-06 12:47:44.055 | ERROR    | apps.rag.services:__init__:109 | Failed to initialize RAGService: cannot access local variable 'asyncio' where it is not associated with a value
+2025-05-06 12:47:51.706 | ERROR    | apps.rag.services:__init__:109 | Failed to initialize RAGService: cannot access local variable 'asyncio' where it is not associated with a value
+2025-05-06 12:50:40.055 | ERROR    | apps.rag.services:__init__:109 | Failed to initialize RAGService: cannot access local variable 'asyncio' where it is not associated with a value
+2025-05-06 12:51:27.360 | ERROR    | core.llm.factory:create_llm:194 | ERROR CREATING LLM: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:51:27.360 | ERROR    | core.llm.factory:create_llm:195 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 137, in create_llm
+    model.repo_id = "yehia-7b-preview-red"
+    ^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "ChatOpenAI" object has no field "repo_id"
+
+2025-05-06 12:51:27.360 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:51:34.018 | ERROR    | core.llm.factory:create_llm:194 | ERROR CREATING LLM: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:51:34.018 | ERROR    | core.llm.factory:create_llm:195 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 137, in create_llm
+    model.repo_id = "yehia-7b-preview-red"
+    ^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "ChatOpenAI" object has no field "repo_id"
+
+2025-05-06 12:51:34.018 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:51:51.664 | ERROR    | core.llm.factory:create_llm:194 | ERROR CREATING LLM: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:51:51.667 | ERROR    | core.llm.factory:create_llm:195 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 137, in create_llm
+    model.repo_id = "yehia-7b-preview-red"
+    ^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "ChatOpenAI" object has no field "repo_id"
+
+2025-05-06 12:51:51.667 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:51:57.808 | ERROR    | core.llm.factory:create_llm:194 | ERROR CREATING LLM: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:51:57.818 | ERROR    | core.llm.factory:create_llm:195 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 137, in create_llm
+    model.repo_id = "yehia-7b-preview-red"
+    ^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "ChatOpenAI" object has no field "repo_id"
+
+2025-05-06 12:51:57.818 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:52:04.370 | ERROR    | core.llm.factory:create_llm:194 | ERROR CREATING LLM: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:52:04.384 | ERROR    | core.llm.factory:create_llm:195 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 137, in create_llm
+    model.repo_id = "yehia-7b-preview-red"
+    ^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "ChatOpenAI" object has no field "repo_id"
+
+2025-05-06 12:52:04.385 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:52:18.437 | ERROR    | core.llm.factory:create_llm:194 | ERROR CREATING LLM: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:52:18.437 | ERROR    | core.llm.factory:create_llm:195 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 137, in create_llm
+    model.repo_id = "yehia-7b-preview-red"
+    ^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "ChatOpenAI" object has no field "repo_id"
+
+2025-05-06 12:52:18.451 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:52:30.305 | ERROR    | core.llm.factory:create_llm:194 | ERROR CREATING LLM: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:52:30.306 | ERROR    | core.llm.factory:create_llm:195 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\llm\factory.py", line 137, in create_llm
+    model.repo_id = "yehia-7b-preview-red"
+    ^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "ChatOpenAI" object has no field "repo_id"
+
+2025-05-06 12:52:30.307 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "ChatOpenAI" object has no field "repo_id"
+2025-05-06 12:52:53.862 | ERROR    | apps.rag.services:__init__:79 | WRONG MODEL CREATED: tgi
+2025-05-06 12:57:27.568 | ERROR    | apps.rag.services:initialize:149 | Error testing LLM: Error code: 401 - {'error': {'message': 'Incorrect API key provided: hf_yevce*************************JAUj. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-05-06 12:57:27.574 | ERROR    | apps.rag.services:initialize:150 | Will try to recreate LLM...
+2025-05-06 12:58:41.976 | ERROR    | apps.chat.routes:process_query:678 | نموذج اللغة غير متاح: Error code: 401 - {'error': {'message': 'Incorrect API key provided: hf_yevce*************************JAUj. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-05-06 12:58:42.350 | ERROR    | apps.chat.routes:process_query:679 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\chat\routes.py", line 663, in process_query
+    test_response = await asyncio.wait_for(
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 863, in agenerate
+    raise exceptions[0]
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 1033, in _agenerate_with_cache
+    result = await self._agenerate(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_openai\chat_models\base.py", line 1157, in _agenerate
+    response = await self.async_client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 2002, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1767, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1461, in request
+    return await self._request(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1562, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: hf_yevce*************************JAUj. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+
+2025-05-06 12:58:42.358 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'error'"
+2025-05-06 13:05:50.195 | ERROR    | apps.rag.services:initialize:170 | Error initializing RAG service: cannot access local variable 'ModelFactory' where it is not associated with a value
+2025-05-06 13:05:50.200 | ERROR    | apps.rag.services:initialize:171 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 129, in initialize
+    self.llm = ModelFactory.create_llm()
+               ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'ModelFactory' where it is not associated with a value
+
+2025-05-06 13:05:50.200 | ERROR    | apps.chat.routes:process_query:700 | Error processing query: cannot access local variable 'ModelFactory' where it is not associated with a value
+2025-05-06 13:09:02.081 | ERROR    | apps.rag.services:initialize:170 | Error initializing RAG service: cannot access local variable 'ModelFactory' where it is not associated with a value
+2025-05-06 13:09:02.097 | ERROR    | apps.rag.services:initialize:171 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 129, in initialize
+    self.llm = ModelFactory.create_llm()
+               ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'ModelFactory' where it is not associated with a value
+
+2025-05-06 13:09:02.097 | ERROR    | apps.chat.routes:upload_attachments:487 | Error in file upload: cannot access local variable 'ModelFactory' where it is not associated with a value
+2025-05-06 13:09:02.113 | ERROR    | core.middleware:error_handler:11 | Unhandled error: APIError.__init__() got an unexpected keyword argument 'error'
+2025-05-06 13:12:42.553 | ERROR    | apps.rag.services:initialize:154 | Error testing LLM: Error code: 401 - {'error': {'message': 'Incorrect API key provided: yevcemHd**********************JAUj. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-05-06 13:12:42.555 | ERROR    | apps.rag.services:initialize:155 | Will try to recreate LLM...
+2025-05-06 13:13:45.949 | ERROR    | apps.chat.routes:process_query:678 | نموذج اللغة غير متاح: Error code: 401 - {'error': {'message': 'Incorrect API key provided: yevcemHd**********************JAUj. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-05-06 13:13:45.975 | ERROR    | apps.chat.routes:process_query:679 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\chat\routes.py", line 663, in process_query
+    test_response = await asyncio.wait_for(
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 863, in agenerate
+    raise exceptions[0]
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 1033, in _agenerate_with_cache
+    result = await self._agenerate(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_openai\chat_models\base.py", line 1157, in _agenerate
+    response = await self.async_client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 2002, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1767, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1461, in request
+    return await self._request(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1562, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: yevcemHd**********************JAUj. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+
+2025-05-06 13:13:45.977 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'error'"
+2025-05-06 13:18:27.239 | ERROR    | apps.rag.services:initialize:154 | Error testing LLM: Error code: 401 - {'error': {'message': 'Incorrect API key provided: dummy-key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-05-06 13:18:27.242 | ERROR    | apps.rag.services:initialize:155 | Will try to recreate LLM...
+2025-05-06 13:19:14.455 | ERROR    | apps.chat.routes:process_query:678 | نموذج اللغة غير متاح: Error code: 401 - {'error': {'message': 'Incorrect API key provided: dummy-key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+2025-05-06 13:19:14.490 | ERROR    | apps.chat.routes:process_query:679 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\chat\routes.py", line 663, in process_query
+    test_response = await asyncio.wait_for(
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 863, in agenerate
+    raise exceptions[0]
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 1033, in _agenerate_with_cache
+    result = await self._agenerate(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_openai\chat_models\base.py", line 1157, in _agenerate
+    response = await self.async_client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 2002, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1767, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1461, in request
+    return await self._request(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1562, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: dummy-key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+
+2025-05-06 13:19:14.503 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'error'"
+2025-05-06 13:46:10.115 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "DummyChatModel" object has no field "model_name"
+2025-05-06 13:46:23.758 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "DummyChatModel" object has no field "model_name"
+2025-05-06 13:46:46.305 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "DummyChatModel" object has no field "model_name"
+2025-05-06 13:46:53.587 | ERROR    | apps.rag.services:__init__:92 | Failed to initialize RAGService: "DummyChatModel" object has no field "model_name"
+2025-05-06 14:09:09.760 | ERROR    | main:lifespan:97 | Failed to start application: name 'RAGService' is not defined
+2025-05-06 14:09:17.872 | ERROR    | main:lifespan:97 | Failed to start application: name 'RAGService' is not defined
+2025-05-06 14:09:35.758 | ERROR    | main:lifespan:97 | Failed to start application: name 'RAGService' is not defined
+2025-05-06 14:10:39.612 | ERROR    | apps.rag.services:initialize:167 | Error testing LLM: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+2025-05-06 14:10:39.612 | ERROR    | apps.rag.services:initialize:168 | Will try to recreate LLM...
+2025-05-06 14:11:15.132 | ERROR    | apps.rag.services:initialize:167 | Error testing LLM: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+2025-05-06 14:11:15.135 | ERROR    | apps.rag.services:initialize:168 | Will try to recreate LLM...
+2025-05-06 14:12:53.586 | ERROR    | apps.rag.services:initialize:167 | Error testing LLM: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+2025-05-06 14:12:53.593 | ERROR    | apps.rag.services:initialize:168 | Will try to recreate LLM...
+2025-05-06 14:14:04.897 | ERROR    | apps.rag.services:initialize:167 | Error testing LLM: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+2025-05-06 14:14:04.915 | ERROR    | apps.rag.services:initialize:168 | Will try to recreate LLM...
+2025-05-06 14:14:55.013 | ERROR    | apps.chat.routes:process_query:652 | نموذج اللغة غير متاح: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+2025-05-06 14:14:55.046 | ERROR    | apps.chat.routes:process_query:653 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\chat\routes.py", line 637, in process_query
+    test_response = await asyncio.wait_for(
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 863, in agenerate
+    raise exceptions[0]
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 1033, in _agenerate_with_cache
+    result = await self._agenerate(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_openai\chat_models\base.py", line 1157, in _agenerate
+    response = await self.async_client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 2002, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1767, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1461, in request
+    return await self._request(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1562, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.BadRequestError: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+
+2025-05-06 14:14:55.063 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'error'"
+2025-05-06 14:26:44.021 | ERROR    | apps.chat.routes:process_query:652 | نموذج اللغة غير متاح: 
+2025-05-06 14:26:44.336 | ERROR    | apps.chat.routes:process_query:653 | Traceback (most recent call last):
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 825, in agenerate
+    results = await asyncio.gather(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 1033, in _agenerate_with_cache
+    result = await self._agenerate(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_openai\chat_models\base.py", line 1157, in _agenerate
+    response = await self.async_client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 2002, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1767, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1461, in request
+    return await self._request(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1500, in _request
+    response = await self._client.send(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py", line 1629, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py", line 1657, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py", line 1694, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_client.py", line 1730, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpx\_transports\default.py", line 394, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpcore\_async\connection_pool.py", line 256, in handle_async_request
+    raise exc from None
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpcore\_async\connection_pool.py", line 236, in handle_async_request
+    response = await connection.handle_async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpcore\_async\connection.py", line 103, in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpcore\_async\http11.py", line 136, in handle_async_request
+    raise exc
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpcore\_async\http11.py", line 106, in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpcore\_async\http11.py", line 177, in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpcore\_async\http11.py", line 217, in _receive_event
+    data = await self._network_stream.read(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\httpcore\_backends\anyio.py", line 35, in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\streams\tls.py", line 204, in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\streams\tls.py", line 147, in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\anyio\_backends\_asyncio.py", line 1246, in receive
+    await self._protocol.read_event.wait()
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\locks.py", line 212, in wait
+    await fut
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\chat\routes.py", line 637, in process_query
+    test_response = await asyncio.wait_for(
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 519, in wait_for
+    async with timeouts.timeout(timeout):
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+
+2025-05-06 14:26:44.349 | ERROR    | apps.chat.routes:process_query:674 | Error processing query: 503: نموذج اللغة غير متاح: 
+2025-05-06 14:34:16.994 | ERROR    | apps.chat.routes:chat_query:914 | Error processing query: name 'conversation_id' is not defined
+2025-05-06 14:37:25.185 | ERROR    | apps.chat.routes:chat_query:914 | Error processing query: name 'conversation_id' is not defined
+2025-05-06 14:41:59.069 | ERROR    | main:initialize_chat:362 | Failed to create LLM: 'NoneType' object has no attribute 'llm'
+2025-05-06 14:41:59.069 | ERROR    | main:initialize_chat:438 | خطأ أثناء فهرسة المستند: name 'traceback' is not defined
+2025-05-06 14:46:28.904 | ERROR    | apps.rag.services:initialize:168 | Error testing LLM: 
+2025-05-06 14:46:28.904 | ERROR    | apps.rag.services:initialize:169 | Will try to recreate LLM...
+2025-05-06 14:48:22.088 | ERROR    | main:initialize_chat:376 | Failed to create LLM: cannot access local variable 'rag_service' where it is not associated with a value
+2025-05-06 14:48:22.094 | ERROR    | main:initialize_chat:377 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\main.py", line 311, in initialize_chat
+    if not rag_service:
+           ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'rag_service' where it is not associated with a value
+
+2025-05-06 14:48:48.545 | ERROR    | main:initialize_chat:452 | خطأ أثناء فهرسة المستند: cannot access local variable 'rag_service' where it is not associated with a value
+2025-05-06 14:55:33.934 | ERROR    | main:initialize_chat:383 | Failed to create LLM: cannot access local variable 'rag_service' where it is not associated with a value
+2025-05-06 14:55:33.939 | ERROR    | main:initialize_chat:384 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\main.py", line 318, in initialize_chat
+    if not rag_service:
+           ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'rag_service' where it is not associated with a value
+
+2025-05-06 14:56:08.541 | ERROR    | main:initialize_chat:485 | خطأ أثناء فهرسة المستند: cannot access local variable 'rag_service' where it is not associated with a value
+2025-05-06 15:09:10.958 | ERROR    | main:initialize_chat:383 | Failed to create LLM: cannot access local variable 'rag_service' where it is not associated with a value
+2025-05-06 15:09:10.973 | ERROR    | main:initialize_chat:384 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\main.py", line 318, in initialize_chat
+    if not rag_service:
+           ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'rag_service' where it is not associated with a value
+
+2025-05-06 15:09:22.034 | ERROR    | main:initialize_chat:485 | خطأ أثناء فهرسة المستند: cannot access local variable 'rag_service' where it is not associated with a value
+2025-05-06 15:51:23.739 | ERROR    | core.search.reranker:initialize:41 | Error initializing reranker: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:51:23.752 | ERROR    | core.search.reranker:initialize:42 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\search\reranker.py", line 35, in initialize
+    model_name = settings.reranker_model_name
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 891, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'reranker_model_name'
+
+2025-05-06 15:51:23.753 | ERROR    | apps.rag.services:initialize:191 | Error initializing RAG service: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:51:23.760 | ERROR    | apps.rag.services:initialize:192 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 149, in initialize
+    await self.reranker.initialize()
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\search\reranker.py", line 35, in initialize
+    model_name = settings.reranker_model_name
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 891, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'reranker_model_name'
+
+2025-05-06 15:51:23.761 | ERROR    | main:lifespan:99 | Failed to start application: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:51:55.113 | ERROR    | core.search.reranker:initialize:41 | Error initializing reranker: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:51:55.128 | ERROR    | core.search.reranker:initialize:42 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\search\reranker.py", line 35, in initialize
+    model_name = settings.reranker_model_name
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 891, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'reranker_model_name'
+
+2025-05-06 15:51:55.128 | ERROR    | apps.rag.services:initialize:191 | Error initializing RAG service: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:51:55.128 | ERROR    | apps.rag.services:initialize:192 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 149, in initialize
+    await self.reranker.initialize()
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\search\reranker.py", line 35, in initialize
+    model_name = settings.reranker_model_name
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 891, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'reranker_model_name'
+
+2025-05-06 15:51:55.137 | ERROR    | main:lifespan:99 | Failed to start application: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:52:30.059 | ERROR    | core.search.reranker:initialize:41 | Error initializing reranker: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:52:30.074 | ERROR    | core.search.reranker:initialize:42 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\search\reranker.py", line 35, in initialize
+    model_name = settings.reranker_model_name
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 891, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'reranker_model_name'
+
+2025-05-06 15:52:30.076 | ERROR    | apps.rag.services:initialize:191 | Error initializing RAG service: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:52:30.082 | ERROR    | apps.rag.services:initialize:192 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 149, in initialize
+    await self.reranker.initialize()
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\search\reranker.py", line 35, in initialize
+    model_name = settings.reranker_model_name
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 891, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'reranker_model_name'
+
+2025-05-06 15:52:30.084 | ERROR    | main:lifespan:99 | Failed to start application: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:53:24.324 | ERROR    | core.search.reranker:initialize:41 | Error initializing reranker: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:53:24.339 | ERROR    | core.search.reranker:initialize:42 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\search\reranker.py", line 35, in initialize
+    model_name = settings.reranker_model_name
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 891, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'reranker_model_name'
+
+2025-05-06 15:53:24.340 | ERROR    | apps.rag.services:initialize:191 | Error initializing RAG service: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 15:53:24.346 | ERROR    | apps.rag.services:initialize:192 | Stack trace: Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\rag\services.py", line 149, in initialize
+    await self.reranker.initialize()
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\core\search\reranker.py", line 35, in initialize
+    model_name = settings.reranker_model_name
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 891, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Settings' object has no attribute 'reranker_model_name'
+
+2025-05-06 15:53:24.347 | ERROR    | main:lifespan:99 | Failed to start application: 'Settings' object has no attribute 'reranker_model_name'
+2025-05-06 16:05:31.569 | ERROR    | main:initialize_chat:383 | Failed to create LLM: cannot access local variable 'rag_service' where it is not associated with a value
+2025-05-06 16:05:31.584 | ERROR    | main:initialize_chat:384 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\main.py", line 318, in initialize_chat
+    if not rag_service:
+           ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'rag_service' where it is not associated with a value
+
+2025-05-06 16:05:43.787 | ERROR    | main:initialize_chat:485 | خطأ أثناء فهرسة المستند: cannot access local variable 'rag_service' where it is not associated with a value
+2025-05-06 16:18:18.779 | ERROR    | main:initialize_chat:489 | Error adding vectors to store: 'VectorStoreManager' object has no attribute 'add_texts'
+2025-05-06 16:18:18.814 | ERROR    | main:initialize_chat:490 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\main.py", line 458, in initialize_chat
+    vector_ids = await vector_store.add_texts(texts, metadatas)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'VectorStoreManager' object has no attribute 'add_texts'
+
+2025-05-06 16:23:44.233 | ERROR    | main:initialize_chat:489 | Error adding vectors to store: "Document" object has no field "vector_count"
+2025-05-06 16:23:44.443 | ERROR    | main:initialize_chat:490 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\main.py", line 464, in initialize_chat
+    doc.vector_count = len(vector_ids)
+    ^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\sqlmodel\main.py", line 824, in __setattr__
+    super().__setattr__(name, value)
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py", line 925, in __setattr__
+    raise ValueError(f'"{self.__class__.__name__}" object has no field "{name}"')
+ValueError: "Document" object has no field "vector_count"
+
+2025-05-06 16:41:25.531 | ERROR    | apps.chat.routes:chat_query:848 | نموذج اللغة غير متاح: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+2025-05-06 16:41:25.643 | ERROR    | apps.chat.routes:chat_query:849 | Traceback (most recent call last):
+  File "C:\Users\hessa\RAG improvement\Navid-RAG-Team\Navid-RAG-ARC\apps\chat\routes.py", line 833, in chat_query
+    test_response = await asyncio.wait_for(
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 863, in agenerate
+    raise exceptions[0]
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_core\language_models\chat_models.py", line 1033, in _agenerate_with_cache
+    result = await self._agenerate(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\langchain_openai\chat_models\base.py", line 1157, in _agenerate
+    response = await self.async_client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\resources\chat\completions\completions.py", line 2002, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1767, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1461, in request
+    return await self._request(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hessa\AppData\Local\Programs\Python\Python312\Lib\site-packages\openai\_base_client.py", line 1562, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.BadRequestError: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+
+2025-05-06 16:41:25.672 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'error'"

@@ -2,6 +2,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from loguru import logger
+from typing import List, Dict, Any
+from fastapi import Request, Body
+from fastapi.responses import JSONResponse
 
 from apps.users.models import User
 from apps.auth.routes import get_current_user
@@ -9,10 +12,14 @@ from core.db import get_session
 from .models import Document
 from .services import RAGService
 from apps.chat.models import Conversation
+from core.config import get_settings
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 rag_service = RAGService()
 
+# دالة لإعادة كائن RAGService الذي تم تعريفه مسبقًا
+def get_rag_service():
+    return rag_service
 
 @router.delete("/{document_id}", status_code=status.HTTP_200_OK)
 async def delete_document(
@@ -300,4 +307,82 @@ async def check_document_vectors(
         raise HTTPException(
             status_code=500,
             detail=f"Error checking document vectors: {str(e)}"
+        )
+
+@router.post("/chat")
+async def chat(
+    request: Request,
+    messages: List[Dict[str, str]],
+    rag_service: RAGService = Depends(get_rag_service),
+) -> Dict[str, Any]:
+    try:
+        logger.info(f"Received chat request with {len(messages)} messages")
+        settings = get_settings()
+        
+        # التحقق من النموذج قبل المتابعة
+        if "yehia-7b-preview-red" not in settings.LLM_MODEL.lower():
+            error_msg = f"Only yehia-7b-preview-red model is supported. Current model: {settings.LLM_MODEL}"
+            logger.error(error_msg)
+            return JSONResponse(
+                status_code=400,
+                content={"error": error_msg}
+            )
+        
+        # التحقق من الرابط قبل المتابعة
+        if "api-inference.huggingface.co" in settings.LLM_BASE_URL:
+            error_msg = "Invalid endpoint URL detected. Default HuggingFace inference API is not supported."
+            logger.error(error_msg)
+            return JSONResponse(
+                status_code=400,
+                content={"error": error_msg}
+            )
+            
+        # استمرار المنطق الأصلي
+        await rag_service.initialize()
+        
+        # ... existing code ...
+    except Exception as e:
+        logger.error(f"Error processing chat: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Internal server error: {str(e)}"}
+        )
+
+@router.post("/query")
+async def query(
+    request: Request,
+    query_text: str = Body(..., embed=True),
+    rag_service: RAGService = Depends(get_rag_service),
+) -> Dict[str, Any]:
+    try:
+        logger.info(f"Received query: {query_text}")
+        settings = get_settings()
+        
+        # التحقق من النموذج قبل المتابعة
+        if "yehia-7b-preview-red" not in settings.LLM_MODEL.lower():
+            error_msg = f"Only yehia-7b-preview-red model is supported. Current model: {settings.LLM_MODEL}"
+            logger.error(error_msg)
+            return JSONResponse(
+                status_code=400,
+                content={"error": error_msg}
+            )
+        
+        # التحقق من الرابط قبل المتابعة
+        if "api-inference.huggingface.co" in settings.LLM_BASE_URL:
+            error_msg = "Invalid endpoint URL detected. Default HuggingFace inference API is not supported."
+            logger.error(error_msg)
+            return JSONResponse(
+                status_code=400,
+                content={"error": error_msg}
+            )
+        
+        # استمرار المنطق الأصلي
+        await rag_service.initialize()
+        
+        # ... existing code ...
+    except Exception as e:
+        logger.error(f"Error processing query: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Internal server error: {str(e)}"}
         )

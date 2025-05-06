@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
+import apiClient, { getBaseUrl } from '@/lib/api-client'
 
 // Define the User interface based on the backend response
 interface User {
@@ -56,9 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Set up axios instance with authentication headers
   const api = axios.create({
-    baseURL: process.env.NODE_ENV === 'production' 
-      ? '/api' 
-      : 'https://4161-2a02-cb80-4271-93aa-dc2c-9eea-2d8e-7325.ngrok-free.app/api',
+    baseURL: getBaseUrl(),
   })
 
   // Add request interceptor to include token in requests
@@ -86,9 +85,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             throw new Error("No refresh token")
           }
           
-          // Try to refresh the token using direct API call
+          // Try to refresh the token using our API client
           const response = await axios.post(
-            `${api.defaults.baseURL}/auth/refresh`, 
+            `${getBaseUrl()}/auth/refresh`, 
             { refresh_token: refreshToken }
           )
           
@@ -121,7 +120,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       console.log('Fetching user data...')
-      const response = await api.get("/auth/me")
+      // Use our API client instead
+      const response = await apiClient.get("/auth/me")
       
       if (response.data) {
         console.log('User data received:', response.data)
@@ -148,12 +148,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Attempting login for user:', username)
       
-      // Direct API call for login
+      // Use URLSearchParams for form data
       const formData = new URLSearchParams()
       formData.append('username', username)
       formData.append('password', password)
       
-      const response = await axios.post(`${api.defaults.baseURL}/auth/login`, formData, {
+      // Use direct axios call with proper content type for login
+      const response = await axios.post(`${getBaseUrl()}/auth/login`, formData.toString(), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },

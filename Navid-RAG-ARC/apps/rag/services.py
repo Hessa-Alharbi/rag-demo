@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Union, Tuple
 from uuid import UUID
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document as LangchainDocument
@@ -17,6 +17,7 @@ from sqlmodel import Session, select
 from langdetect import detect
 import asyncio
 import re
+import traceback  # تأكد من استيراد traceback
 from core.vector_store.singleton import VectorStoreSingleton
 from core.chunking.semantic_chunker import SemanticChunker
 from core.search.reranker import QueryResultReranker
@@ -25,6 +26,20 @@ from core.language.arabic_utils import ArabicTextProcessor
 from langchain_community.document_loaders import PyPDFLoader
 from core.db import get_session_context
 import os
+import traceback
+from pydantic import ValidationError
+from langchain.chains.question_answering import load_qa_chain
+from langchain.prompts.prompt import PromptTemplate
+from langchain.callbacks.base import BaseCallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.prompts.chat import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
+from langchain_core.messages import SystemMessage
+from apps.users.models import User
+# from apps.documents.models import Collection  # Comment out this import to fix the ModuleNotFoundError
 
 class RAGService:
     def __init__(self):
@@ -32,6 +47,28 @@ class RAGService:
             self.settings = get_settings()
             self._initialize_lock = asyncio.Lock()
             self._initialized = False
+            
+            logger.info(f"======= INITIALIZING RAG SERVICE (CONSTRUCTOR) =======")
+            logger.info(f"LLM Provider: {self.settings.LLM_PROVIDER}")
+            logger.info(f"LLM Model: {self.settings.LLM_MODEL}")
+            logger.info(f"Base URL: {self.settings.LLM_BASE_URL}")
+            logger.info(f"HF Token available: {bool(self.settings.HF_TOKEN)}")
+            
+            # تحقق من أن النموذج المستخدم هو yehia-7b-preview-red فقط
+            if "yehia-7b-preview-red" not in self.settings.LLM_MODEL.lower():
+                error_msg = f"Only yehia-7b-preview-red model is supported. Got: {self.settings.LLM_MODEL}"
+                logger.error(f"CONFIGURATION ERROR: {error_msg}")
+                # تصحيح الإعداد
+                self.settings.LLM_MODEL = "yehia-7b-preview-red"
+                logger.info(f"Forced model to: {self.settings.LLM_MODEL}")
+            
+            # منع استخدام api-inference.huggingface.co
+            if "api-inference.huggingface.co" in self.settings.LLM_BASE_URL:
+                error_msg = "Invalid endpoint URL or default HuggingFace inference API detected. Must use custom endpoint."
+                logger.error(f"CONFIGURATION ERROR: {error_msg}")
+                # تصحيح الرابط
+                self.settings.LLM_BASE_URL = "https://ijt42iqbf30i3nly.us-east4.gcp.endpoints.huggingface.cloud/v1"
+                logger.info(f"Forced endpoint URL to: {self.settings.LLM_BASE_URL}")
             
             # Initialize enhanced semantic chunker instead of basic text splitter
             self.semantic_chunker = SemanticChunker(
@@ -46,22 +83,106 @@ class RAGService:
             self.reranker = QueryResultReranker()
             
             # Initialize LLM
+            logger.info("Creating LLM instances using ModelFactory...")
             self.llm = ModelFactory.create_llm()
-            self.chat_model = ModelFactory.create_llm()
+            self.chat_model = self.llm
+            
+            # تحقق من النموذج بعد الإنشاء
+            model_name = getattr(self.llm, 'model_name', '') or getattr(self.llm, 'repo_id', '') or self.settings.LLM_MODEL
+            if "yehia-7b-preview-red" not in str(model_name).lower():
+                logger.error(f"WRONG MODEL CREATED: {model_name}")
+                # إعادة إنشاء النموذج
+                self.llm = ModelFactory.create_llm()
+                self.chat_model = ModelFactory.create_llm()
+                logger.info("Recreated LLM instances with correct model")
+            
+            # تم إزالة اختبار LLM المتزامن من constructor لتجنب مشاكل مع event loop
+            # سنقوم باختبار LLM في دالة initialize المتزامنة بدلاً من ذلك
+            logger.info(f"LLM instances created, testing will be done in async initialize method")
+            
+            logger.info(f"RAG Service constructor completed successfully")
             
         except Exception as e:
             logger.error(f"Failed to initialize RAGService: {e}", exc_info=True)
             raise RuntimeError(f"Failed to initialize RAGService: {str(e)}")
 
     async def initialize(self):
-        """Initialize global vector store and reranker"""
+        """Initialize the RAG service if not already initialized"""
         if not self._initialized:
             async with self._initialize_lock:
                 if not self._initialized:
-                    await VectorStoreSingleton.get_instance()
-                    await self.reranker.initialize()
-                    await self.query_processor.initialize()
-                    self._initialized = True
+                    # Get settings
+                    settings = get_settings()
+                    
+                    # Log startup information
+                    logger.info(f"==== INITIALIZING RAG SERVICE ====")
+                    logger.info(f"LLM Provider: {settings.LLM_PROVIDER}")
+                    logger.info(f"LLM Model: {settings.LLM_MODEL}")
+                    logger.info(f"Vector Store Provider: {settings.VECTOR_STORE_PROVIDER}")
+                    
+                    # Validate that only yehia-7b-preview-red model is being used
+                    if "yehia-7b-preview-red" not in settings.LLM_MODEL.lower():
+                        logger.error(f"CONFIGURATION ERROR: Only yehia-7b-preview-red model is supported. Found: {settings.LLM_MODEL}")
+                        raise RuntimeError(f"Unsupported model in configuration: {settings.LLM_MODEL}. Only yehia-7b-preview-red is allowed.")
+                                    
+                    try:
+                        # Create vector store connection first
+                        self.vector_store = await VectorStoreSingleton.get_instance()
+                        
+                        # Initialize services
+                        await VectorStoreSingleton.get_instance()
+                        
+                        # Initialize query processor and reranker
+                        self.query_processor = QueryProcessor()
+                        await self.query_processor.initialize()
+                        
+                        self.reranker = QueryResultReranker()
+                        await self.reranker.initialize()
+                        
+                        # Create LLM and verify it's yehia-7b-preview-red
+                        logger.info("Creating LLM instances using ModelFactory...")
+                        self.llm = ModelFactory.create_llm()
+                        self.chat_model = self.llm
+                        
+                        # اختبار متزامن للتأكد من عمل النموذج
+                        logger.info("Directly testing LLM with a simple prompt...")
+                        try:
+                            # إعادة استخدام نفس طريقة إنشاء النموذج التي تم استخدامها سابقاً
+                            # بدلاً من استيراد ModelFactory هنا، نستخدم المستورد على مستوى النطاق العام للوحدة
+                            
+                            # اختبار النموذج
+                            test_response = await asyncio.wait_for(
+                                self.llm.agenerate(["اختبار النموذج"], max_tokens=10),
+                                timeout=5.0
+                            )
+                            
+                            if test_response and test_response.generations and len(test_response.generations[0]) > 0:
+                                logger.info(f"LLM test successful: {test_response.generations[0][0].text}")
+                            else:
+                                logger.error("LLM test failed - no generations returned")
+                                # إعادة إنشاء النموذج
+                                self.llm = ModelFactory.create_llm()
+                                self.chat_model = ModelFactory.create_llm()
+                                logger.info("Recreated LLM instances after test failure")
+                        except Exception as e:
+                            logger.error(f"Error testing LLM: {e}")
+                            logger.error(f"Will try to recreate LLM...")
+                            # محاولة إنشاء النموذج مرة أخرى
+                            self.llm = ModelFactory.create_llm()
+                            self.chat_model = ModelFactory.create_llm()
+                        
+                        # Initialize chunker
+                        self.semantic_chunker = SemanticChunker()
+                        
+                        # Set initialized flag
+                        self._initialized = True
+                        logger.info("RAG service initialized successfully with yehia-7b-preview-red model")
+                        
+                    except Exception as e:
+                        logger.error(f"Error initializing RAG service: {e}")
+                        logger.error(f"Stack trace: {traceback.format_exc()}")
+                        # Re-raise to show the error
+                        raise
 
     async def extract_file_content(self, file_path: str) -> str:
         """Extract text content from different file types"""
@@ -498,92 +619,224 @@ class RAGService:
     ) -> str:
         """توليد استجابة بناءً على السياق المقدم"""
         try:
+            logger.info(f"====== GENERATE_RESPONSE START ======")
+            logger.info(f"Query: {query}")
+            logger.info(f"Context docs count: {len(context_docs)}")
+            logger.info(f"History available: {bool(conversation_history)}")
+            
             # الحصول على إعدادات النموذج
             settings = get_settings()
             logger.info(f"Using LLM provider: {settings.LLM_PROVIDER}, model: {settings.LLM_MODEL}")
+            logger.info(f"Base URL: {settings.LLM_BASE_URL}")
             
             # التحقق من وجود مستندات سياق
             if not context_docs:
-                # التحقق من اللغة وإرجاع رسالة مناسبة
-                is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
-                return (
-                    "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال."
-                    if is_arabic else
-                    "I couldn't find sufficient information to answer this question."
+                # دائمًا إرجاع رسالة باللغة العربية بغض النظر عن لغة السؤال
+                logger.warning("No context documents provided!")
+                return "لم أتمكن من العثور على معلومات كافية للإجابة على هذا السؤال."
+
+            # التحقق من أن نموذج اللغة متاح قبل المتابعة - تحقق صارم
+            llm_available = False
+            llm_error = None
+            logger.info(f"---> Verifying LLM availability with test prompt...")
+            try:
+                # إرسال استعلام بسيط للتحقق من أن النموذج يعمل
+                test_prompt = "هل أنت متاح؟"
+                logger.info(f"---> Sending test prompt: '{test_prompt}'")
+                
+                test_response = await asyncio.wait_for(
+                    self.llm.agenerate([test_prompt], max_tokens=10),
+                    timeout=3.0
                 )
+                logger.info(f"---> Test response received: {test_response}")
+                
+                if not test_response.generations or not test_response.generations[0]:
+                    logger.error(f"---> Test response has no generations")
+                    raise RuntimeError("نموذج اللغة غير متوفر حاليًا")
+                
+                llm_available = True
+                logger.info(f"---> LLM is available and working")
+                logger.info(f"---> Test response text: {test_response.generations[0][0].text}")
+            except Exception as e:
+                llm_error = str(e)
+                logger.error(f"نموذج اللغة غير متاح: {e}")
+                logger.error(f"---> Error details: {str(e)}")
+                logger.error(f"---> Stack trace: {traceback.format_exc()}")
+                
+                # بدلاً من إعادة رسالة خطأ منسقة، سنقوم برفع استثناء صريح
+                error_message = f"نموذج اللغة غير متوفر. الخطأ الأصلي: {llm_error}"
+                logger.error(f"!!!! RAISING EXCEPTION: {error_message}")
+                raise RuntimeError(error_message)
+
+            # فحص نهائي - التأكد من توفر النموذج
+            if not llm_available:
+                error_message = "عذرًا، نموذج اللغة غير متوفر حاليًا. يرجى التحقق من إعدادات النظام."
+                logger.error(f"!!!! RAISING EXCEPTION: {error_message}")
+                raise RuntimeError(error_message)
 
             # معالجة وتحسين السياق
+            logger.info(f"Prioritizing and organizing context documents...")
             optimized_contexts = self._prioritize_and_organize_contexts(context_docs, query)
+            logger.info(f"Optimized contexts count: {len(optimized_contexts)}")
+            
             formatted_context = self._format_context(optimized_contexts)
+            logger.info(f"Formatted context length: {len(formatted_context)} chars")
+            logger.debug(f"Formatted context preview: {formatted_context[:200]}...")
             
             # إضافة سجل المحادثة إذا كان متاحًا
             history_context = ""
             if conversation_history:
-                history_context = "\nPrevious conversation:\n" + "\n".join(
+                logger.info(f"Adding conversation history ({len(conversation_history)} messages)...")
+                history_context = "\nالمحادثة السابقة:\n" + "\n".join(
                     f"{msg['role']}: {msg['content']}"
                     for msg in conversation_history[-3:]  # آخر 3 رسائل
                 )
+                logger.debug(f"History context: {history_context}")
             
             # الحصول على قالب المطالبة المناسب
+            logger.info(f"Selecting prompt template...")
             prompt_template = self._select_specialized_prompt(query, context_docs)
             
             # إنشاء مطالبة كاملة مع السياق والتاريخ
+            logger.info(f"Creating complete prompt...")
             prompt = prompt_template.format(
                 context=formatted_context + history_context,
                 question=query
             )
             
-            # التحقق من اللغة العربية وإضافة تعليمات مناسبة
-            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
-            if is_arabic:
-                arabic_instruction = "IMPORTANT: This question is in Arabic. You must answer in Arabic language only.\n\n"
-                prompt = arabic_instruction + prompt
+            # إضافة تعليمات صريحة للإجابة باللغة العربية فقط
+            logger.info(f"Adding Arabic-only instruction...")
+            arabic_instruction = "هام: يجب أن تكون إجابتك باللغة العربية فقط مهما كانت لغة السؤال.\n\n"
+            prompt = arabic_instruction + prompt
             
-            # توليد الاستجابة مع مهلة زمنية محددة
-            async with asyncio.timeout(30):  # مهلة 30 ثانية
-                response = await self.llm.agenerate([prompt])
-                raw_response = response.generations[0][0].text.strip()
+            logger.info(f"Final prompt length: {len(prompt)} chars")
+            logger.debug(f"Final prompt preview: {prompt[:200]}...")
+            
+            # توليد الاستجابة مع مهلة زمنية محددة والإعدادات المطلوبة
+            logger.info(f"Generating response with LLM...")
+            try:
+                async with asyncio.timeout(30):  # مهلة 30 ثانية
+                    logger.info(f"Calling LLM.agenerate with max_tokens=500...")
+                    response = await self.llm.agenerate(
+                        [prompt],
+                        max_tokens=500,
+                        stream=True
+                    )
+                    logger.info(f"LLM response received: {response}")
+                    
+                    if not response.generations:
+                        logger.error("Response has no generations!")
+                        return "عذرًا، حدث خطأ أثناء توليد الإجابة. يرجى المحاولة مرة أخرى."
+                        
+                    raw_response = response.generations[0][0].text.strip()
+                    logger.info(f"Raw response length: {len(raw_response)} chars")
+                    logger.debug(f"Raw response: {raw_response}")
+                    
+                    # التأكد من أن الإجابة بالعربية
+                    if not self._is_arabic_text(raw_response):
+                        logger.warning("Response was not in Arabic, regenerating")
+                        # إذا لم تكن الإجابة بالعربية، نعيد توليدها مع تعليمات أكثر وضوحًا
+                        enhanced_prompt = prompt + "\n\nيجب أن تكون إجابتك باللغة العربية فقط. لا تستخدم أي لغة أخرى."
+                        logger.info("Calling LLM again with enhanced Arabic instructions...")
+                        response = await self.llm.agenerate(
+                            [enhanced_prompt],
+                            max_tokens=500,
+                            stream=True
+                        )
+                        raw_response = response.generations[0][0].text.strip()
+                        logger.info(f"Regenerated raw response length: {len(raw_response)} chars")
+                        logger.debug(f"Regenerated raw response: {raw_response}")
+                    
+                    # استخراج الإجابة النهائية إذا لزم الأمر
+                    if "Answer:" in raw_response:
+                        logger.info("Extracting answer part after 'Answer:'")
+                        answer_parts = raw_response.split("Answer:")
+                        raw_response = answer_parts[-1].strip()
+                    
+                    if "الإجابة:" in raw_response:
+                        logger.info("Extracting answer part after 'الإجابة:'")
+                        answer_parts = raw_response.split("الإجابة:")
+                        raw_response = answer_parts[-1].strip()
+                    
+                    # تطبيق معالجة ما بعد التوليد
+                    logger.info("Post-processing response...")
+                    processed_response = self._post_process_response(raw_response, query)
+                    
+                    # التحقق من جودة الاستجابة
+                    logger.info("Validating response quality...")
+                    if not self._validate_response_quality(processed_response, query):
+                        logger.info("Response quality insufficient, attempting refinement")
+                        refined_response = await self._generate_refined_response(query, context_docs)
+                        logger.info(f"Refined response generated: {refined_response[:100]}...")
+                        return refined_response
+                    
+                    logger.info(f"====== GENERATE_RESPONSE COMPLETE ======")
+                    logger.info(f"Final response length: {len(processed_response)} chars")
+                    logger.debug(f"Final response: {processed_response}")
+                    return processed_response
+            except asyncio.TimeoutError:
+                logger.error("Response generation timed out")
+                error_message = "أعتذر، لقد استغرقت العملية وقتًا طويلًا. يرجى المحاولة مرة أخرى."
+                logger.error(f"!!!! RAISING EXCEPTION: {error_message}")
+                raise RuntimeError(error_message)
                 
-                # استخراج الإجابة النهائية إذا لزم الأمر
-                if "Answer:" in raw_response:
-                    answer_parts = raw_response.split("Answer:")
-                    raw_response = answer_parts[-1].strip()
-                
-                # تطبيق معالجة ما بعد التوليد
-                processed_response = self._post_process_response(raw_response, query)
-                
-                # التحقق من جودة الاستجابة
-                if not self._validate_response_quality(processed_response, query):
-                    logger.info("Response quality insufficient, attempting refinement")
-                    return await self._generate_refined_response(query, context_docs)
-                
-                return processed_response
-
-        except asyncio.TimeoutError:
-            logger.error("Response generation timed out")
-            # إرجاع رسالة خطأ مناسبة للغة
-            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
-            return (
-                "أعتذر، لقد استغرقت العملية وقتًا طويلًا. يرجى المحاولة مرة أخرى."
-                if is_arabic else 
-                "I apologize, but I'm having trouble generating a response right now. Please try again."
-            )
         except Exception as e:
             logger.error(f"Error generating response: {e}")
-            # إرجاع رسالة خطأ مناسبة للغة
-            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
-            return (
-                "أعتذر، لقد حدث خطأ أثناء معالجة سؤالك."
-                if is_arabic else 
-                "I apologize, but I encountered an error while processing your question."
-            )
+            logger.error(f"Stack trace: {traceback.format_exc()}")
+            # بدلاً من إرجاع رسالة خطأ، نقوم برفع الاستثناء للتعامل معه على مستوى أعلى
+            raise RuntimeError(f"Error generating response: {str(e)}")
+
+    def _is_arabic_text(self, text: str) -> bool:
+        """التحقق من أن النص عربي بنسبة عالية"""
+        if not text:
+            return False
+        
+        # عد الأحرف العربية
+        arabic_chars = sum(1 for c in text if '\u0600' <= c <= '\u06FF')
+        
+        # عد أحرف التشكيل
+        diacritics = sum(1 for c in text if '\u064B' <= c <= '\u065F')
+        
+        # عد الحروف اللاتينية
+        latin_chars = sum(1 for c in text if 'a' <= c.lower() <= 'z')
+        
+        # طول النص بدون المسافات
+        non_space_length = sum(1 for c in text if not c.isspace())
+        
+        if non_space_length == 0:
+            return False
+        
+        # نسبة الأحرف العربية
+        arabic_ratio = (arabic_chars - diacritics) / non_space_length
+        
+        # نسبة الحروف اللاتينية
+        latin_ratio = latin_chars / non_space_length
+        
+        # اختبار صارم: يجب أن تكون النسبة العربية عالية والنسبة اللاتينية منخفضة
+        return arabic_ratio > 0.75 and latin_ratio < 0.15
 
     def _select_specialized_prompt(self, query: str, context_docs: List[Dict[str, Any]]):
         """Select the most appropriate prompt template based on query type and language"""
         from core.llm.prompt_templates import REACT_PROMPT_TEMPLATE
         
         # استخدام قالب REACT_PROMPT_TEMPLATE الافتراضي لجميع الاستعلامات
-        logger.info("Using default REACT_PROMPT_TEMPLATE")
+        logger.info("Using default REACT_PROMPT_TEMPLATE - This is the only template currently in use")
+        
+        # تسجيل محتوى القالب بطريقة آمنة
+        try:
+            template_content = str(REACT_PROMPT_TEMPLATE)
+            logger.debug(f"REACT_PROMPT_TEMPLATE preview: {template_content[:100] if len(template_content) > 100 else template_content}...")
+        except Exception as e:
+            logger.error(f"Error accessing template content: {e}")
+        
+        # إضافة تسجيل لمحتوى المطالبة الكامل لتتبع أفضل
+        try:
+            with open("prompt_template_used.log", "w", encoding="utf-8") as f:
+                f.write(f"Template used for query: {query}\n\n")
+                f.write(str(REACT_PROMPT_TEMPLATE))
+        except Exception as e:
+            logger.error(f"Error writing template to log: {e}")
+        
         return REACT_PROMPT_TEMPLATE
 
     def _prioritize_and_organize_contexts(self, context_docs: List[Dict[str, Any]], query: str) -> List[Dict[str, Any]]:
@@ -738,9 +991,16 @@ class RAGService:
                 question=query
             )
             
+            # إضافة تعليمات صريحة للإجابة باللغة العربية فقط
+            prompt = "هام: يجب أن تكون إجابتك باللغة العربية فقط مهما كانت لغة السؤال.\n\n" + prompt
+            
             # توليد الاستجابة مع مهلة زمنية
             async with asyncio.timeout(30):
-                response = await self.llm.agenerate([prompt])
+                response = await self.llm.agenerate(
+                    [prompt],
+                    max_tokens=500,
+                    stream=True
+                )
                 
             reasoned_response = response.generations[0][0].text.strip()
             
@@ -748,51 +1008,29 @@ class RAGService:
             if "Answer:" in reasoned_response:
                 answer_parts = reasoned_response.split("Answer:")
                 final_answer = answer_parts[-1].strip()
+            elif "الإجابة:" in reasoned_response:
+                answer_parts = reasoned_response.split("الإجابة:")
+                final_answer = answer_parts[-1].strip()
             else:
                 final_answer = reasoned_response
+            
+            # التأكد من أن الإجابة بالعربية
+            if not self._is_arabic_text(final_answer):
+                logger.warning("Refined response was not in Arabic, forcing Arabic")
+                return "لم أتمكن من الحصول على إجابة واضحة. يرجى إعادة صياغة السؤال بطريقة أخرى."
             
             # تطبيق معالجة ما بعد التوليد
             return self._post_process_response(final_answer, query)
             
         except Exception as e:
             logger.error(f"Error in refined response generation: {e}")
-            # استخدام طريقة استخراج مباشرة في حالة الفشل
-            return self._extract_direct_answer(query, context_docs)
-            
+            # تغيير السلوك لمنع استخدام الاستخراج المباشر عندما يكون النموذج غير متاح
+            return "عذرًا، نموذج اللغة غير متوفر حاليًا. يرجى التحقق من إعدادات النظام."
+
     def _extract_direct_answer(self, query: str, context_docs: List[Dict[str, Any]]) -> str:
-        """استخراج إجابة مباشرة من السياق"""
-        try:
-            # التحقق من لغة الاستعلام
-            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
-            
-            # ترتيب المستندات حسب الصلة
-            sorted_docs = sorted(
-                context_docs, 
-                key=lambda x: float(x.get('relevance_score', 0)), 
-                reverse=True
-            )
-            
-            # استخراج أهم المقاطع
-            top_passages = [doc.get('content', '') for doc in sorted_docs[:3]]
-            
-            # تنسيق الرد
-            if is_arabic:
-                return f"""عذراً، لم أتمكن من صياغة إجابة مناسبة، ولكن إليك بعض المعلومات ذات الصلة:
-
-{' '.join(top_passages)}"""
-            else:
-                return f"""I couldn't generate a complete answer, but here's some relevant information:
-
-{' '.join(top_passages)}"""
-                
-        except Exception as e:
-            logger.error(f"Error in direct answer extraction: {e}")
-            # رسالة خطأ بناءً على اللغة
-            return (
-                "عذراً، لم أتمكن من استخراج إجابة مناسبة من المعلومات المتاحة."
-                if is_arabic else 
-                "I apologize, but I couldn't extract a suitable answer from the available information."
-            )
+        """استخراج إجابة مباشرة من أكثر جزء ذي صلة - معطلة الآن وترجع رسالة خطأ فقط"""
+        # تم تعطيل الاستخراج المباشر من المستندات في حالة عدم توفر نموذج اللغة
+        return "عذرًا، النموذج اللغوي غير متوفر حاليًا. يرجى التحقق من إعدادات النظام."
 
     async def _generate_search_queries(self, query: str) -> Dict:
         """Generate search queries using enhanced query processing"""
@@ -894,22 +1132,97 @@ class RAGService:
             # Make sure RAG service is initialized
             await self.initialize()
             
-            logger.info(f"Querying documents for: {query}")
+            logger.info(f"====== QUERY DOCUMENTS START ======")
+            logger.info(f"Query: {query}")
+            logger.info(f"Conversation ID: {conversation_id}")
+            
+            # الكشف عن تشغيل النموذج - التحقق من إعداد REQUIRE_LLM في ملف الإعدادات
+            settings = get_settings()
+            require_llm = getattr(settings, "REQUIRE_LLM", True)  # افتراضياً نطلب أن يكون النموذج متاحًا
+            logger.info(f"REQUIRE_LLM setting: {require_llm}")
+            
+            # اختبار محسن للتحقق من أن نموذج اللغة يعمل
+            llm_available = False
+            llm_error = None
+            logger.info(f"Testing LLM availability...")
+            try:
+                # توثيق بداية فحص النموذج بسجل واضح
+                logger.info(f"---> التحقق من توفر نموذج اللغة، الإعداد REQUIRE_LLM={require_llm}")
+                logger.info(f"---> إعدادات النموذج: {settings.LLM_PROVIDER}/{settings.LLM_MODEL}")
+                logger.info(f"---> رابط النموذج: {settings.LLM_BASE_URL}")
+
+                # تنفيذ اختبار صارم ومباشر
+                test_prompt = "اختبار التوفر فقط"
+                logger.info(f"---> إرسال استعلام اختبار: '{test_prompt}'")
+                
+                test_response = await asyncio.wait_for(
+                    self.llm.agenerate([test_prompt], max_tokens=5),
+                    timeout=5.0  # زيادة مهلة الزمن
+                )
+                
+                logger.info(f"---> استلام الاستجابة: {test_response}")
+                
+                # فحص متعمق للاستجابة
+                if (test_response and 
+                    hasattr(test_response, 'generations') and 
+                    test_response.generations and 
+                    test_response.generations[0] and 
+                    len(test_response.generations[0]) > 0 and
+                    hasattr(test_response.generations[0][0], 'text') and
+                    test_response.generations[0][0].text):
+                    llm_available = True
+                    logger.info(f"---> تم التأكد من توفر نموذج اللغة بنجاح")
+                    logger.info(f"---> نص الاستجابة: {test_response.generations[0][0].text}")
+                else:
+                    llm_error = "استجابة فارغة أو غير صالحة من النموذج"
+                    logger.error(f"---> النموذج غير متاح: {llm_error}")
+                    logger.error(f"---> تفاصيل الاستجابة: {test_response}")
+                    
+            except asyncio.TimeoutError as e:
+                llm_error = f"انتهت مهلة الزمن: {str(e)}"
+                logger.error(f"---> انتهت مهلة الاتصال بالنموذج: {e}")
+                logger.error(f"---> تفاصيل الخطأ: {str(e)}")
+            except Exception as e:
+                llm_error = f"خطأ عام: {str(e)}"
+                logger.error(f"---> النموذج غير متاح (خطأ): {e}")
+                logger.error(f"---> تفاصيل الخطأ: {str(e)}")
+                logger.error(f"---> مسار التتبع: {traceback.format_exc()}")
+            
+            # قرار حاسم عند عدم توفر النموذج - إضافة رسالة فخ مميزة للكشف عن مصدر الاستجابات
+            if not llm_available:
+                logger.warning(f"===> منع الاستجابة: النموذج غير متوفر، REQUIRE_LLM={require_llm}")
+                
+                # تعديل الرسالة لتكون فريدة ومميزة جداً بحيث يسهل تتبعها في المخرجات
+                error_message = f"MODIFIED-ERROR-CODE-ABC1234: النموذج اللغوي غير متوفر! تم تعديل الكود للكشف عن مصدر الاستجابات. [رمز الخطأ: TRACKING-ID-567890]"
+                
+                logger.error(f"!!!! RETURNING MODIFIED UNIQUE ERROR: {error_message}")
+                
+                # إرجاع رسالة خطأ دائمًا بغض النظر عن قيمة REQUIRE_LLM
+                return {
+                    "response": error_message,
+                    "sources": [],
+                    "error": "llm_unavailable_tracked",
+                    "llm_error": llm_error
+                }
+            
+            logger.info(f"Continuing processing with LLM available")
             
             # Process query through advanced query processor 
             processed_query = await self.query_processor.process_query(query)
             logger.info(f"Query type: {processed_query['query_type']}, concepts: {processed_query['concepts']}")
             
             # Perform search with improved hybrid search
+            logger.info(f"Performing hybrid search...")
             search_results = await self.hybrid_search(
                 query=query,
                 conversation_id=str(conversation_id),
-                limit=limit * 2  # Get more results for better reranking
+                limit=limit * 3  # Get more results for better reranking
             )
             
-            logger.debug(f"Found {len(search_results)} search results")
+            logger.info(f"Found {len(search_results)} search results")
             
             if not search_results:
+                logger.warning("No search results found")
                 # Return language-appropriate message
                 try:
                     lang = detect(query)
@@ -921,7 +1234,8 @@ class RAGService:
                 except Exception as e:
                     logger.error(f"Error detecting language: {e}")
                     message = "I couldn't find any relevant information to answer your question."
-                    
+                
+                logger.info(f"Returning no results message: {message}")    
                 return {
                     "response": message,
                     "sources": []
@@ -929,11 +1243,13 @@ class RAGService:
 
             # Apply semantic reranking for more accurate results
             if len(search_results) > 1:
+                logger.info(f"Reranking {len(search_results)} results...")
                 try:
                     # For complex queries, use advanced semantic or cross-encoder reranking
                     if processed_query["query_type"] == "complex" and len(query.split()) > 3:
                         # Choose more sophisticated reranking for complex queries
                         reranking_method = "cross_encoder" if len(search_results) <= 10 else "semantic"
+                        logger.info(f"Using {reranking_method} reranking for complex query")
                         reranked_results = await self.reranker.rerank_results(
                             query=query, 
                             results=search_results, 
@@ -942,6 +1258,7 @@ class RAGService:
                         )
                     else:
                         # For simpler queries, use faster keyword reranking
+                        logger.info(f"Using keyword reranking for simple query")
                         reranked_results = await self.reranker.rerank_results(
                             query=query, 
                             results=search_results, 
@@ -950,19 +1267,37 @@ class RAGService:
                         )
                     
                     search_results = reranked_results
+                    logger.info(f"Reranking complete, {len(search_results)} results after reranking")
                 except Exception as e:
                     logger.error(f"Error during reranking: {e}")
+                    logger.error(f"Stack trace: {traceback.format_exc()}")
                     # If reranking fails, use original results
                     if len(search_results) > limit:
                         search_results = search_results[:limit]
+                        logger.info(f"Using top {limit} results without reranking")
 
-            # Generate response with chat history context
-            response = await self.generate_response(
-                query=query,
-                context_docs=search_results
-            )
+            # تحديد مصدر الإجابة بناءً على توفر النموذج
+            if llm_available:
+                # استخدام النموذج لإنشاء إجابة
+                logger.info(f"Calling generate_response with {len(search_results)} context documents...")
+                response = await self.generate_response(
+                    query=query,
+                    context_docs=search_results
+                )
+                logger.info(f"Response generated: {response[:100]}...")
+            else:
+                # إذا كان النموذج غير متاح، نعيد رسالة خطأ واضحة ولا نستخدم استخراج النص المباشر
+                logger.warning("LLM unavailable, returning clear error message")
+                error_message = f"عذرًا، النموذج اللغوي غير متوفر حاليًا. يرجى التحقق من إعدادات النظام.\n\nالخطأ: {llm_error}"
+                return {
+                    "response": error_message,
+                    "sources": [],
+                    "error": "llm_unavailable_tracked",
+                    "llm_error": llm_error
+                }
             
             # Enhance source information - ensure file name is included
+            logger.info(f"Enhancing source information for {len(search_results)} results")
             enhanced_sources = []
             for doc in search_results:
                 metadata = doc.get("metadata", {})
@@ -996,14 +1331,25 @@ class RAGService:
                 enhanced_sources.append(enhanced_source)
             
             # Return response with enhanced source documents
-            return {
+            logger.info(f"====== QUERY DOCUMENTS COMPLETE ======")
+            result = {
                 "response": response,
-                "sources": enhanced_sources
+                "sources": enhanced_sources,
+                "using_llm": llm_available  # إضافة علامة توضح ما إذا تم استخدام النموذج
             }
+            logger.info(f"Returning result with response and {len(enhanced_sources)} sources")
+            return result
 
         except Exception as e:
             logger.error(f"Error in document query: {e}", exc_info=True)
-            raise
+            logger.error(f"Stack trace: {traceback.format_exc()}")
+            error_message = "عذرًا، حدث خطأ أثناء معالجة الاستعلام. يرجى المحاولة مرة أخرى لاحقًا."
+            logger.error(f"!!!! RETURNING ERROR: {error_message}")
+            return {
+                "response": error_message,
+                "sources": [],
+                "error": str(e)
+            }
 
     async def get_document(self, document_id: str, session: Session) -> Document:
         """
@@ -1082,21 +1428,33 @@ class RAGService:
         return documents
 
     def _format_context(self, docs: List[dict]) -> str:
-        """Format retrieved documents into context string with improved structure"""
-        context_parts = []
+        """تنسيق وثائق السياق بطريقة منظمة ومفيدة"""
+        if not docs:
+            return ""
+        
+        formatted_sections = []
+        
         for i, doc in enumerate(docs, 1):
-            # Extract content and metadata
-            content = doc.get("content", "")
+            content = doc.get("content", "").strip()
+            if not content:
+                continue
+            
+            # تضمين عنوان للقسم (استخدام العنوان من البيانات الوصفية إذا كان متاحًا)
             metadata = doc.get("metadata", {})
-            source = metadata.get("source", f"Document {i}")
-            title = metadata.get("title", f"Section {i}")
-            doc_title = metadata.get("doc_title", "")
+            title = metadata.get("title", "") or f"مستند {i}"
+            source = metadata.get("file_name", "") or metadata.get("source", "")
             
-            # Format with better source information
-            header = f"[Document: {doc_title}] [Section: {title}]"
-            context_parts.append(f"{header}\n{content}\n")
+            # إضافة معلومات حول المصدر
+            section_header = f"== {title} =="
+            if source:
+                section_header += f" (المصدر: {source})"
             
-        return "\n---\n".join(context_parts)
+            # تنسيق النص مع فصل واضح بين الأقسام
+            formatted_section = f"{section_header}\n{content}\n"
+            formatted_sections.append(formatted_section)
+        
+        # الجمع بين الأقسام مع فواصل واضحة
+        return "\n---\n".join(formatted_sections)
 
     def clean_and_format_text(self, text: str) -> str:
         """Clean and format text"""
@@ -1236,3 +1594,119 @@ class RAGService:
                 logger.error(f"Error indexing document: {e}")
                 session.rollback()
                 raise
+
+    def _initialize_qa_chain(self):
+        """Initialize QA chain for generating answers."""
+        try:
+            system_template = """أنت مساعد يقوم بالإجابة على الأسئلة بناءً على المعلومات المحددة المقدمة. قم بالإجابة فقط باستخدام المحتوى المقدم دون إختراع معلومات.
+
+المعلومات المتاحة:
+
+{context}
+
+قم بالإجابة باللغة العربية بطريقة مفيدة ومهذبة ودقيقة. إذا لم تعرف الإجابة أو لم تكن المعلومات متوفرة في السياق المقدم، فقط اعترف بذلك بدلاً من اختراع المعلومات.
+"""
+            system_message_prompt = SystemMessagePromptTemplate.from_template(system_template)
+            
+            human_template = "{question}"
+            human_message_prompt = HumanMessagePromptTemplate.from_template(human_template)
+            
+            chat_prompt = ChatPromptTemplate.from_messages(
+                [system_message_prompt, human_message_prompt]
+            )
+            
+            self.qa_chain = load_qa_chain(
+                self.chat_model,
+                chain_type="stuff",
+                prompt=chat_prompt,
+            )
+            
+            logger.info("QA chain initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize QA chain: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            raise
+
+    def process_query(
+        self,
+        query: str,
+        document_ids: List[str] = None,
+        options: Dict[str, Any] = None,
+    ):
+        """Process a query and return the answer with relevant context."""
+        try:
+            options = options or {}
+            
+            # Query preprocessing
+            self.query_processor.process(query)
+            
+            # Retrieve documents
+            docs = self._retrieve_documents(query, document_ids, options)
+            
+            if not docs:
+                return {
+                    "answer": "لم أجد أي معلومات ذات صلة بسؤالك.",
+                    "context": [],
+                    "metadata": {"status": "no_documents_found"},
+                }
+            
+            # Rerank documents
+            if self.reranker and len(docs) > 1:
+                docs = self.reranker.rerank(query, docs)
+            
+            # Generate answer
+            answer = self._generate_answer(query, docs)
+            
+            # Prepare context for response
+            context = []
+            for i, doc in enumerate(docs[:self.settings.RAG_MAX_DOCUMENTS_IN_RESPONSE]):
+                context.append({
+                    "document_id": doc.metadata.get("document_id", f"doc_{i}"),
+                    "title": doc.metadata.get("title", f"Document {i+1}"),
+                    "content": doc.page_content[:1000],
+                    "score": doc.metadata.get("score", 0),
+                })
+            
+            # Return result
+            return {
+                "answer": answer,
+                "context": context,
+                "metadata": {
+                    "model": getattr(self.chat_model, "model_name", "unknown"),
+                    "document_count": len(docs),
+                },
+            }
+            
+        except Exception as e:
+            logger.error(f"Error processing query: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            raise RuntimeError(f"Failed to process query: {str(e)}")
+
+    def _retrieve_documents(
+        self,
+        query: str,
+        document_ids: List[str] = None,
+        options: Dict[str, Any] = None,
+    ) -> List[Document]:
+        """Retrieve relevant documents for the query."""
+        # Simple document retrieval logic
+        # In a real implementation, this would search a vector database
+        return self.query_processor.search(query, document_ids=document_ids, **options)
+
+    def _generate_answer(self, query: str, docs: List[Document]) -> str:
+        """Generate an answer for the query using the retrieved documents."""
+        if not docs:
+            return "لم أجد أي معلومات ذات صلة بسؤالك."
+        
+        try:
+            result = self.qa_chain(
+                {"input_documents": docs, "question": query, "context": "\n\n".join([doc.page_content for doc in docs])}
+            )
+            return result.get("output_text", "عذراً، لم أتمكن من إنشاء إجابة.")
+        except Exception as e:
+            logger.error(f"Error generating answer: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return "عذراً، حدث خطأ أثناء توليد الإجابة."

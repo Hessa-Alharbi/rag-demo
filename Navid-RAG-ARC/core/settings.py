@@ -19,11 +19,12 @@ class Settings(BaseSettings):
     VECTOR_STORE_DIR: Path = DATA_DIR / "vector_store"
     
     # LLM Configuration
-    LLM_PROVIDER: str = "openai"  # or "huggingface", "anthropic", etc.
-    LLM_MODEL: str = "gpt-4o-mini"
-    LLM_BASE_URL: str = "https://api.openai.com/v1/engines"
+    LLM_PROVIDER: str = ""  # or "huggingface", "anthropic", etc.
+    LLM_MODEL: str = ""
+    LLM_BASE_URL: str = ""
     LLM_API_KEY: Optional[str] = None
     LLM_CONFIG: Dict[str, Any] = {}
+    REQUIRE_LLM: bool = True  # إجبار هذا الإعداد على True دائمًا لمنع استخدام النص المستخرج مباشرة
     
     # API Keys
     OPENAI_API_KEY: Optional[str] = None
@@ -31,10 +32,11 @@ class Settings(BaseSettings):
     HF_TOKEN: Optional[str] = None  # HuggingFace token
     
     # OpenAI specific settings
-    OPENAI_MODEL_NAME: str = "gpt-4o-mini"
-    OPENAI_EMBEDDING_MODEL: str = "text-embedding-ada-002"
-    OPENAI_MAX_TOKENS: int = 1000
-    OPENAI_TEMPERATURE: float = 0.0
+    OPENAI_MODEL: str = "tgi"  # موديل yehia-7b-preview-red ولكن بالاسم المتوافق مع خادم TGI
+    OPENAI_MODEL_NAME: str = "tgi"  # موديل yehia-7b-preview-red ولكن بالاسم المتوافق مع خادم TGI
+    OPENAI_EMBEDDING_MODEL: str = ""
+    OPENAI_MAX_TOKENS: int = 800
+    OPENAI_TEMPERATURE: float = 0.3
     
     # Embeddings Configuration
     EMBEDDING_PROVIDER: str = "huggingface"
@@ -93,6 +95,8 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        # هام: السماح بالحقول الإضافية للاستيعاب التوافقي مع ملف .env
+        extra = "allow"
         
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -109,6 +113,27 @@ class Settings(BaseSettings):
     
     def validate_settings(self):
         """Validate required settings are present"""
+        # تحقق أولاً من نموذج اللغة - منع استخدام Mistral
+        if self.LLM_MODEL != "yehia-7b-preview-red":
+            from loguru import logger
+            logger.warning(f"لم يتم تحديد نموذج yehia-7b-preview-red، يرجى استخدام هذا النموذج فقط.")
+            self.LLM_MODEL = "yehia-7b-preview-red"
+            logger.info(f"تم تغيير LLM_MODEL إلى: {self.LLM_MODEL}")
+        
+        # منع استخدام api-inference.huggingface.co
+        if "api-inference.huggingface.co" in self.LLM_BASE_URL:
+            from loguru import logger
+            logger.error(f"تم اكتشاف استخدام api-inference.huggingface.co، وهذا غير مسموح.")
+            self.LLM_BASE_URL = "https://ijt42iqbf30i3nly.us-east4.gcp.endpoints.huggingface.cloud/v1"
+            logger.info(f"تم تغيير LLM_BASE_URL إلى: {self.LLM_BASE_URL}")
+        
+        # تأكد من وجود حقل OPENAI_MODEL صحيح
+        if self.OPENAI_MODEL != "tgi":
+            from loguru import logger
+            logger.warning(f"OPENAI_MODEL يجب أن يكون 'tgi' للعمل مع yehia-7b-preview-red")
+            self.OPENAI_MODEL = "tgi"
+            logger.info(f"تم تصحيح OPENAI_MODEL إلى: {self.OPENAI_MODEL}")
+        
         if self.VECTOR_STORE_PROVIDER == "milvus":
             if not self.MILVUS_HOST or not self.MILVUS_PORT:
                 raise ValueError("Milvus host and port must be configured")

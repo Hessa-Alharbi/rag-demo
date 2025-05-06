@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { motion, AnimatePresence } from "framer-motion"
+import apiClient from "@/lib/api-client"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -129,6 +130,13 @@ export default function LoginPage() {
         setReturnTo(returnToParam)
         console.log('Found returnTo URL:', returnToParam)
       }
+      
+      // Check if user was just registered
+      const registered = params.get('registered') === 'true'
+      if (registered) {
+        // Show success message for registration
+        setError("Registration successful! Please log in with your credentials.")
+      }
     }
   }, [])
 
@@ -147,10 +155,19 @@ export default function LoginPage() {
     try {
       // Use the auth context to handle login
       await login(data.username_or_email, data.password)
-      // If successful, login will redirect to the home page
+      // If we reach here, login was successful and the auth context will handle redirection
     } catch (err: any) {
       console.error("Login error:", err)
-      setError(err.response?.data?.error || "Invalid username or password")
+      // Display more user-friendly error messages
+      if (err.response?.status === 401) {
+        setError("Invalid username or password. Please try again.")
+      } else if (err.response?.status === 404) {
+        setError("User not found. Please check your credentials.")
+      } else if (err.message) {
+        setError(err.message)
+      } else {
+        setError("Login failed. Please check your internet connection and try again.")
+      }
     } finally {
       setIsLoading(false)
     }

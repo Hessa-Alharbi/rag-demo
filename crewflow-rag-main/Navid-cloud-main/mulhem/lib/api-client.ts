@@ -2,10 +2,10 @@ import axios from 'axios';
 
 // Determine the base URL based on the environment
 export const getBaseUrl = () => {
-  // تغيير عنوان الخادم ليشير إلى خدمة Navid-RAG-ARC
+  // Use a stable backend URL or the relative /api path for production
   return process.env.NODE_ENV === 'production' 
     ? '/api' 
-    : 'https://4161-2a02-cb80-4271-93aa-dc2c-9eea-2d8e-7325.ngrok-free.app/api';
+    : 'http://localhost:8000/api';
 };
 
 const apiClient = axios.create({

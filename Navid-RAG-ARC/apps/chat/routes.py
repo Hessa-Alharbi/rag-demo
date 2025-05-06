@@ -1,21 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Body
-from typing import List, Dict, Any, Optional
+import sys
+import os
+import json
 from uuid import UUID
-from sqlmodel import Session, select
+from typing import List, Dict, Any, Optional
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Query, Body, status
+from sqlmodel import Session, select, or_, and_
+from datetime import datetime, timedelta
+from loguru import logger
+import asyncio
 from apps.chat.models import Conversation, Message, Attachment, MessageRole, MessageStatus
 from apps.chat.schemas import ConversationCreate, ConversationRead, MessageCreate, MessageRead, AttachmentRead
 from apps.chat.utils import FileHandler
 from apps.users.models import User
 from core.db import get_session
 from apps.auth.routes import get_current_user
-from core.logger import logger
 from core.errors import APIError
 from apps.rag.services import RAGService
-import asyncio
 from apps.rag.models import Document, DocumentStatus, Chunk
-from datetime import datetime
-import sys
-import os
+from core.config import get_settings
+import traceback
 
 
 router = APIRouter()
@@ -205,6 +208,37 @@ async def generate_rag_response(
     session: Session
 ):
     try:
+        # التحقق من إعدادات النموذج اللغوي قبل البدء
+        settings = get_settings()
+        logger.info(f"LLM CONFIG IN GENERATE_RESPONSE: Provider={settings.LLM_PROVIDER}, Model={settings.LLM_MODEL}")
+        logger.info(f"LLM_BASE_URL={settings.LLM_BASE_URL}")
+        
+        # تحقق من أن النموذج المستخدم هو yehia-7b-preview-red فقط
+        if settings.LLM_MODEL != "yehia-7b-preview-red":
+            logger.error(f"WRONG MODEL CONFIGURATION: {settings.LLM_MODEL} instead of yehia-7b-preview-red")
+            # قم بتصحيح الإعدادات إجبارياً
+            settings.LLM_MODEL = "yehia-7b-preview-red"
+            logger.info(f"Forced model to: {settings.LLM_MODEL}")
+            
+            # إعادة تهيئة LLM في خدمة RAG
+            from core.llm.factory import ModelFactory
+            rag_service.llm = ModelFactory.create_llm()
+            rag_service.chat_model = ModelFactory.create_llm()
+            logger.info("Re-initialized LLM with correct model")
+        
+        # تحقق من أن الرابط لا يشير إلى Hugging Face الافتراضي
+        if "api-inference.huggingface.co" in settings.LLM_BASE_URL:
+            logger.error(f"INVALID ENDPOINT URL: Using default HF API")
+            # قم بتصحيح الرابط إجبارياً
+            settings.LLM_BASE_URL = "https://ijt42iqbf30i3nly.us-east4.gcp.endpoints.huggingface.cloud/v1"
+            logger.info(f"Forced endpoint URL to: {settings.LLM_BASE_URL}")
+            
+            # إعادة تهيئة LLM في خدمة RAG
+            from core.llm.factory import ModelFactory
+            rag_service.llm = ModelFactory.create_llm()
+            rag_service.chat_model = ModelFactory.create_llm()
+            logger.info("Re-initialized LLM with correct endpoint")
+        
         # Initialize RAG service
         await rag_service.initialize()
         
@@ -222,6 +256,63 @@ async def generate_rag_response(
         if not context_docs:
             logger.warning(f"No relevant documents found for query: {message.content}")
 
+        # التحقق من توفر النموذج اللغوي قبل استدعاء generate_response
+        try:
+            # إرسال استعلام بسيط للتحقق من أن النموذج يعمل
+            test_response = await asyncio.wait_for(
+                rag_service.llm.agenerate(["هل أنت متاح؟"], max_tokens=10),
+                timeout=3.0
+            )
+            if not test_response.generations or not test_response.generations[0]:
+                # إظهار خطأ صريح - LLM غير متاح
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="نموذج اللغة غير متاح حاليًا. يرجى المحاولة لاحقًا."
+                )
+                
+            # التحقق من اسم النموذج المستخدم في الاستجابة
+            model_info = getattr(test_response, 'llm_output', {}) or {}
+            model_name = model_info.get('model_name', '') or getattr(rag_service.llm, 'model_name', '') or ''
+            
+            if model_name and 'mistral' in model_name.lower():
+                logger.error(f"WRONG MODEL IN USE: {model_name}")
+                # إعادة تهيئة النموذج مباشرة باستخدام OpenAI وتجاوز Factory
+                from langchain_openai import ChatOpenAI
+                from openai import OpenAI
+                
+                # استخدام OpenAI بشكل مباشر لتجاوز إعادة توجيه HuggingFace
+                custom_client = OpenAI(
+                    api_key=settings.HF_TOKEN or "hf_fake_token",
+                    base_url=settings.LLM_BASE_URL
+                )
+                
+                # إنشاء نموذج LangChain مع OpenAI
+                rag_service.llm = ChatOpenAI(
+                    model_name="tgi",  # اسم المستخدم من قبل النموذج المستضاف
+                    openai_api_key=settings.HF_TOKEN or "hf_fake_token",
+                    openai_api_base=settings.LLM_BASE_URL,
+                    temperature=0.3,
+                    max_tokens=800,
+                    client=custom_client
+                )
+                rag_service.chat_model = rag_service.llm
+                logger.info(f"Created direct OpenAI client for: {settings.LLM_BASE_URL}")
+                
+                # تحقق مجددًا بعد إعادة التهيئة
+                test_response = await asyncio.wait_for(
+                    rag_service.llm.agenerate(["تحقق سريع من نموذج yehia"], max_tokens=10),
+                    timeout=3.0
+                )
+                logger.info(f"Reinitialized LLM test: {test_response.generations[0][0].text}")
+            
+        except Exception as e:
+            logger.error(f"نموذج اللغة غير متاح: {e}")
+            # إرجاع خطأ للعميل بدلاً من استجابة وهمية
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"نموذج اللغة غير متاح: {str(e)}"
+            )
+        
         # Generate response with full context
         response = await rag_service.generate_response(
             query=message.content,
@@ -474,6 +565,25 @@ async def process_query(
     try:
         logger.info(f"Processing query request: {query} for conversation: {conversation_id}")
         
+        # سجل معلومات التكوين للتأكد من الإعدادات المستخدمة
+        settings = get_settings()
+        logger.info(f"LLM CONFIGURATION CHECK: Provider={settings.LLM_PROVIDER}, Model={settings.LLM_MODEL}")
+        logger.info(f"LLM_BASE_URL={settings.LLM_BASE_URL}, HF_TOKEN available: {bool(settings.HF_TOKEN)}")
+        
+        # تحقق من أن النموذج المستخدم هو yehia-7b-preview-red فقط
+        if settings.LLM_MODEL != "yehia-7b-preview-red":
+            logger.error(f"WRONG MODEL CONFIGURATION: {settings.LLM_MODEL} instead of yehia-7b-preview-red")
+            # قم بتصحيح الإعدادات إجبارياً
+            settings.LLM_MODEL = "yehia-7b-preview-red"
+            logger.info(f"Forced model to: {settings.LLM_MODEL}")
+        
+        # تحقق من أن الرابط لا يشير إلى Hugging Face الافتراضي
+        if "api-inference.huggingface.co" in settings.LLM_BASE_URL:
+            logger.error(f"INVALID ENDPOINT URL: Using default HF API")
+            # قم بتصحيح الرابط إجبارياً
+            settings.LLM_BASE_URL = "https://ijt42iqbf30i3nly.us-east4.gcp.endpoints.huggingface.cloud/v1"
+            logger.info(f"Forced endpoint URL to: {settings.LLM_BASE_URL}")
+            
         # Convert string to UUID
         try:
             conv_uuid = UUID(conversation_id.replace("-", ""))
@@ -495,15 +605,57 @@ async def process_query(
                 "conversation_id": conversation_id
             }
         
+        # إعادة تهيئة LLM في خدمة RAG باستخدام النموذج الصحيح
+        from core.llm.factory import ModelFactory
+        # إنشاء نموذج جديد مع إعدادات صحيحة
+        rag_service.llm = ModelFactory.create_llm()
+        rag_service.chat_model = rag_service.llm
+        logger.info("Re-initialized LLM with ModelFactory")
+        
+        # Initialize RAG service
+        await rag_service.initialize()
+        
         # Get relevant documents for the conversation
         context_docs = await rag_service.hybrid_search(
             query=query,
-            conversation_id=conversation_id,
+            conversation_id=str(conv_uuid),
             limit=5
         )
         
         # Get conversation history
         history = get_conversation_history(conv_uuid, session)
+        
+        # التحقق من توفر النموذج اللغوي قبل استدعاء generate_response
+        try:
+            # تسجيل معلومات تفصيلية عن النموذج الحالي
+            logger.info(f"Current LLM instance: {rag_service.llm}")
+            logger.info(f"LLM model_name: {getattr(rag_service.llm, 'model_name', 'unknown')}")
+            
+            # إرسال استعلام بسيط للتحقق من أن النموذج يعمل
+            test_prompt = "هل أنت متاح؟"
+            logger.info(f"Testing LLM with prompt: {test_prompt}")
+            test_response = await asyncio.wait_for(
+                rag_service.llm.agenerate([test_prompt], max_tokens=10),
+                timeout=3.0
+            )
+            
+            if not test_response.generations or not test_response.generations[0]:
+                # إظهار خطأ صريح - LLM غير متاح
+                logger.error("LLM test failed - no generations returned")
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="نموذج اللغة غير متاح حاليًا. يرجى المحاولة لاحقًا."
+                )
+                
+            logger.info(f"LLM test successful with response: {test_response.generations[0][0].text}")
+        except Exception as e:
+            logger.error(f"نموذج اللغة غير متاح: {e}")
+            logger.error(traceback.format_exc())
+            # إرجاع خطأ للعميل بدلاً من استجابة وهمية
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"نموذج اللغة غير متاح: {str(e)}"
+            )
         
         # Generate response
         response = await rag_service.generate_response(
@@ -538,12 +690,33 @@ async def chat_query(
         # Import manager at runtime to avoid circular imports
         from main import manager
         import os
+        import traceback
         
         logger.info(f"Received chat query: {payload.get('query')}")
         
         query = payload.get("query", "")
         session_id = payload.get("session_id", "")
         history = payload.get("history", [])
+        
+        # سجل معلومات التكوين للتأكد من الإعدادات المستخدمة
+        from core.config import get_settings
+        settings = get_settings()
+        logger.info(f"CHAT_QUERY LLM CONFIG: Provider={settings.LLM_PROVIDER}, Model={settings.LLM_MODEL}")
+        logger.info(f"LLM_BASE_URL={settings.LLM_BASE_URL}, HF_TOKEN available: {bool(settings.HF_TOKEN)}")
+        
+        # تحقق من أن النموذج المستخدم هو yehia-7b-preview-red فقط
+        if settings.LLM_MODEL != "yehia-7b-preview-red":
+            logger.error(f"WRONG MODEL CONFIGURATION: {settings.LLM_MODEL} instead of yehia-7b-preview-red")
+            # قم بتصحيح الإعدادات إجبارياً
+            settings.LLM_MODEL = "yehia-7b-preview-red"
+            logger.info(f"Forced model to: {settings.LLM_MODEL}")
+            
+        # تحقق من أن الرابط لا يشير إلى Hugging Face الافتراضي
+        if "api-inference.huggingface.co" in settings.LLM_BASE_URL:
+            logger.error(f"INVALID ENDPOINT URL DETECTED: {settings.LLM_BASE_URL}")
+            # قم بتصحيح الرابط إجبارياً
+            settings.LLM_BASE_URL = "https://ijt42iqbf30i3nly.us-east4.gcp.endpoints.huggingface.cloud/v1"
+            logger.info(f"Forced endpoint URL to: {settings.LLM_BASE_URL}")
         
         # Update WebSocket with processing status
         if session_id:
@@ -628,154 +801,73 @@ async def chat_query(
             
             return result
         
-        # Use RAG service for better search and response generation
+        # إعادة تهيئة LLM في خدمة RAG باستخدام النموذج الصحيح
+        from core.llm.factory import ModelFactory
+        # إنشاء نموذج جديد مع إعدادات صحيحة
+        rag_service.llm = ModelFactory.create_llm()
+        rag_service.chat_model = rag_service.llm
+        logger.info("Re-initialized LLM with ModelFactory")
+        
+        # Initialize RAG service
         await rag_service.initialize()
         
-        # Get conversation history for context
-        conv_history = []
-        if history:
-            for msg in history:
-                conv_history.append({
-                    "role": "user" if msg.get("type") == "human" else "assistant",
-                    "content": msg.get("content", ""),
-                    "created_at": msg.get("timestamp", datetime.now().isoformat())
-                })
-        
-        # Use hybrid search to find relevant document sections
-        logger.info(f"Performing hybrid search for query: '{query}'")
+        # Get relevant documents for the conversation
         context_docs = await rag_service.hybrid_search(
             query=query,
             conversation_id=str(conversation_uuid),
             limit=5
         )
         
-        # Prepare context docs with enhanced metadata
-        enhanced_context_docs = []
-        for doc in context_docs:
-            metadata = doc.get("metadata", {})
-            
-            # Extract filename from source path if available
-            source_path = metadata.get("source", "")
-            file_name = "Unknown Source"
-            
-            if source_path:
-                try:
-                    file_name = os.path.basename(source_path)
-                except (TypeError, AttributeError):
-                    # If source_path isn't a valid path, use it directly
-                    file_name = str(source_path)
-            elif metadata.get("doc_title"):
-                file_name = metadata.get("doc_title")
-                
-            enhanced_context_docs.append({
-                "content": doc.get("content", ""),
-                "metadata": {
-                    **metadata,
-                    "file_name": file_name,
-                    "title": metadata.get("title", "Unknown Section")
-                },
-                "score": doc.get("ensemble_score", 0) or 
-                        doc.get("semantic_score", 0) or 
-                        doc.get("cross_encoder_score", 0) or
-                        doc.get("relevance_score", 0)
-            })
+        # Get conversation history
+        history = get_conversation_history(conversation_uuid, session)
         
-        if not enhanced_context_docs:
-            logger.warning(f"No relevant documents found for query: {query}")
-            enhanced_context_docs = []
+        # التحقق من توفر النموذج اللغوي قبل استدعاء generate_response
+        try:
+            # تسجيل معلومات تفصيلية عن النموذج الحالي
+            logger.info(f"Current LLM instance: {rag_service.llm}")
+            logger.info(f"LLM model_name: {getattr(rag_service.llm, 'model_name', 'unknown')}")
             
-            # Check if query is in Arabic
-            is_arabic = any(c for c in query if '\u0600' <= c <= '\u06FF')
+            # إرسال استعلام بسيط للتحقق من أن النموذج يعمل
+            test_prompt = "هل أنت متاح؟"
+            logger.info(f"Testing LLM with prompt: {test_prompt}")
+            test_response = await asyncio.wait_for(
+                rag_service.llm.agenerate([test_prompt], max_tokens=10),
+                timeout=3.0
+            )
             
-            # Fallback to improved text search if hybrid search returns nothing
-            for doc in documents:
-                if not doc.content:
-                    continue
+            if not test_response.generations or not test_response.generations[0]:
+                # إظهار خطأ صريح - LLM غير متاح
+                logger.error("LLM test failed - no generations returned")
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="نموذج اللغة غير متاح حاليًا. يرجى المحاولة لاحقًا."
+                )
                 
-                # Use enhanced text search approach
-                if is_arabic:
-                    # Import ArabicTextProcessor for better Arabic handling
-                    from core.language.arabic_utils import ArabicTextProcessor
-                    
-                    # Normalize query for better matching
-                    normalized_query = ArabicTextProcessor.normalize_arabic(query)
-                    query_keywords = ArabicTextProcessor.preprocess_arabic_query(query)["keywords"]
-                    
-                    # Normalize document content
-                    normalized_content = ArabicTextProcessor.normalize_arabic(doc.content)
-                    paragraphs = normalized_content.split('\n\n')
-                    
-                    for i, paragraph in enumerate(paragraphs):
-                        # Match on normalized text and keywords for better recall
-                        if normalized_query in paragraph or any(keyword in paragraph for keyword in query_keywords if keyword):
-                            # Add this paragraph as a "document" with metadata
-                            original_paragraph = doc.content.split('\n\n')[i] if i < len(doc.content.split('\n\n')) else paragraph
-                            
-                            # Get file name from metadata or title
-                            file_name = doc.title
-                            if hasattr(doc, 'doc_metadata') and doc.doc_metadata:
-                                if isinstance(doc.doc_metadata, dict):
-                                    file_name = doc.doc_metadata.get('original_filename', doc.title)
-                            
-                            enhanced_context_docs.append({
-                                "content": original_paragraph,
-                                "metadata": {
-                                    "document_id": str(doc.id),
-                                    "title": doc.title,
-                                    "paragraph": i,
-                                    "file_name": file_name
-                                },
-                                "score": 2.0 if normalized_query in paragraph else 1.0  # Higher score for better matches
-                            })
-                            
-                            # Limit to 5 paragraphs per document
-                            if len(enhanced_context_docs) >= 5:
-                                break
-                else:
-                    # Simple text search for non-Arabic - find paragraphs that contain any of the query words
-                    query_words = query.lower().split()
-                    paragraphs = doc.content.split('\n\n')
-                    
-                    for i, paragraph in enumerate(paragraphs):
-                        if any(word.lower() in paragraph.lower() for word in query_words):
-                            # Get file name from metadata or title
-                            file_name = doc.title
-                            if hasattr(doc, 'doc_metadata') and doc.doc_metadata:
-                                if isinstance(doc.doc_metadata, dict):
-                                    file_name = doc.doc_metadata.get('original_filename', doc.title)
-                            
-                            # Add this paragraph as a "document" with metadata
-                            enhanced_context_docs.append({
-                                "content": paragraph,
-                                "metadata": {
-                                    "document_id": str(doc.id),
-                                    "title": doc.title,
-                                    "paragraph": i,
-                                    "file_name": file_name
-                                },
-                                "score": 1.0  # Dummy score
-                            })
-                            
-                            # Limit to 5 paragraphs per document
-                            if len(enhanced_context_docs) >= 5:
-                                break
+            logger.info(f"LLM test successful with response: {test_response.generations[0][0].text}")
+        except Exception as e:
+            logger.error(f"نموذج اللغة غير متاح: {e}")
+            logger.error(traceback.format_exc())
+            # إرجاع خطأ للعميل بدلاً من استجابة وهمية
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"نموذج اللغة غير متاح: {str(e)}"
+            )
         
-        # Generate response using RAG
-        logger.info("Generating response with RAG service")
+        logger.info("Generating final response with context...")
         response = await rag_service.generate_response(
             query=query,
-            context_docs=enhanced_context_docs,
-            conversation_history=conv_history
+            context_docs=context_docs,
+            conversation_history=history
         )
         
-        # If still no proper response, create a basic one
+        # If still no proper response, do not create a basic one but show error
         if not response or response.strip() == "":
-            if enhanced_context_docs:
-                # Create context by joining paragraphs
-                context = "\n\n".join([d.get("content", "") for d in enhanced_context_docs])
-                response = f"وجدت المعلومات التالية حول '{query}':\n\n{context[:1000]}..."
-            else:
-                response = "لم أتمكن من العثور على معلومات كافية حول استفسارك."
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="فشل في توليد استجابة. يرجى المحاولة مرة أخرى."
+            )
+            
+        logger.info(f"Generated response successfully with {len(response)} characters")
         
         # Add response to chat history
         new_history = [
@@ -784,14 +876,14 @@ async def chat_query(
                 "type": "ai",
                 "content": response,
                 "timestamp": datetime.now().isoformat(),
-                "context_docs": enhanced_context_docs
+                "context_docs": context_docs
             }
         ]
         
         # Create result object with the enhanced context documents
         result = {
             "fused_answer": response,
-            "docs": enhanced_context_docs,
+            "docs": context_docs,
             "chat_history": new_history,
             "session_id": session_id
         }
@@ -810,7 +902,7 @@ async def chat_query(
                     }
                 },
                 "session_id": session_id,
-                "docs": enhanced_context_docs,
+                "docs": context_docs,
                 "fused_answer": response
             },
             "session_id": session_id

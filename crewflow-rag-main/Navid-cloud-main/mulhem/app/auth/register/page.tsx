@@ -6,7 +6,7 @@ import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import axios from "axios"
+import apiClient from "@/lib/api-client"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -61,16 +61,32 @@ export default function RegisterPage() {
       // Remove confirm_password as it's not needed in the API
       const { confirm_password, ...registerData } = data
       
-      // Use the Next.js API route for registration
-      const response = await axios.post(`/api/auth/register`, registerData)
+      // Use our API client instead of axios directly
+      const response = await apiClient.post('/auth/register', registerData)
       
       if (response.status === 200 || response.status === 201) {
+        console.log("Registration successful:", response.data)
         // Redirect to login page after successful registration
         router.push('/auth/login?registered=true')
       }
     } catch (err: any) {
       console.error("Registration error:", err)
-      setError(err.response?.data?.error || "Registration failed. Please try again.")
+      
+      // Improved error handling
+      if (err.status === 400) {
+        // Handle validation errors
+        if (err.data?.detail?.includes("already exists")) {
+          setError("A user with this email or username already exists")
+        } else {
+          setError(err.message || "Registration failed. Please check your information.")
+        }
+      } else if (err.status === 422) {
+        // Handle validation errors
+        setError("Please check your information and try again.")
+      } else {
+        // Generic error message
+        setError(err.message || "Registration failed. Please try again later.")
+      }
     } finally {
       setIsLoading(false)
     }
