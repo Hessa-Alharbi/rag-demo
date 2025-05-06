@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: mulhem-nextjs
+    env: node
+    region: frankfurt  # يمكنك اختيار المنطقة المناسبة
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://mulhem-nextjs.onrender.com  # سيتم تحديثه لاحقًا بعنوان الخدمة
+      - key: NEXTAUTH_URL
+        sync: false  # يجب تعيينه يدويًا في لوحة تحكم Render
+      - key: NEXTAUTH_SECRET
+        generateValue: true  # سيقوم Render بإنشاء قيمة آمنة
+    autoDeploy: true 
