@@ -12,4 +12,30 @@ services:
         sync: false  # يجب تعيينه يدويًا في لوحة تحكم Render
       - key: NEXTAUTH_SECRET
         generateValue: true  # سيقوم Render بإنشاء قيمة آمنة
+    autoDeploy: true
+
+  - type: web
+    name: rag-demo-frontend
+    env: node
+    buildDir: crewflow-rag-main/Navid-cloud-main/mulhem
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://rag-demo-backend.onrender.com
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+    autoDeploy: true
+
+  - type: web
+    name: rag-demo-backend
+    env: python
+    buildDir: Navid-RAG-ARC
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: PORT
+        value: 8000
     autoDeploy: true 
