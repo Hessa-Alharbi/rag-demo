@@ -1,0 +1,55 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Package & Distribution Folders
+dist/
+build/
+*.egg-info/
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Environment Folders
+.env
+.venv
+venv/
+ENV/
+env/
+
+# Local Dev
+.git
+.github
+.gitignore
+*.log
+logs/
+temp/
+tmp/
+
+# Data files that shouldn't be in the image
+data/documents/
+uploads/
+*.sqlite
+*.db
+test.db
+*.pdf
+*.docx
+*.txt
+!requirements.txt
+
+# Model files that shouldn't be included (can be downloaded at runtime)
+models/
+embeddings/ 

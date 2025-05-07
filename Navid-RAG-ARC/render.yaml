@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: navid-rag-backend
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      chmod +x render_startup.sh
+      cp main_render.py main_optimized.py
+    startCommand: uvicorn main_optimized:app --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 4 --timeout-keep-alive 30
+    plan: standard
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: WEB_CONCURRENCY
+        value: 1
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: MALLOC_ARENA_MAX
+        value: 2
+      - key: PYTORCH_NO_CUDA_MEMORY_CACHING
+        value: 1
+      - key: MAX_WORKERS
+        value: 1
+      - key: SENTENCE_TRANSFORMERS_HOME
+        value: /app/models
+      - key: TRANSFORMERS_CACHE
+        value: /app/models
+      - key: TRANSFORMERS_OFFLINE
+        value: 1
+      - key: OMP_NUM_THREADS
+        value: 1
+      - key: MKL_NUM_THREADS
+        value: 1
+      - key: MEMORY_OPTIMIZATION_ENABLED
+        value: 1
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+      targetMemoryPercent: 60
+      targetCPUPercent: 70
+    healthCheckPath: /api/health
+    autoDeploy: false
+    disk:
+      name: navid-data
+      mountPath: /app/data
+      sizeGB: 1 

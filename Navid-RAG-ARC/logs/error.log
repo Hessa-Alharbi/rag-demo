@@ -1519,3 +1519,8 @@ ValueError: "Document" object has no field "vector_count"
 openai.BadRequestError: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
 
 2025-05-06 16:41:25.672 | ERROR    | core.middleware:error_handler:11 | Unhandled error: "'error'"
+2025-05-07 12:23:43.274 | ERROR    | apps.rag.services:__init__:106 | Failed to initialize RAGService: API key not found. Please set OPENAI_API_KEY or HF_TOKEN in .env file.
+2025-05-07 12:27:45.485 | ERROR    | apps.rag.services:initialize:168 | Error testing LLM: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+2025-05-07 12:27:45.485 | ERROR    | apps.rag.services:initialize:169 | Will try to recreate LLM...
+2025-05-07 12:33:28.975 | ERROR    | apps.rag.services:initialize:168 | Error testing LLM: Error code: 400 - {'error': 'Bad Request: The endpoint is paused, ask a maintainer to restart it'}
+2025-05-07 12:33:28.975 | ERROR    | apps.rag.services:initialize:169 | Will try to recreate LLM...
