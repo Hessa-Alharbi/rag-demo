@@ -3,7 +3,7 @@ name = "navid-rag"
 version = "0.1.0"
 description = "A modern state of the art Arabic LLM"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "aiofiles>=24.1.0",
     "arabic-reshaper>=3.0.0",
@@ -28,4 +28,5 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "sentence-transformers>=3.4.1",
     "sqlmodel>=0.0.22",
+    "uvicorn>=0.24.0"
 ]

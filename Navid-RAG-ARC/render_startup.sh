@@ -20,4 +20,4 @@ export MPLBACKEND=Agg # تقليل استخدام الذاكرة إذا كان �
 
 # تم تغيير إعدادات بدء التشغيل لـ uvicorn
 echo "Starting application with memory optimizations..."
-exec uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 4 --timeout-keep-alive 30 --log-level info 
+exec python -m uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 4 --timeout-keep-alive 30 --log-level info 
