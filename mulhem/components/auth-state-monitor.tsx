@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { usePathname, useRouter } from 'next/navigation'
 
@@ -10,19 +10,24 @@ export default function AuthStateMonitor() {
   const { isAuthenticated, isLoading, getUserData } = useAuth()
   const pathname = usePathname()
   const router = useRouter()
+  const isRedirectingRef = useRef(false)
   
   // تحقق من حالة المصادقة عند تغيير المسار
   useEffect(() => {
     const checkAuthState = async () => {
       // تجاهل المسارات العامة
       if (publicPaths.includes(pathname || '')) {
+        isRedirectingRef.current = false
         return
       }
       
       // إذا كان المستخدم غير مصادق ولسنا في صفحة تسجيل الدخول، أعد التوجيه
-      if (!isLoading && !isAuthenticated) {
-        console.log('User not authenticated, redirecting to login page')
+      if (!isLoading && !isAuthenticated && !isRedirectingRef.current) {
+        console.log('User not authenticated, redirecting to login page, current path:', pathname)
+        isRedirectingRef.current = true
         router.push('/auth/login')
+      } else if (isAuthenticated) {
+        isRedirectingRef.current = false
       }
     }
     
