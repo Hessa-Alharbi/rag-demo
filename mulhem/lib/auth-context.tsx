@@ -215,12 +215,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Attempting login for user:', username)
       
-      // استخدام استراتيجية مماثلة لاستراتيجية رفع الملفات
+      // Use a similar strategy to the file upload strategy
       let retryCount = 0;
       const maxRetries = 3;
-      const initialDelay = 2000; // تأخير أطول للسماح للخادم بالتعافي
+      const initialDelay = 2000; // Longer delay to allow server to recover
       
-      // وظيفة محلية للمحاولة مع backoff
+      // Local function for retrying with backoff
       const attemptLogin = async () => {
         try {
           // Use URLSearchParams for form data
@@ -228,18 +228,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           formData.append('username', username)
           formData.append('password', password)
 
-          // استخدام التأخير قبل إرسال الطلب
+          // Use a delay before sending the request
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          // تجربة استخدام الفيتش المباشر بدلاً من الأكسيوس
+          // Try using direct fetch instead of axios
           const response = await fetch(`${getBaseUrl()}/auth/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: formData.toString(),
-            // إعدادات أخرى
-            credentials: 'omit', // تجنب إرسال الكوكيز
+            // Other settings
+            credentials: 'omit', // Avoid sending cookies
             cache: 'no-cache',
             redirect: 'follow',
           });
@@ -250,25 +250,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           const data = await response.json();
           return data;
-        } catch (error) {
-          if (retryCount < maxRetries) {
-            retryCount++;
-            const delay = initialDelay * Math.pow(2, retryCount - 1);
-            console.log(`Login retry attempt ${retryCount}/${maxRetries} after ${delay}ms`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            return attemptLogin(); // إعادة المحاولة
+        } catch (error: any) {
+          console.error("Login attempt failed:", error);
+          
+          // Check if it's a server error (500)
+          if (error.message && error.message.includes('500')) {
+            console.error("Server returned 500 error - internal server error");
+            throw error; // Don't retry on 500 errors
           }
-          throw error; // إعادة إلقاء الخطأ إذا استنفدنا جميع المحاولات
+          
+          // Retry logic for 503 errors or network issues
+          if ((error.message && (error.message.includes('503') || error.message.includes('network'))) && retryCount < maxRetries) {
+            retryCount++;
+            const backoffDelay = initialDelay * Math.pow(2, retryCount - 1);
+            console.log(`Retrying login after ${backoffDelay}ms delay (attempt ${retryCount} of ${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, backoffDelay));
+            return attemptLogin();
+          }
+          
+          throw error;
         }
       };
       
-      // تنفيذ المحاولة
-      const responseData = await attemptLogin();
+      // Call the login function with retry logic
+      const tokens = await attemptLogin();
       
       // التعامل مع الاستجابة
-      if (responseData.access_token) {
+      if (tokens.access_token) {
         console.log('Login successful, storing tokens')
-        setAuthTokens(responseData.access_token, responseData.refresh_token)
+        setAuthTokens(tokens.access_token, tokens.refresh_token)
         
         // انتظار وقت قصير لضمان حفظ الرموز
         await new Promise(resolve => setTimeout(resolve, 300));
