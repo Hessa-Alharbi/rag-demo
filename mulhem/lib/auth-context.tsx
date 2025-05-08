@@ -114,24 +114,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const token = localStorage.getItem("access_token")
       if (!token) {
+        console.log('No token found, user is not authenticated')
         setUser(null)
         setIsLoading(false)
         return
       }
       
-      console.log('Fetching user data...')
+      console.log('Fetching user data with token:', token.substring(0, 15) + '...')
       // Use our API client instead
       const response = await apiClient.get("/auth/me")
       
       if (response.data) {
-        console.log('User data received:', response.data)
+        console.log('User data received successfully:', response.data)
         setUser(response.data)
+        console.log('User state updated, authenticated:', !!response.data)
         return response.data
       }
     } catch (error) {
       console.error("Error fetching user data:", error)
       // If there's an authentication error, clear the tokens
       if (axios.isAxiosError(error) && error.response?.status === 401) {
+        console.log('Authentication error, clearing tokens')
         clearAuthTokens()
       }
       setUser(null)
@@ -173,14 +176,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const params = new URLSearchParams(window.location.search)
           const returnTo = params.get('returnTo')
           
-          if (returnTo) {
-            // Redirect to the original URL
-            console.log('Redirecting to:', returnTo)
-            router.push(returnTo)
-          } else {
-            // Redirect to home page as usual
-            router.push('/')
-          }
+          // إضافة تأخير قبل التوجيه لضمان تحديث حالة المستخدم في كل مكان
+          setTimeout(() => {
+            if (returnTo) {
+              // Redirect to the original URL
+              console.log('Redirecting to:', returnTo)
+              router.push(returnTo)
+            } else {
+              // Redirect to home page as usual
+              console.log('Redirecting to dashboard /')
+              router.push('/')
+            }
+          }, 500); // تأخير 500 مللي ثانية
         } else {
           throw new Error('Failed to get user data after login')
         }
