@@ -35,14 +35,14 @@ export const useFileUpload = () => {
       try {
         // First try using the initialize endpoint
         response = await apiClient.post<UploadResponse>('/initialize', formData, {
-          timeout: 300000, // 5 minute timeout
+          timeout: 600000, // 10 minute timeout
         });
       } catch (initError: any) {
         if (initError.status === 404) {
           // If the endpoint doesn't exist, try the attachments endpoint
           console.log('Endpoint /initialize not found, trying attachments endpoint');
           response = await apiClient.post<UploadResponse>('/conversations/new/attachments', formData, {
-            timeout: 300000, // 5 minute timeout
+            timeout: 600000, // 10 minute timeout
           });
         } else {
           // Rethrow the original error if it's not a 404
