@@ -61,7 +61,11 @@ export default function RegisterPage() {
       // Remove confirm_password as it's not needed in the API
       const { confirm_password, ...registerData } = data
       
-      // Use our API client instead of axios directly
+      // طباعة معلومات تشخيصية
+      console.log("Register data:", registerData)
+      console.log("API base URL:", apiClient.defaults.baseURL)
+      
+      // استخدام المسار الصحيح للتسجيل (بدون /api في البداية لأن baseURL يتضمنه)
       const response = await apiClient.post('/auth/register', registerData)
       
       if (response.status === 200 || response.status === 201) {
