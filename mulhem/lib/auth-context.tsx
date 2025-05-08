@@ -151,26 +151,60 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Attempting login for user:', username)
       
-      // Use URLSearchParams for form data
-      const formData = new URLSearchParams()
-      formData.append('username', username)
-      formData.append('password', password)
+      // استخدام استراتيجية مماثلة لاستراتيجية رفع الملفات
+      let retryCount = 0;
+      const maxRetries = 3;
+      const initialDelay = 2000; // تأخير أطول للسماح للخادم بالتعافي
       
-      // استخدام التأخير البسيط قبل إرسال الطلب
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // وظيفة محلية للمحاولة مع backoff
+      const attemptLogin = async () => {
+        try {
+          // Use URLSearchParams for form data
+          const formData = new URLSearchParams()
+          formData.append('username', username)
+          formData.append('password', password)
+
+          // استخدام التأخير قبل إرسال الطلب
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // تجربة استخدام الفيتش المباشر بدلاً من الأكسيوس
+          const response = await fetch(`${getBaseUrl()}/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData.toString(),
+            // إعدادات أخرى
+            credentials: 'omit', // تجنب إرسال الكوكيز
+            cache: 'no-cache',
+            redirect: 'follow',
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          if (retryCount < maxRetries) {
+            retryCount++;
+            const delay = initialDelay * Math.pow(2, retryCount - 1);
+            console.log(`Login retry attempt ${retryCount}/${maxRetries} after ${delay}ms`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return attemptLogin(); // إعادة المحاولة
+          }
+          throw error; // إعادة إلقاء الخطأ إذا استنفدنا جميع المحاولات
+        }
+      };
       
-      // Use direct axios call with proper content type for login
-      const response = await axios.post(`${getBaseUrl()}/auth/login`, formData.toString(), {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        // إضافة خيارات إضافية لتجاوز مشاكل CORS المحتملة
-        withCredentials: false
-      })
+      // تنفيذ المحاولة
+      const responseData = await attemptLogin();
       
-      if (response.data.access_token) {
+      // التعامل مع الاستجابة
+      if (responseData.access_token) {
         console.log('Login successful, storing tokens')
-        setAuthTokens(response.data.access_token, response.data.refresh_token)
+        setAuthTokens(responseData.access_token, responseData.refresh_token)
         
         // Fetch user data after successful login
         const userData = await getUserData()
