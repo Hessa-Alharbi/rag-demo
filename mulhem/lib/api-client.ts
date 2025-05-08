@@ -20,7 +20,7 @@ export function getBaseUrl() {
   }
   
   // Production fallback - أستخدم عنوان Railway الخاص بك هنا
-  return 'https://ingenious-transformation-production-be7c.up.railway.app';;
+  return 'https://ingenious-transformation-production-be7c.up.railway.app';
 };
 
 // Create an Axios instance with a base URL
@@ -31,6 +31,8 @@ const apiClient = axios.create({
 
 // سجل عنوان URL الأساسي عند إنشاء العميل
 console.log('API client created with baseURL:', apiClient.defaults.baseURL);
+console.log('Frontend application running at: https://rag-demo-frontend-8eyx.onrender.com');
+console.log('IMPORTANT: Please add this frontend domain to the CORS allowed origins in your backend settings');
 
 // Add proper typing for request interceptors
 apiClient.interceptors.request.use(
