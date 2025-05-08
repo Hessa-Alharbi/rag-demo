@@ -143,22 +143,64 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       console.log('Fetching user data with token:', token.substring(0, 15) + '...')
-      // Use our API client instead
-      const response = await apiClient.get("/auth/me")
       
-      if (response.data) {
-        console.log('User data received successfully:', response.data)
-        setUser(response.data)
-        console.log('User state updated, authenticated:', !!response.data)
-        return response.data
-      }
+      // إضافة محاولات متعددة مع تأخير
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      const fetchWithRetry = async () => {
+        try {
+          // استخدام مفتاح عشوائي لمنع التخزين المؤقت
+          const timestamp = new Date().getTime();
+          
+          // سجل طريقة الطلب مع تفاصيل الرؤوس
+          console.log('Making auth/me request with headers:', {
+            'Authorization': `Bearer ${token.substring(0, 15)}...`,
+            'Timestamp': timestamp
+          });
+          
+          // استخدام fetch مباشرة بدلاً من apiClient
+          const response = await fetch(`${getBaseUrl()}/auth/me?_t=${timestamp}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache, no-store',
+              'Pragma': 'no-cache'
+            },
+            credentials: 'omit' // لا ترسل الكوكيز
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          
+          const userData = await response.json();
+          console.log('User data received successfully:', userData);
+          setUser(userData);
+          console.log('User state updated, authenticated:', !!userData);
+          return userData;
+        } catch (error) {
+          console.error(`Attempt ${attempts + 1}/${maxAttempts} failed:`, error);
+          
+          if (attempts < maxAttempts - 1) {
+            attempts++;
+            const delay = 500 * attempts; // تأخير متزايد
+            console.log(`Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return fetchWithRetry(); // إعادة المحاولة
+          }
+          
+          // إعادة إلقاء الخطأ إذا استنفدنا جميع المحاولات
+          throw error;
+        }
+      };
+      
+      return await fetchWithRetry();
     } catch (error) {
       console.error("Error fetching user data:", error)
       // If there's an authentication error, clear the tokens
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        console.log('Authentication error, clearing tokens')
-        clearAuthTokens()
-      }
+      clearAuthTokens()
       setUser(null)
     } finally {
       setIsLoading(false)
@@ -228,7 +270,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log('Login successful, storing tokens')
         setAuthTokens(responseData.access_token, responseData.refresh_token)
         
+        // انتظار وقت قصير لضمان حفظ الرموز
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         // Fetch user data after successful login
+        console.log('Now fetching user data with the new token');
         const userData = await getUserData()
         
         if (userData) {
