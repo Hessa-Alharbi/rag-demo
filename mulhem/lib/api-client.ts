@@ -1,24 +1,40 @@
-import axios from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-// Determine the base URL based on the environment
-export const getBaseUrl = () => {
-  // Use a stable backend URL or the relative /api path for production
-  return process.env.NODE_ENV === 'production' 
-    ? '/api' 
-    : 'http://localhost:8000/api';
+// تعريف نوع موسع للطلبات يتضمن خصائص إعادة المحاولة
+interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
+  retryCount?: number;
+  maxRetries?: number;
+  _retry?: boolean;
+}
+
+// تحديد عنوان API ثابت للباك إند
+function getBaseUrl() {
+  // Use the environment variable if available
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // Fallback to local development URL
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:8000';
+  }
+  
+  // Production fallback
+  return 'https://api.example.com';
 };
 
+// Create an Axios instance with a base URL
 const apiClient = axios.create({
   baseURL: getBaseUrl(),
-  headers: {
-    'Accept': 'application/json',
-  },
-  timeout: 300000, // 5 minute timeout for large files
+  timeout: 600000, // 10 minutes timeout for large file uploads
 });
+
+// سجل عنوان URL الأساسي عند إنشاء العميل
+console.log('API client created with baseURL:', apiClient.defaults.baseURL);
 
 // Add proper typing for request interceptors
 apiClient.interceptors.request.use(
-  (config) => {
+  (config: ExtendedAxiosRequestConfig) => {
     // For form data requests, don't set Content-Type - browser will set it
     if (config.data instanceof FormData) {
       if (config.headers) {
@@ -41,6 +57,10 @@ apiClient.interceptors.request.use(
       }
     }
     
+    // إضافة معلومات إعادة المحاولة للطلبات
+    config.retryCount = config.retryCount || 0;
+    config.maxRetries = 3; // عدد المحاولات الأقصى
+    
     // Log requests for debugging
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     
@@ -59,8 +79,8 @@ apiClient.interceptors.response.use(
     console.log(`API Response: ${response.status} ${response.config.url}`);
     return response;
   },
-  async (error) => {
-    const originalRequest = error.config;
+  async (error: AxiosError) => {
+    const originalRequest = error.config as ExtendedAxiosRequestConfig;
     
     // Check if error is due to authorization (401) and we haven't tried refreshing yet
     if (error.response?.status === 401 && 
@@ -79,7 +99,7 @@ apiClient.interceptors.response.use(
           window.location.href = '/auth/login';
           return Promise.reject(error);
         }
-        
+
         // Call the refresh endpoint
         const response = await axios.post(`${getBaseUrl()}/auth/refresh`, {
           refresh_token: refreshToken
@@ -92,7 +112,7 @@ apiClient.interceptors.response.use(
           
           // Update authorization header in the original request
           originalRequest.headers['Authorization'] = `Bearer ${response.data.access_token}`;
-          
+    
           // Retry the original request with the new token
           return axios(originalRequest);
         }
@@ -104,6 +124,26 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('refresh_token');
         window.location.href = '/auth/login';
         return Promise.reject(error);
+      }
+    }
+    
+    // إعادة المحاولة للأخطاء المتعلقة بالشبكة
+    if (originalRequest && 
+        !originalRequest._retry && 
+        (error.code === 'ECONNABORTED' || error.message.includes('timeout') || !error.response)) {
+      
+      // إذا لم يتم تجاوز الحد الأقصى من المحاولات
+      if (!originalRequest.maxRetries || originalRequest.retryCount! < originalRequest.maxRetries) {
+        // زيادة عدد المحاولات
+        originalRequest.retryCount = (originalRequest.retryCount || 0) + 1;
+        
+        // انتظر قبل إعادة المحاولة (زيادة الوقت مع كل محاولة)
+        const delay = 1000 * Math.pow(2, originalRequest.retryCount);
+        console.log(`Retrying request (${originalRequest.retryCount}/${originalRequest.maxRetries}) after ${delay}ms`);
+        
+        return new Promise(resolve => {
+          setTimeout(() => resolve(apiClient(originalRequest)), delay);
+        });
       }
     }
     
