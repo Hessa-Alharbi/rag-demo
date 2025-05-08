@@ -19,8 +19,8 @@ export function getBaseUrl() {
     return 'http://localhost:8000';
   }
   
-  // Production fallback
-  return 'https://api.example.com';
+  // Production fallback - أستخدم عنوان Railway الخاص بك هنا
+  return 'ingenious-transformation-production-be7c.up.railway.app';
 };
 
 // Create an Axios instance with a base URL
@@ -153,8 +153,8 @@ apiClient.interceptors.response.use(
     
     if (error.response) {
       // The request was made and the server responded with an error status
-      errorMessage = error.response.data?.detail || 
-                    error.response.data?.message || 
+      errorMessage = (error.response.data as any)?.detail || 
+                    (error.response.data as any)?.message || 
                     `Server error: ${error.response.status}`;
       statusCode = error.response.status;
       
