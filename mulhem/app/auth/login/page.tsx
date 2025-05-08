@@ -23,8 +23,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/lib/auth-context"
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"
-import { Loader2 } from "lucide-react"
+import { EyeIcon as EyeIconHero, EyeSlashIcon as EyeSlashIconHero } from "@heroicons/react/24/outline"
+import { Loader2, Eye, EyeOff } from "lucide-react"
 
 const loginSchema = z.object({
   username_or_email: z.string().min(1, "Username or email is required"),
@@ -111,6 +111,10 @@ const AnimatedLogo = ({ size = 180 }: { size?: number }) => {
     </motion.div>
   );
 };
+
+// تعريفات الأيقونات البديلة إذا لم تعمل heroicons
+const EyeIconComponent = EyeIconHero || Eye;
+const EyeSlashIconComponent = EyeSlashIconHero || EyeOff;
 
 export default function LoginPage() {
   const router = useRouter()
@@ -459,9 +463,9 @@ export default function LoginPage() {
                                   tabIndex={-1}
                                 >
                                   {showPassword ? (
-                                    <EyeSlashIcon className="h-5 w-5" />
+                                    <EyeSlashIconComponent className="h-5 w-5" />
                                   ) : (
-                                    <EyeIcon className="h-5 w-5" />
+                                    <EyeIconComponent className="h-5 w-5" />
                                   )}
                                 </button>
                               </div>
