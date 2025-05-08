@@ -8,7 +8,7 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
 }
 
 // تحديد عنوان API ثابت للباك إند
-function getBaseUrl() {
+export function getBaseUrl() {
   // Use the environment variable if available
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
