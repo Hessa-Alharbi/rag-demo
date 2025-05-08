@@ -3,7 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
-import apiClient, { getBaseUrl } from '@/lib/api-client'
+import apiClient from '@/lib/api-client'
+import { getBaseUrl } from '@/lib/utils'
 
 // Define the User interface based on the backend response
 interface User {
@@ -30,23 +31,29 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 // Helper functions to manage cookies and localStorage
 const setAuthTokens = (accessToken: string, refreshToken: string) => {
-  // Set in localStorage for client-side access
-  localStorage.setItem('access_token', accessToken)
-  localStorage.setItem('refresh_token', refreshToken)
-  
-  // Set in cookies for middleware access
-  document.cookie = `access_token=${accessToken}; path=/; max-age=${30 * 60}; SameSite=Strict` // 30 minutes
-  document.cookie = `refresh_token=${refreshToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict` // 7 days
+  // تأكد من أننا في المتصفح قبل محاولة استخدام localStorage
+  if (typeof window !== 'undefined') {
+    // Set in localStorage for client-side access
+    localStorage.setItem('access_token', accessToken)
+    localStorage.setItem('refresh_token', refreshToken)
+    
+    // Set in cookies for middleware access
+    document.cookie = `access_token=${accessToken}; path=/; max-age=${30 * 60}; SameSite=Strict` // 30 minutes
+    document.cookie = `refresh_token=${refreshToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict` // 7 days
+  }
 }
 
 const clearAuthTokens = () => {
-  // Clear from localStorage
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('refresh_token')
-  
-  // Clear from cookies
-  document.cookie = 'access_token=; path=/; max-age=0; SameSite=Strict'
-  document.cookie = 'refresh_token=; path=/; max-age=0; SameSite=Strict'
+  // تأكد من أننا في المتصفح قبل محاولة استخدام localStorage
+  if (typeof window !== 'undefined') {
+    // Clear from localStorage
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+    
+    // Clear from cookies
+    document.cookie = 'access_token=; path=/; max-age=0; SameSite=Strict'
+    document.cookie = 'refresh_token=; path=/; max-age=0; SameSite=Strict'
+  }
 }
 
 // Auth provider component
@@ -62,7 +69,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Add request interceptor to include token in requests
   api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("access_token")
+    // الحصول على التوكن من التخزين المحلي - فقط عندما يكون المستعرض متاحًا
+    let token;
+    if (typeof window !== 'undefined') {
+      token = localStorage.getItem("access_token")
+    }
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -80,7 +92,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         originalRequest._retry = true
         
         try {
-          const refreshToken = localStorage.getItem("refresh_token")
+          // تأكد من وجود المتصفح
+          let refreshToken = null;
+          if (typeof window !== 'undefined') {
+            refreshToken = localStorage.getItem("refresh_token")
+          }
+          
           if (!refreshToken) {
             throw new Error("No refresh token")
           }
@@ -112,6 +129,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const getUserData = async () => {
     try {
+      if (typeof window === 'undefined') {
+        setIsLoading(false)
+        return null
+      }
+      
       const token = localStorage.getItem("access_token")
       if (!token) {
         console.log('No token found, user is not authenticated')
