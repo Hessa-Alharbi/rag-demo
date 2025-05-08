@@ -283,18 +283,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const params = new URLSearchParams(window.location.search)
           const returnTo = params.get('returnTo')
           
-          // إضافة تأخير قبل التوجيه لضمان تحديث حالة المستخدم في كل مكان
-          setTimeout(() => {
-            if (returnTo) {
-              // Redirect to the original URL
-              console.log('Redirecting to:', returnTo)
-              router.push(returnTo)
-            } else {
-              // Redirect to home page as usual
-              console.log('Redirecting to dashboard /')
-              router.push('/')
-            }
-          }, 500); // تأخير 500 مللي ثانية
+          // تحديث حالة المستخدم أولاً
+          setUser(userData);
+          setIsLoading(false);
+          
+          // استخدام عنوان مطلق بدلاً من عنوان نسبي
+          const targetUrl = returnTo || '/';
+          console.log('Redirecting to:', targetUrl);
+          
+          // تنفيذ التوجيه مباشرة بدون تأخير
+          try {
+            // استخدام واجهة router.push مع انتظار العملية
+            router.push(targetUrl);
+            
+            // إضافة إجراء احتياطي في حالة فشل التوجيه الأول
+            setTimeout(() => {
+              console.log('Checking if redirect was successful...');
+              const currentPath = window.location.pathname;
+              if (currentPath.includes('login')) {
+                console.log('Redirect may have failed, trying alternate method');
+                window.location.href = targetUrl;
+              }
+            }, 1000);
+          } catch (routerError) {
+            console.error('Error during navigation:', routerError);
+            // استخدام window.location كحل بديل
+            console.log('Falling back to window.location.href redirect');
+            window.location.href = targetUrl;
+          }
         } else {
           throw new Error('Failed to get user data after login')
         }
@@ -316,14 +332,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('Logging out user')
     clearAuthTokens()
     setUser(null)
-    router.push("/auth/login")
+    
+    // تحسين آلية التوجيه
+    console.log('Redirecting to login page')
+    
+    try {
+      // استخدام واجهة router.push أولاً
+      router.push("/auth/login")
+      
+      // إضافة إجراء احتياطي في حالة فشل التوجيه الأول
+      setTimeout(() => {
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes('login')) {
+          console.log('Redirect may have failed, trying alternate method');
+          window.location.href = "/auth/login";
+        }
+      }, 500);
+    } catch (routerError) {
+      console.error('Error during navigation:', routerError);
+      // استخدام window.location كحل بديل
+      window.location.href = "/auth/login";
+    }
   }
 
   // Check if user is logged in on initial load
   useEffect(() => {
     const checkAuth = async () => {
       console.log('Checking authentication on initial load')
-      await getUserData()
+      try {
+        // تأكد من أننا في بيئة المتصفح
+        if (typeof window === 'undefined') {
+          console.log('Not in browser environment, skipping auth check');
+          setIsLoading(false);
+          return;
+        }
+        
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          console.log('No token found, user is not authenticated');
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+        
+        // تأخير بسيط للسماح بتهيئة المتصفح بشكل كامل
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // استدعاء وظيفة الحصول على بيانات المستخدم
+        await getUserData();
+      } catch (error) {
+        console.error('Error during initial auth check:', error);
+        setUser(null);
+        setIsLoading(false);
+      }
     }
     
     checkAuth()
