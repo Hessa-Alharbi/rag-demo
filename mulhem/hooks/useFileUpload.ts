@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import apiClient from '@/lib/api-client';
+import axios from 'axios';
 
 export interface UploadError {
   message: string;
@@ -18,48 +19,87 @@ export const useFileUpload = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<UploadError | null>(null);
   const [uploadResponse, setUploadResponse] = useState<UploadResponse | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+
+  // إضافة وظيفة إعادة المحاولة مع انتظار متزايد
+  const retryWithBackoff = async (fn: () => Promise<any>, maxRetries = 3, initialDelay = 1000) => {
+    let retries = 0;
+    while (retries < maxRetries) {
+      try {
+        return await fn();
+      } catch (error: any) {
+        // إذا كان الخطأ مرتبط بالشبكة أو خطأ 5xx من الخادم، حاول مرة أخرى
+        const isNetworkError = !error.response || error.code === 'ECONNABORTED';
+        const isServerError = error.response?.status >= 500;
+        if ((isNetworkError || isServerError) && retries < maxRetries - 1) {
+          retries++;
+          const delay = initialDelay * Math.pow(2, retries);
+          console.log(`Retry attempt ${retries}/${maxRetries} after ${delay}ms`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw error;
+      }
+    }
+  };
 
   const uploadFile = async (file: File) => {
     setIsLoading(true);
     setError(null);
     setUploadResponse(null);
+    setUploadProgress(0);
 
     const formData = new FormData();
     formData.append('file', file);
 
+    // تحقق من نوع وحجم الملف قبل المحاولة
+    const maxSize = 10 * 1024 * 1024; // 10 ميجابايت
+    if (file.size > maxSize) {
+      setError({
+        message: `الملف كبير جدًا. الحد الأقصى المسموح به هو ${maxSize / (1024 * 1024)} ميجابايت`,
+        status: 413
+      });
+      setIsLoading(false);
+      throw new Error("File too large");
+    }
+
+    // الأنواع المدعومة
+    const supportedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    if (!supportedTypes.includes(file.type) && !file.name.endsWith('.pdf') && !file.name.endsWith('.docx') && !file.name.endsWith('.doc') && !file.name.endsWith('.txt')) {
+      console.warn(`File type might not be supported: ${file.type}`);
+    }
+
     try {
+      console.log('Starting file upload...');
       console.log('Uploading file:', file.name);
       
-      // Try to use the correct endpoint for the server
-      let response;
-      try {
-        // First try using the initialize endpoint
-        response = await apiClient.post<UploadResponse>('/initialize', formData, {
+      // استخدام استدعاء مباشر لـ axios مع خيارات محسنة
+      return await retryWithBackoff(async () => {
+        const response = await apiClient.post<UploadResponse>('/initialize', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
           timeout: 600000, // 10 minute timeout
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setUploadProgress(progress);
+              console.log(`Upload progress: ${progress}%`);
+            }
+          }
         });
-      } catch (initError: any) {
-        if (initError.status === 404) {
-          // If the endpoint doesn't exist, try the attachments endpoint
-          console.log('Endpoint /initialize not found, trying attachments endpoint');
-          response = await apiClient.post<UploadResponse>('/conversations/new/attachments', formData, {
-            timeout: 600000, // 10 minute timeout
-          });
-        } else {
-          // Rethrow the original error if it's not a 404
-          throw initError;
+        
+        const data = response.data;
+        console.log('Upload response:', data);
+        
+        // Validate the response
+        if (!data.task_id && !data.session_id) {
+          throw new Error('Server did not return a valid task or session ID');
         }
-      }
-      
-      const data = response.data;
-      console.log('Upload response:', data);
-      
-      // Validate the response
-      if (!data.task_id && !data.session_id) {
-        throw new Error('Server did not return a valid task or session ID');
-      }
-      
-      setUploadResponse(data);
-      return data;
+        
+        setUploadResponse(data);
+        return data;
+      }, 3, 2000);
     } catch (err: any) {
       console.error('Upload error:', err);
       
@@ -100,9 +140,11 @@ export const useFileUpload = () => {
     isLoading,
     error,
     uploadResponse,
+    uploadProgress,
     resetState: () => {
       setError(null);
       setUploadResponse(null);
+      setUploadProgress(0);
     }
   };
 };
