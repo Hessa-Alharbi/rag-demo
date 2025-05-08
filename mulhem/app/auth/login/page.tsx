@@ -23,6 +23,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/lib/auth-context"
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"
+import { Loader2 } from "lucide-react"
 
 const loginSchema = z.object({
   username_or_email: z.string().min(1, "Username or email is required"),
@@ -117,6 +119,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [mounted, setMounted] = useState(false)
   const [returnTo, setReturnTo] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [loginAttempts, setLoginAttempts] = useState(0)
 
   // For ensuring animations run after mount
   useEffect(() => {
@@ -152,26 +156,69 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
     
-    try {
-      // Use the auth context to handle login
-      await login(data.username_or_email, data.password)
-      // If we reach here, login was successful and the auth context will handle redirection
-    } catch (err: any) {
-      console.error("Login error:", err)
-      // Display more user-friendly error messages
-      if (err.response?.status === 401) {
-        setError("Invalid username or password. Please try again.")
-      } else if (err.response?.status === 404) {
-        setError("User not found. Please check your credentials.")
-      } else if (err.message) {
-        setError(err.message)
-      } else {
-        setError("Login failed. Please check your internet connection and try again.")
+    // بدء التأخير بين المحاولات
+    const attemptLoginWithRetry = async (retryCount = 0, maxRetries = 5) => {
+      try {
+        console.log(`Login attempt ${retryCount + 1}/${maxRetries + 1}`)
+        
+        // تسجيل المحاولة
+        setLoginAttempts(prev => prev + 1)
+        
+        // تأخير متزايد بين المحاولات
+        if (retryCount > 0) {
+          const delay = Math.min(retryCount * 2000, 10000); // زيادة وقت الانتظار مع كل محاولة (حد أقصى 10 ثواني)
+          setError(`الخادم مشغول حاليًا، جارٍ إعادة المحاولة تلقائيًا خلال ${delay/1000} ثوانٍ... (محاولة ${retryCount + 1}/${maxRetries + 1})`)
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+        
+        // استخدام الواجهة البرمجية للتطبيق مباشرة بدلاً من مكتبة axios
+        await login(data.username_or_email, data.password);
+        
+      } catch (err: any) {
+        console.error("Login error:", err)
+        
+        // التعامل مع خطأ تجاوز حد التزامن (503 Service Unavailable)
+        if (err?.message?.includes('503') || err?.message?.toLowerCase().includes('unavailable') || err?.response?.status === 503) {
+          console.log("Server busy (503), will retry automatically");
+          
+          if (retryCount < maxRetries) {
+            // إعادة المحاولة تلقائيًا
+            return attemptLoginWithRetry(retryCount + 1, maxRetries);
+          } else {
+            setError("الخادم مشغول جدًا حاليًا. يرجى الانتظار لبضع دقائق ثم المحاولة مرة أخرى.");
+          }
+        } 
+        // التعامل مع أخطاء المصادقة (401 Unauthorized)
+        else if (err.message?.includes('401') || err.response?.status === 401) {
+          setError("بيانات الاعتماد غير صحيحة. يرجى التحقق من اسم المستخدم/البريد الإلكتروني وكلمة المرور.");
+          
+          // عرض نصائح إضافية بعد المحاولة الثانية
+          if (loginAttempts >= 2) {
+            setError(prev => prev + " تأكد من عدم وجود مسافات زائدة وتحقق من حالة الأحرف في كلمة المرور.");
+          }
+        } 
+        // خطأ الشبكة
+        else if (err.message?.includes('Network') || err.message?.includes('fetch')) {
+          setError("خطأ في الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت وحاول مرة أخرى.");
+        } 
+        // أي أخطاء أخرى
+        else {
+          setError(`فشل تسجيل الدخول: ${err.message}`);
+        }
       }
+    };
+    
+    try {
+      // بدء المحاولة مع إمكانية إعادة المحاولة
+      await attemptLoginWithRetry();
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(prev => !prev);
+  };
 
   // Background elements animation
   const backgroundVariants = {
@@ -346,8 +393,8 @@ export default function LoginPage() {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <Alert variant="destructive" className="mb-4">
-                        <AlertDescription>{error}</AlertDescription>
+                      <Alert variant={error.includes("مشغول") || error.includes("Registration successful") ? "default" : "destructive"} className="mb-4">
+                        <AlertDescription className="whitespace-pre-wrap">{error}</AlertDescription>
                       </Alert>
                     </motion.div>
                   )}
@@ -374,6 +421,7 @@ export default function LoginPage() {
                                 {...field} 
                                 disabled={isLoading}
                                 className="transition-all duration-300"
+                                autoComplete="username"
                               />
                             </FormControl>
                             <FormMessage />
@@ -395,13 +443,28 @@ export default function LoginPage() {
                           <FormItem>
                             <FormLabel>Password</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="Enter your password" 
-                                {...field} 
-                                disabled={isLoading}
-                                className="transition-all duration-300"
-                              />
+                              <div className="relative">
+                                <Input 
+                                  type={showPassword ? "text" : "password"} 
+                                  placeholder="Enter your password" 
+                                  {...field} 
+                                  disabled={isLoading}
+                                  className="transition-all duration-300 pr-10"
+                                  autoComplete="current-password"
+                                />
+                                <button
+                                  type="button"
+                                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                  onClick={togglePasswordVisibility}
+                                  tabIndex={-1}
+                                >
+                                  {showPassword ? (
+                                    <EyeSlashIcon className="h-5 w-5" />
+                                  ) : (
+                                    <EyeIcon className="h-5 w-5" />
+                                  )}
+                                </button>
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -424,12 +487,12 @@ export default function LoginPage() {
                       >
                         {isLoading ? (
                           <span className="flex items-center justify-center">
-                            <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></span>
-                            Logging in...
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {loginAttempts > 1 ? `محاولة جديدة (${loginAttempts})...` : "جاري تسجيل الدخول..."}
                           </span>
                         ) : (
                           <>
-                            <span className="relative z-10">Login</span>
+                            <span className="relative z-10">تسجيل الدخول</span>
                             <motion.span 
                               className="absolute inset-0 bg-primary-foreground/10"
                               initial={{ x: "-100%" }}
@@ -440,6 +503,42 @@ export default function LoginPage() {
                         )}
                       </Button>
                     </motion.div>
+                    
+                    {/* إضافة أزرار اختصار لتسجيل الدخول السريع للاختبار */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1.5 }}
+                        className="mt-4 p-3 border border-gray-200 rounded-md bg-gray-50"
+                      >
+                        <p className="text-sm font-medium text-gray-800 mb-2">حسابات تجريبية للاختبار:</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              form.setValue("username_or_email", "test@example.com");
+                              form.setValue("password", "Test@123!");
+                            }}
+                          >
+                            مستخدم اختبار
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              form.setValue("username_or_email", "admin@example.com");
+                              form.setValue("password", "Admin@123!");
+                            }}
+                          >
+                            مدير النظام
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
                   </form>
                 </Form>
               </CardContent>
