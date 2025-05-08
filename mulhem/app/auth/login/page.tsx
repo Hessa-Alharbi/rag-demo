@@ -155,60 +155,65 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
     
-    // بدء التأخير بين المحاولات
+    // Start delay between attempts
     const attemptLoginWithRetry = async (retryCount = 0, maxRetries = 5) => {
       try {
         console.log(`Login attempt ${retryCount + 1}/${maxRetries + 1}`)
         
-        // تسجيل المحاولة
+        // Record the attempt
         setLoginAttempts(prev => prev + 1)
         
-        // تأخير متزايد بين المحاولات
+        // Increasing delay between attempts
         if (retryCount > 0) {
-          const delay = Math.min(retryCount * 2000, 10000); // زيادة وقت الانتظار مع كل محاولة (حد أقصى 10 ثواني)
-          setError(`الخادم مشغول حاليًا، جارٍ إعادة المحاولة تلقائيًا خلال ${delay/1000} ثوانٍ... (محاولة ${retryCount + 1}/${maxRetries + 1})`)
+          const delay = Math.min(retryCount * 2000, 10000); // Increase wait time with each attempt (max 10 seconds)
+          setError(`Server is busy, automatically retrying in ${delay/1000} seconds... (Attempt ${retryCount + 1}/${maxRetries + 1})`)
           await new Promise(resolve => setTimeout(resolve, delay));
         }
         
-        // استخدام الواجهة البرمجية للتطبيق مباشرة بدلاً من مكتبة axios
+        // Use the API interface directly instead of axios library
         await login(data.username_or_email, data.password);
         
       } catch (err: any) {
         console.error("Login error:", err)
         
-        // التعامل مع خطأ تجاوز حد التزامن (503 Service Unavailable)
+        // Handle concurrency limit error (503 Service Unavailable)
         if (err?.message?.includes('503') || err?.message?.toLowerCase().includes('unavailable') || err?.response?.status === 503) {
           console.log("Server busy (503), will retry automatically");
           
           if (retryCount < maxRetries) {
-            // إعادة المحاولة تلقائيًا
+            // Retry automatically
             return attemptLoginWithRetry(retryCount + 1, maxRetries);
           } else {
-            setError("الخادم مشغول جدًا حاليًا. يرجى الانتظار لبضع دقائق ثم المحاولة مرة أخرى.");
+            setError("Server is currently very busy. Please wait a few minutes and try again.");
           }
         } 
-        // التعامل مع أخطاء المصادقة (401 Unauthorized)
+        // Handle authentication errors (401 Unauthorized)
         else if (err.message?.includes('401') || err.response?.status === 401) {
-          setError("بيانات الاعتماد غير صحيحة. يرجى التحقق من اسم المستخدم/البريد الإلكتروني وكلمة المرور.");
+          setError("Invalid credentials. Please check your username/email and password.");
           
-          // عرض نصائح إضافية بعد المحاولة الثانية
+          // Display additional tips after the second attempt
           if (loginAttempts >= 2) {
-            setError(prev => prev + " تأكد من عدم وجود مسافات زائدة وتحقق من حالة الأحرف في كلمة المرور.");
+            setError(prev => prev + " Make sure there are no extra spaces and check the case sensitivity of your password.");
           }
         } 
-        // خطأ الشبكة
+        // Handle internal server errors (500)
+        else if (err.message?.includes('500') || err.response?.status === 500) {
+          setError("Server error. The system is experiencing technical difficulties. Please try again later.");
+          console.log("Server returned 500 error - please check server logs for details");
+        }
+        // Network error
         else if (err.message?.includes('Network') || err.message?.includes('fetch')) {
-          setError("خطأ في الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت وحاول مرة أخرى.");
+          setError("Error connecting to server. Please check your internet connection and try again.");
         } 
-        // أي أخطاء أخرى
+        // Any other errors
         else {
-          setError(`فشل تسجيل الدخول: ${err.message}`);
+          setError(`Login failed: ${err.message}`);
         }
       }
     };
     
     try {
-      // بدء المحاولة مع إمكانية إعادة المحاولة
+      // Start the attempt with possible retry
       await attemptLoginWithRetry();
     } finally {
       setIsLoading(false);
@@ -392,7 +397,7 @@ export default function LoginPage() {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <Alert variant={error.includes("مشغول") || error.includes("Registration successful") ? "default" : "destructive"} className="mb-4">
+                      <Alert variant={error.includes("Server") || error.includes("Registration successful") ? "default" : "destructive"} className="mb-4">
                         <AlertDescription className="whitespace-pre-wrap">{error}</AlertDescription>
                       </Alert>
                     </motion.div>
@@ -487,11 +492,11 @@ export default function LoginPage() {
                         {isLoading ? (
                           <span className="flex items-center justify-center">
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            {loginAttempts > 1 ? `محاولة جديدة (${loginAttempts})...` : "جاري تسجيل الدخول..."}
+                            {loginAttempts > 1 ? `New attempt (${loginAttempts})...` : "Logging in..."}
                           </span>
                         ) : (
                           <>
-                            <span className="relative z-10">تسجيل الدخول</span>
+                            <span className="relative z-10">Login</span>
                             <motion.span 
                               className="absolute inset-0 bg-primary-foreground/10"
                               initial={{ x: "-100%" }}
@@ -503,7 +508,7 @@ export default function LoginPage() {
                       </Button>
                     </motion.div>
                     
-                    {/* إضافة أزرار اختصار لتسجيل الدخول السريع للاختبار */}
+                    {/* Add shortcut buttons for testing */}
                     {process.env.NODE_ENV === 'development' && (
                       <motion.div 
                         initial={{ opacity: 0 }}
@@ -511,7 +516,7 @@ export default function LoginPage() {
                         transition={{ delay: 1.5 }}
                         className="mt-4 p-3 border border-gray-200 rounded-md bg-gray-50"
                       >
-                        <p className="text-sm font-medium text-gray-800 mb-2">حسابات تجريبية للاختبار:</p>
+                        <p className="text-sm font-medium text-gray-800 mb-2">Test accounts for testing:</p>
                         <div className="grid grid-cols-2 gap-2">
                           <Button 
                             type="button" 
@@ -522,7 +527,7 @@ export default function LoginPage() {
                               form.setValue("password", "Test@123!");
                             }}
                           >
-                            مستخدم اختبار
+                            Test user
                           </Button>
                           <Button 
                             type="button" 
@@ -533,7 +538,7 @@ export default function LoginPage() {
                               form.setValue("password", "Admin@123!");
                             }}
                           >
-                            مدير النظام
+                            System admin
                           </Button>
                         </div>
                       </motion.div>
