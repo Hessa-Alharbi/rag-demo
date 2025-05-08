@@ -156,11 +156,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       formData.append('username', username)
       formData.append('password', password)
       
+      // استخدام التأخير البسيط قبل إرسال الطلب
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Use direct axios call with proper content type for login
       const response = await axios.post(`${getBaseUrl()}/auth/login`, formData.toString(), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        // إضافة خيارات إضافية لتجاوز مشاكل CORS المحتملة
+        withCredentials: false
       })
       
       if (response.data.access_token) {
