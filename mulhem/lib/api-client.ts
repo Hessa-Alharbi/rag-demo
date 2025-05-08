@@ -20,7 +20,7 @@ export function getBaseUrl() {
   }
   
   // Production fallback - أستخدم عنوان Railway الخاص بك هنا
-  return 'ingenious-transformation-production-be7c.up.railway.app';
+  return 'https://ingenious-transformation-production-be7c.up.railway.app';;
 };
 
 // Create an Axios instance with a base URL
