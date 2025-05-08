@@ -231,17 +231,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Use a delay before sending the request
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          // Try using direct fetch instead of axios
-          const response = await fetch(`${getBaseUrl()}/auth/login`, {
+          // Get the API URL
+          const apiUrl = getBaseUrl();
+          console.log('Using API URL:', apiUrl);
+          
+          // Try using direct fetch instead of axios with additional options
+          const response = await fetch(`${apiUrl}/auth/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
+              'Accept': 'application/json',
+              'Origin': window.location.origin,
+              'Access-Control-Request-Method': 'POST',
             },
             body: formData.toString(),
             // Other settings
             credentials: 'omit', // Avoid sending cookies
             cache: 'no-cache',
             redirect: 'follow',
+            mode: 'cors', // Explicitly request CORS mode
+            // Add longer timeout
+            signal: AbortSignal.timeout(15000), // 15 second timeout
           });
           
           if (!response.ok) {
@@ -252,6 +262,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return data;
         } catch (error: any) {
           console.error("Login attempt failed:", error);
+          
+          // Check if it's a network error (Failed to fetch)
+          if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
+            console.error("Network error - connection issue to server");
+            
+            // If we have retries left, try again
+            if (retryCount < maxRetries) {
+              retryCount++;
+              const backoffDelay = initialDelay * Math.pow(2, retryCount - 1);
+              console.log(`Network error - retrying login after ${backoffDelay}ms delay (attempt ${retryCount} of ${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, backoffDelay));
+              return attemptLogin();
+            }
+            
+            // Provide more specific error message
+            throw new Error("Failed to connect to the server. Please check your internet connection and make sure the server is running.");
+          }
           
           // Check if it's a server error (500)
           if (error.message && error.message.includes('500')) {
@@ -275,12 +302,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Call the login function with retry logic
       const tokens = await attemptLogin();
       
-      // التعامل مع الاستجابة
-      if (tokens.access_token) {
+      // Handle the response
+      if (tokens && tokens.access_token) {
         console.log('Login successful, storing tokens')
         setAuthTokens(tokens.access_token, tokens.refresh_token)
         
-        // انتظار وقت قصير لضمان حفظ الرموز
+        // Wait a short time to ensure tokens are saved
         await new Promise(resolve => setTimeout(resolve, 300));
         
         // Fetch user data after successful login
