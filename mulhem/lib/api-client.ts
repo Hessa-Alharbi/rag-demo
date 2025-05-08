@@ -25,11 +25,16 @@ console.log('IMPORTANT: Please add this frontend domain to the CORS allowed orig
 // إضافة معالج للطلبات لإضافة التوكن إذا كان متاحاً
 apiClient.interceptors.request.use(
   (config) => {
+    // تجنب استخدام localStorage في بيئة الخادم
+    if (typeof window === 'undefined') {
+      return config;
+    }
+    
     // إضافة رؤوس إضافية لتجنب مشاكل CORS
     config.headers['Access-Control-Allow-Origin'] = '*';
     
     // حصول على التوكن من التخزين المحلي إذا كان متاحاً
-    const accessToken = localStorage.getItem('accessToken');
+    const accessToken = localStorage.getItem('access_token');
     
     if (accessToken) {
       try {
@@ -49,11 +54,13 @@ apiClient.interceptors.request.use(
         } else {
           // التوكن منتهي الصلاحية - لا تُستخدم
           console.warn('Token expired, not using it');
-          localStorage.removeItem('accessToken');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
         }
       } catch (error) {
         console.error('Error decoding token:', error);
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
       }
     }
     
@@ -122,8 +129,10 @@ apiClient.interceptors.response.use(
       // التعامل مع أخطاء محددة
       if (error.response.status === 401) {
         // غير مصرح به - تنظيف التوكن
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+        }
         
         // يمكن إضافة منطق إعادة التوجيه إلى صفحة تسجيل الدخول هنا
       }
